@@ -1,0 +1,59 @@
+@using Socialify.Application.DTOs.Account
+@model RegisterDto
+
+@{
+    ViewData["Title"] = "Register";
+    ViewData["CssFile"] = "login.css";
+    Layout = "~/Views/Shared/_UnAuthorizedLayout.cshtml";
+}
+
+<div class="register-card">
+    <div class="brand-header">
+        <h1>Socialify</h1>
+    </div>
+    <form asp-action="Register" method="post" class="registration-form">
+        @Html.AntiForgeryToken()
+        <div class="title"><h2>Register</h2></div>
+
+        <div class="row mb-2">
+            <div class="col-md-6">
+                <label asp-for="FirstName" class="form-label"></label>
+                <input asp-for="FirstName" class="form-control" />
+                <span asp-validation-for="FirstName" class="text-danger"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="LastName" class="form-label"></label>
+                <input asp-for="LastName" class="form-control" />
+                <span asp-validation-for="LastName" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="mb-2">
+            <label asp-for="Email" class="form-label"></label>
+            <input asp-for="Email" class="form-control" />
+            <span asp-validation-for="Email" class="text-danger"></span>
+        </div>
+
+        <div class="mb-2">
+            <label asp-for="Password" class="form-label"></label>
+            <input asp-for="Password" class="form-control" />
+            <span asp-validation-for="Password" class="text-danger"></span>
+        </div>
+
+        <div class="mb-2">
+            <label asp-for="ConfirmPassword" class="form-label"></label>
+            <input asp-for="ConfirmPassword" class="form-control" />
+            <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Next</button>
+
+        <div class="login-link">
+            Already have an account? <a asp-controller="Account" asp-action="Login">Sign in here</a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

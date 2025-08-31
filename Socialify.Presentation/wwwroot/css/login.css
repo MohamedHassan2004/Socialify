@@ -1,0 +1,154 @@
+﻿:root {
+    --primary-color: #2c3e50;
+    --secondary-color: #3498db;
+    --accent-color: #7f8c8d;
+    --dark-color: #2c3e50;
+    --light-color: #ecf0f1;
+}
+
+body {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+}
+
+.register-card, .login-card {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 1rem;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    width: 500px;
+    margin: 2rem auto;
+    transition: transform 0.3s ease;
+}
+
+    .register-card:hover, .login-card:hover {
+        transform: translateY(-5px);
+    }
+
+.brand-header {
+    background: var(--dark-color);
+    padding: 2rem;
+    text-align: center;
+}
+
+    .brand-header h1 {
+        color: white;
+        font-size: 2.5rem;
+        font-weight: 700;
+        letter-spacing: -1px;
+        margin: 0;
+        font-style: italic;
+    }
+
+        .brand-header h1 i {
+            color: var(--accent-color);
+        }
+
+.registration-form, .login-form {
+    padding: 2rem;
+}
+
+.form-label {
+    font-weight: 600;
+    color: var(--dark-color);
+    margin-bottom: 0.5rem;
+}
+
+.form-control {
+    border: 2px solid #e2e8f0;
+    border-radius: 0.5rem;
+    padding: 0.75rem 1rem;
+    transition: border-color 0.3s ease;
+}
+
+    .form-control:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+    }
+
+.gender-options {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+    .gender-options .form-check {
+        flex: 1;
+    }
+
+    .gender-options .form-check-input {
+        width: 1.2em;
+        height: 1.2em;
+        margin-top: 0.2em;
+    }
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    border: none;
+    padding: 0.75rem 2rem;
+    font-weight: 600;
+    transition: transform 0.2s ease;
+    width: 100%;
+    border-radius: 0.5rem;
+}
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+    }
+
+.login-link {
+    text-align: center;
+    margin-top: 1.5rem;
+    color: var(--dark-color);
+}
+
+    .login-link a {
+        color: var(--primary-color);
+        text-decoration: none;
+        font-weight: 600;
+    }
+
+        .login-link a:hover {
+            text-decoration: underline;
+        }
+
+.title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    letter-spacing: -1px;
+    margin: 0;
+    margin-bottom: 1.5rem;
+    color: var(--dark-color)
+}
+
+@media (max-width: 576px) {
+    .register-card, .login-card {
+        margin: 2rem auto;
+    }
+
+    .brand-header h1 {
+        font-size: 2rem;
+    }
+}
+
+@media (max-width: 512px) {
+    * {
+        font-size: 1rem;
+    }
+
+    .title {
+        margin-bottom: 1rem;
+    }
+
+    .login-card, .register-card {
+        width: 95%;
+    }
+
+    .registration-form, .login-form {
+        padding: 2rem 1rem;
+    }
+}

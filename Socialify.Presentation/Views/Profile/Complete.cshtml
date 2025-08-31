@@ -1,0 +1,61 @@
+@using Socialify.Application.DTOs.Profile
+@model CompleteProfileDto
+
+@{
+    ViewData["Title"] = "Complete Profile";
+    ViewData["CssFile"] = "login.css";
+    Layout = "~/Views/Shared/_UnAuthorizedLayout.cshtml";
+}
+
+<div class="register-card">
+    <div class="brand-header">
+        <h1>Socialify</h1>
+    </div>
+    <form asp-action="Complete" asp-controller="Profile" method="post" class="registration-form">
+        @Html.AntiForgeryToken()
+        <div class="title"><h2>Complete Your Profile</h2></div>
+
+        <div class="mb-2">
+            <label asp-for="PhoneNumber" class="form-label"></label>
+            <input asp-for="PhoneNumber" class="form-control" type="tel" pattern="[0-9]{11}" placeholder="01X-XXXXXXXX" required/>
+            <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+        </div>
+
+        <div class="mb-2">
+            <label asp-for="Gender" class="form-label"></label>
+            <div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" asp-for="Gender" value="0" id="genderMale" />
+                    <label class="form-check-label" for="genderMale">Male</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" asp-for="Gender" value="1" id="genderFemale" />
+                    <label class="form-check-label" for="genderFemale">Female</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" asp-for="Gender" value="2" id="genderOther" />
+                    <label class="form-check-label" for="genderOther">Other</label>
+                </div>
+            </div>
+            <span asp-validation-for="Gender" class="text-danger"></span>
+        </div>
+
+        <div class="mb-2">
+            <label asp-for="Bio" class="form-label"></label>
+            <textarea asp-for="Bio" class="form-control"></textarea>
+            <span asp-validation-for="Bio" class="text-danger"></span>
+        </div>
+
+        <div class="mb-2">
+            <label asp-for="BirthDate" class="form-label"></label>
+            <input asp-for="BirthDate" type="date" class="form-control" required/>
+            <span asp-validation-for="BirthDate" class="text-danger"></span>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Create Account</button>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

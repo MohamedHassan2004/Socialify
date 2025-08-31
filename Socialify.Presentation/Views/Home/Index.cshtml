@@ -1,0 +1,12 @@
+﻿@{
+	ViewData["CssFile"] = "HomePage.css";
+}
+
+<div class='all'>
+    @await Html.PartialAsync("_AsideBarLeft")
+    <main>
+        @await Html.PartialAsync("_PostForm")
+        @await Html.PartialAsync("_PostContainer")
+    </main>
+    @await Html.PartialAsync("_AsideBarRight")
+</div>

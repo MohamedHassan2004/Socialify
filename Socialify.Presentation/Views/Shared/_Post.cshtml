@@ -1,0 +1,36 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}
+
+@if (Model != null)
+{
+	<div class="card mt-3 post" post-id="postId">
+		<div class="post-header">
+			<img src="@Model.UserAvatarUrl" alt="@Model.UserName's avatar" class="avatar" />
+			<div class="user-info">
+				<span class="user-name">@Model.UserName</span>
+				<span class="post-date">@Model.PostedDate.ToString("g")</span>
+			</div>
+		</div>
+		<div class="post-content">
+			<p>@Model.Content</p>
+			@if (!string.IsNullOrEmpty(Model.ImageUrl))
+			{
+				<img src="@Model.ImageUrl" alt="Post image" class="post-image" />
+			}
+		</div>
+		<div class="post-actions">
+			<button class="like-button">Like (@Model.LikesCount)</button>
+			<button class="comment-button">Comment (@Model.CommentsCount)</button>
+		</div>
+	</div>
+}
+else
+{
+	<center>
+		<div class="alert alert-info mt-3">No posts available</div>
+		<a class="btn btn-primary" href="explore.html"><i class="far fa-compass"></i> Explore</a>
+	</center>
+}

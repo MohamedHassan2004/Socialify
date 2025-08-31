@@ -1,0 +1,20 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}
+<div class="posts-container">
+	@if (Model == null || !Model.Any())
+	{
+		<center>
+			<div class="alert alert-info mt-3">No posts available</div>
+		</center>
+	}
+	else
+	{
+		foreach (var post in Model)
+		{
+			@* @await Html.PartialAsync("~/Views/Shared/_Post", post) *@
+		}
+	}
+</div>
