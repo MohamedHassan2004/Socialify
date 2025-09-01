@@ -2,12 +2,12 @@ using Socialify.Application.Validation;
 using System;
 using System.ComponentModel.DataAnnotations;
 
-namespace Socialify.Application.DTOs.Profile
+namespace Socialify.Application.DTOs.Account
 {
     public class CompleteProfileDto
     {
         [Required]
-        [Length(11, 11, ErrorMessage = "Phone number must be exactly 11 characters long.")]
+        [RegularExpression(@"^\d{11}$", ErrorMessage = "Phone number must be exactly 11 characters long.")]
         [DataType(DataType.PhoneNumber)]
         [Display(Name = "Phone Number")]
         public string? PhoneNumber { get; set; }

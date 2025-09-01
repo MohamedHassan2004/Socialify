@@ -3,6 +3,7 @@ using System.Linq.Expressions;
 using System;
 using Socialify.Infrastructure.Data.Context;
 using Socialify.Application.Interfaces;
+using Socialify.Application.RepoInterfaces;
 
 public class Repository<T> : IRepository<T> where T : class
 {

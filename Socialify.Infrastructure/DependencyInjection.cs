@@ -1,9 +1,9 @@
 
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
+using Socialify.Application.RepoInterfaces;
 using Socialify.Application.Interfaces;
 using Socialify.Application.Services;
-using Socialify.Domain.Interfaces;
 using Socialify.Infrastructure.Data.Repository;
 using Socialify.Infrastructure.Identity;
 

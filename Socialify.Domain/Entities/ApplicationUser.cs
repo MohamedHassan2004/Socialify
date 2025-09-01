@@ -14,7 +14,7 @@ namespace Socialify.Domain.Entities
         public DateTime CreatedAt { get; set; }
         public int Gender { get; set; }
         public string? Bio { get; set; }
-        public string ProfilePicUrl { get; set; } = "~/images/profilePics/default-profile-pic.jpg";
+        public string ProfilePicUrl { get; set; } = "images/profilePics/default-profile-pic.jpg";
         public DateTime BirthDate { get; set; }
         public bool IsActive { get; set; } = true;
 

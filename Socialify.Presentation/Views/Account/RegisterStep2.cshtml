@@ -1,3 +1,4 @@
+@using Socialify.Application.DTOs.Account
 @using Socialify.Application.DTOs.Profile
 @model CompleteProfileDto
 
@@ -11,13 +12,13 @@
     <div class="brand-header">
         <h1>Socialify</h1>
     </div>
-    <form asp-action="Complete" asp-controller="Profile" method="post" class="registration-form">
+    <form asp-action="RegisterStep2" asp-controller="Account" method="post" class="registration-form">
         @Html.AntiForgeryToken()
         <div class="title"><h2>Complete Your Profile</h2></div>
 
         <div class="mb-2">
             <label asp-for="PhoneNumber" class="form-label"></label>
-            <input asp-for="PhoneNumber" class="form-control" type="tel" pattern="[0-9]{11}" placeholder="01X-XXXXXXXX" required/>
+            <input asp-for="PhoneNumber" class="form-control" type="tel" pattern="[0-9]{11}" maxlength="11" placeholder="01X-XXXXXXXX" required />
             <span asp-validation-for="PhoneNumber" class="text-danger"></span>
         </div>
 
@@ -58,4 +59,5 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script src="~/js/RestrictPhoneNumber.js"></script>
 }

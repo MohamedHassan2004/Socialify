@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Socialify.Application.DTOs.Account;
 using Socialify.Application.Interfaces;
+using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace Socialify.Presentation.Controllers
@@ -37,27 +39,66 @@ namespace Socialify.Presentation.Controllers
         }
 
         [HttpGet]
-        public IActionResult Register()
+        public IActionResult RegisterStep1()
         {
             return View();
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Register(RegisterDto model)
+        public IActionResult RegisterStep1(RegisterDto model)
         {
             if (ModelState.IsValid)
             {
-                var result = await _authService.RegisterAsync(model);
+                TempData["RegisterModel"] = JsonSerializer.Serialize(model);
+                return RedirectToAction("RegisterStep2");
+            }
+            return View(model);
+        }
+
+        [HttpGet]
+        public IActionResult RegisterStep2()
+        {
+            var step1Data = TempData.Peek("RegisterModel") as string;
+            if (string.IsNullOrEmpty(step1Data))
+            {
+                return RedirectToAction("RegisterStep1");
+            }
+
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RegisterStep2(CompleteProfileDto model)
+        {
+            if (ModelState.IsValid)
+            {
+                var registerModelJson = TempData["RegisterModel"] as string;
+                if (string.IsNullOrEmpty(registerModelJson))
+                {
+                    ModelState.AddModelError(string.Empty, "Registration session expired. Please register again.");
+                    return View(model);
+                }
+
+                var registerModel = JsonSerializer.Deserialize<RegisterDto>(registerModelJson);
+                if (registerModel == null)
+                {
+                    ModelState.AddModelError(string.Empty, "An error occurred. Please register again.");
+                    return View(model);
+                }
+
+                var result = await _authService.RegisterAsync(registerModel, model);
+
                 if (result.IsSuccess)
                 {
-                    return RedirectToAction("Complete", "Profile");
+                    return RedirectToAction("Login", "Account");
                 }
-                foreach (var error in result.Errors)
-                {
-                    ModelState.AddModelError(string.Empty, error);
-                }
+
+                result.Errors.ForEach(error => ModelState.AddModelError(string.Empty, error));
             }
+
+            TempData.Keep("RegisterModel");
             return View(model);
         }
 
@@ -68,5 +109,6 @@ namespace Socialify.Presentation.Controllers
             await _authService.LogoutAsync();
             return RedirectToAction("Login", "Account");
         }
+
     }
 }

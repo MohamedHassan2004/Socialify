@@ -1,7 +1,7 @@
 ﻿using Socialify.Domain.Entities;
 using System.Threading.Tasks;
 
-namespace Socialify.Application.Interfaces
+namespace Socialify.Application.RepoInterfaces
 {
     public interface IUserRepository
     {

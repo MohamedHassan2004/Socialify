@@ -12,7 +12,7 @@ namespace Socialify.Application.Interfaces
     public interface IAuthService
     {
         Task<Result<UserDto>> LoginAsync(LoginDto loginDto);
-        Task<Result<UserDto>> RegisterAsync(RegisterDto registerDto);
+        Task<Result<UserDto>> RegisterAsync(RegisterDto registerDto, CompleteProfileDto completeProfileDto);
         Task<Result> LogoutAsync();
         Task<Result<UserDto>> GetCurrentUserAsync();
         Task<Result> ChangePasswordAsync(string userId, string currentPassword, string newPassword);

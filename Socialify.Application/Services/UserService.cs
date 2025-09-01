@@ -1,8 +1,10 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
+using Socialify.Application.DTOs.Account;
 using Socialify.Application.DTOs.Profile;
 using Socialify.Application.Interfaces;
+using Socialify.Application.RepoInterfaces;
 using Socialify.Domain.Common;
 using Socialify.Domain.Entities;
 using System.Security.Claims;

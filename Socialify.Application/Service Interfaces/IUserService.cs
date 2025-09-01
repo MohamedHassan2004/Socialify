@@ -1,4 +1,4 @@
-using Socialify.Application.DTOs.Profile;
+using Socialify.Application.DTOs.Account;
 using Socialify.Domain.Common;
 using Socialify.Domain.Entities;
 using System.Threading.Tasks;

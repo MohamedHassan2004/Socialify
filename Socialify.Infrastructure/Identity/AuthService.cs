@@ -84,7 +84,7 @@ namespace Socialify.Infrastructure.Identity
             }
         }
 
-        public async Task<Result<UserDto>> RegisterAsync(RegisterDto registerDto)
+        public async Task<Result<UserDto>> RegisterAsync(RegisterDto registerDto, CompleteProfileDto completeProfileDto)
         {
             try
             {
@@ -101,7 +101,11 @@ namespace Socialify.Infrastructure.Identity
                     FirstName = registerDto.FirstName,
                     LastName = registerDto.LastName,
                     CreatedAt = DateTime.UtcNow,
-                    IsActive = true
+                    IsActive = true,
+                    PhoneNumber = completeProfileDto.PhoneNumber,
+                    Gender = completeProfileDto.Gender,
+                    Bio = completeProfileDto.Bio,
+                    BirthDate = completeProfileDto.BirthDate
                 };
 
                 var result = await _userManager.CreateAsync(user, registerDto.Password);
