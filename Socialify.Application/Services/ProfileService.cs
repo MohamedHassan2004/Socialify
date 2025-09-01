@@ -12,13 +12,13 @@ using System.Threading.Tasks;
 
 namespace Socialify.Application.Services
 {
-    public class UserService : IUserService
+    public class ProfileService : IProfileService
     {
-        private readonly IUserRepository _userRepository;
+        private readonly IProfileRepository _userRepository;
         private readonly IHttpContextAccessor _httpContextAccessor;
-        private readonly ILogger<UserDto> _logger;
+        private readonly ILogger<ProfileDto> _logger;
 
-        public UserService(IUserRepository userRepository, IHttpContextAccessor httpContextAccessor, ILogger<UserDto> logger)
+        public ProfileService(IProfileRepository userRepository, IHttpContextAccessor httpContextAccessor, ILogger<ProfileDto> logger)
         {
             _userRepository = userRepository;
             _httpContextAccessor = httpContextAccessor;

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Socialify.Application.DTOs.Profile
 {
-    public class UserDto
+    public class ProfileDto
     {
         public string Id { get; set; }
         public string Email { get; set; }

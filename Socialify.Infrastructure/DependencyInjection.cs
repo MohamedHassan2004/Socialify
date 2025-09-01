@@ -14,8 +14,8 @@ namespace Socialify.Infrastructure
         public static IServiceCollection AddInfrastructure(this IServiceCollection services)
         {
             services.AddScoped<IAuthService, AuthService>();
-            services.AddScoped<IUserService, UserService>();
-            services.AddScoped<IUserRepository, UserRepository>();
+            services.AddScoped<IProfileService, ProfileService>();
+            services.AddScoped<IProfileRepository, ProfileRepository>();
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             return services;
         }

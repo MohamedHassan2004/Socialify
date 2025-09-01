@@ -13,7 +13,7 @@ namespace Socialify.Application.Automapper
     {
         public UserProfile()
         {
-            CreateMap<ApplicationUser, UserDto>()
+            CreateMap<ApplicationUser, ProfileDto>()
                 .ForMember(dest => dest.FullName, opt => opt.MapFrom(src => src.FullName));
         }
     }

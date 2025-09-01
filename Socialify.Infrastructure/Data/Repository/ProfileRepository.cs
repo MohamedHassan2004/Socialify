@@ -6,11 +6,11 @@ using System.Threading.Tasks;
 
 namespace Socialify.Infrastructure.Data.Repository
 {
-    public class UserRepository : Repository<ApplicationUser>, IUserRepository
+    public class ProfileRepository : Repository<ApplicationUser>, IProfileRepository
     {
         private readonly SocialifyDbContext _context;
 
-        public UserRepository(SocialifyDbContext context) : base(context)
+        public ProfileRepository(SocialifyDbContext context) : base(context)
         {
             _context = context;
         }

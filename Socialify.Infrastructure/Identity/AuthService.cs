@@ -30,19 +30,19 @@ namespace Socialify.Infrastructure.Identity
             _logger = logger;
         }
 
-        public async Task<Result<UserDto>> LoginAsync(LoginDto loginDto)
+        public async Task<Result<ProfileDto>> LoginAsync(LoginDto loginDto)
         {
             try
             {
                 var user = await _userManager.FindByEmailAsync(loginDto.Email);
                 if (user == null)
                 {
-                    return Result<UserDto>.Failure("Invalid email or password.");
+                    return Result<ProfileDto>.Failure("Invalid email or password.");
                 }
 
                 if (!user.IsActive)
                 {
-                    return Result<UserDto>.Failure("Account is deactivated.");
+                    return Result<ProfileDto>.Failure("Account is deactivated.");
                 }
 
                 var Result = await _signInManager.CheckPasswordSignInAsync(
@@ -67,31 +67,31 @@ namespace Socialify.Infrastructure.Identity
 
                     await _signInManager.SignInWithClaimsAsync(user, authProps, claims);
 
-                    var dto = _mapper.Map<UserDto>(user);
+                    var dto = _mapper.Map<ProfileDto>(user);
                     _logger.LogInformation("User {Email} logged in successfully.", user.Email);
-                    return Result<UserDto>.Success(dto);
+                    return Result<ProfileDto>.Success(dto);
                 }
 
                 if (Result.IsLockedOut)
-                    return Result<UserDto>.Failure("Account is locked out.");
+                    return Result<ProfileDto>.Failure("Account is locked out.");
 
-                return Result<UserDto>.Failure("Invalid email or password.");
+                return Result<ProfileDto>.Failure("Invalid email or password.");
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error occurred during login for {Email}", loginDto.Email);
-                return Result<UserDto>.Failure("An error occurred during login.");
+                return Result<ProfileDto>.Failure("An error occurred during login.");
             }
         }
 
-        public async Task<Result<UserDto>> RegisterAsync(RegisterDto registerDto, CompleteProfileDto completeProfileDto)
+        public async Task<Result<ProfileDto>> RegisterAsync(RegisterDto registerDto, CompleteProfileDto completeProfileDto)
         {
             try
             {
                 var existingUser = await _userManager.FindByEmailAsync(registerDto.Email);
                 if (existingUser != null)
                 {
-                    return Result<UserDto>.Failure("Email already exists.");
+                    return Result<ProfileDto>.Failure("Email already exists.");
                 }
 
                 var user = new ApplicationUser
@@ -114,18 +114,18 @@ namespace Socialify.Infrastructure.Identity
                 {
                     await _userManager.AddToRoleAsync(user, "User");
 
-                    var userDto = _mapper.Map<UserDto>(user);
+                    var userDto = _mapper.Map<ProfileDto>(user);
                     _logger.LogInformation("User {Email} registered successfully.", user.Email);
-                    return Result<UserDto>.Success(userDto);
+                    return Result<ProfileDto>.Success(userDto);
                 }
 
                 var errors = result.Errors.Select(e => e.Description).ToList();
-                return Result<UserDto>.Failure(errors);
+                return Result<ProfileDto>.Failure(errors);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error occurred during registration for {Email}", registerDto.Email);
-                return Result<UserDto>.Failure("An error occurred during registration.");
+                return Result<ProfileDto>.Failure("An error occurred during registration.");
             }
         }
 
@@ -143,23 +143,23 @@ namespace Socialify.Infrastructure.Identity
             }
         }
 
-        public async Task<Result<UserDto>> GetCurrentUserAsync()
+        public async Task<Result<ProfileDto>> GetCurrentUserAsync()
         {
             try
             {
                 var user = await _userManager.GetUserAsync(_signInManager.Context.User);
                 if (user == null)
                 {
-                    return Result<UserDto>.Failure("User not found.");
+                    return Result<ProfileDto>.Failure("User not found.");
                 }
 
-                var userDto = _mapper.Map<UserDto>(user);
-                return Result<UserDto>.Success(userDto);
+                var userDto = _mapper.Map<ProfileDto>(user);
+                return Result<ProfileDto>.Success(userDto);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error occurred while getting current user");
-                return Result<UserDto>.Failure("An error occurred while getting user information.");
+                return Result<ProfileDto>.Failure("An error occurred while getting user information.");
             }
         }
 

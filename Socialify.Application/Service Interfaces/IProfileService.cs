@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace Socialify.Application.Interfaces
 {
-    public interface IUserService
+    public interface IProfileService
     {
         Task<Result<ApplicationUser>> GetCurrentUserAsync();
         Task<Result> UpdateUserAsync(ApplicationUser user, CompleteProfileDto model);
