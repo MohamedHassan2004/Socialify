@@ -1,0 +1,38 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+	ViewData["Title"] = "Update Profile Picture";
+	ViewData["CssFile"] = "Forms.css";
+}
+@model Socialify.Application.DTOs.Profile.PatchProfilePicDto
+
+
+<div class="form-card">
+    <div class="brand-header">
+        <h1>Socialify</h1>
+    </div>
+
+    <form asp-action="UpdateProfilePic" asp-controller="Profile" method="post" enctype="multipart/form-data">
+        @Html.AntiForgeryToken()
+        <div class="title"><h2>Update Profile Picture</h2></div>
+        <div asp-validation-summary="All" class="text-danger"></div>
+
+
+        <div class="mb-2">
+            <label asp-for="ProfilePicture" class="form-label"></label>
+            <input asp-for="ProfilePicture" type="file" class="form-control" />
+            <span asp-validation-for="ProfilePicture" class="text-danger"></span>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Save</button>
+        <div class="link">
+            <a asp-controller="Profile" asp-action="Index">Back</a>
+        </div>
+        
+    </form>
+</div>
+
+@section scripts {
+	<partial name="_ValidationScriptsPartial" />
+}

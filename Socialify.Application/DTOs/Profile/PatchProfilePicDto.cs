@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Socialify.Application.Validation;
+using Socialify.Application.Validation.ImgValidation;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -13,9 +14,10 @@ namespace Socialify.Application.DTOs.Profile
 {
     public class PatchProfilePicDto
     {
-        [FromForm]
-        [ImageValidationAttribute]
+        [Required]
+        [ValidateFileSize]
+        [ValidateImgExtension]
         [Display(Name ="Profile Picture")]
-        public IFormFile ProfilePicUrl { get; set; }
+        public IFormFile? ProfilePicture { get; set; }
     }
 }

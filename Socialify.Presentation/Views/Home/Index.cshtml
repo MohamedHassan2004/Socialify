@@ -1,12 +1,13 @@
 ﻿@{
 	ViewData["CssFile"] = "HomePage.css";
 }
+@model Socialify.Application.DTOs.Home.HomePageDto
 
 <div class='all'>
-    @await Html.PartialAsync("_AsideBarLeft")
+    @await Html.PartialAsync("_AsideBarLeft", Model.User)
     <main>
         @await Html.PartialAsync("_PostForm")
-        @await Html.PartialAsync("_PostContainer")
+        @await Html.PartialAsync("_PostContainer",Model.Posts)
     </main>
     @await Html.PartialAsync("_AsideBarRight")
 </div>

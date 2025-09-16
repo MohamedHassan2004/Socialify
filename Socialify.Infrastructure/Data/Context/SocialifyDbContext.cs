@@ -11,11 +11,24 @@ namespace Socialify.Infrastructure.Data.Context
         {
         }
 
+        public DbSet<Post> Posts { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
-            
+            modelBuilder.Entity<Post>()
+                .HasOne(p => p.User)
+                .WithMany(u => u.Posts)
+                .HasForeignKey(p => p.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Post>()
+                .HasIndex(p => p.UserId);
+
+
+
+
         }
     }
 }

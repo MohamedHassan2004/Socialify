@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Socialify.Application.Validation
 {
-    public class AgeValidationAttribute : ValidationAttribute
+    public class ValidateAgeAttribute : ValidationAttribute
     {
         protected override ValidationResult? IsValid(object? value, ValidationContext validationContext)
         {

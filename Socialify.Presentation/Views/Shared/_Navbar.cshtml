@@ -1,8 +1,4 @@
-﻿@{
-    var currentUserId = 5; // Example user ID
-}
-
-<nav class="navbar navbar-expand-lg fixed-top p-3">
+﻿<nav class="navbar navbar-expand-lg fixed-top p-3">
     <div class="container-fluid container">
         <a class="navbar-brand" asp-controller="Home" asp-action="Index"><i><b>Socialify</b></i></a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
@@ -14,10 +10,10 @@
                     <a class="nav-link" asp-controller="Home" asp-action="Index" aria-current="page"><i class="fa-solid fa-house"></i> Home</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" asp-controller="Profile" asp-action="Index" asp-route-id="@currentUserId"><i class="fa-solid fa-user"></i> Profile</a>
+                    <a class="nav-link" asp-controller="Profile" asp-action="MyProfile"><i class="fa-solid fa-user"></i> Profile</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" asp-controller="Profile" asp-action="Edit"><i class="fa-solid fa-sliders"></i> Settings</a>
+                    <a class="nav-link" asp-controller="Profile" asp-action="Settings"><i class="fa-solid fa-sliders"></i> Settings</a>
                 </li>
                 <li class="nav-item d-lg-none">
                     <a class="nav-link" asp-controller="Notifications" asp-action="Index"><i class="fa-solid fa-bell"></i> Notifications</a>
@@ -35,13 +31,17 @@
                     <a class="nav-link" asp-controller="Friends" asp-action="Requests"><i class="fas fa-user-plus"></i> Friends Requests</a>
                 </li>
                 <li class="nav-item d-lg-none">
-                    <a class="nav-link" asp-controller="Account" asp-action="Logout"><i class="fas fa-sign-out-alt"></i> Log out</a>
+                    <a class="nav-link" asp-controller="Account" asp-action="Logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
                 </li>
             </ul>
-            <form class="d-flex" role="search" asp-controller="Home" asp-action="Search" method="get">
-                <input class="form-control me-2" type="search" name="query" placeholder="Search" aria-label="Search">
-                <button class="btn btn-outline-success" type="submit"><i class="fa-solid fa-magnifying-glass"></i></button>
-            </form>
+            <div class="search-container">
+                <form asp-controller="Search" asp-action="Index" method="get">
+                    <input class="form-control search-input" type="search" name="query" placeholder="Search..." aria-label="Search">
+                    <button class="search-btn" type="submit" aria-label="Submit search">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                    </button>
+                </form>
+            </div>
         </div>
     </div>
 </nav>

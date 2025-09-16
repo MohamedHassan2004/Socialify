@@ -8,13 +8,15 @@
     Layout = "~/Views/Shared/_UnAuthorizedLayout.cshtml";
 }
 
-<div class="register-card">
+<div class="form-card">
     <div class="brand-header">
         <h1>Socialify</h1>
     </div>
-    <form asp-action="RegisterStep2" asp-controller="Account" method="post" class="registration-form">
+    <form asp-action="RegisterStep2" asp-controller="Account" method="post">
         @Html.AntiForgeryToken()
         <div class="title"><h2>Complete Your Profile</h2></div>
+
+        <div asp-validation-summary="All" class="text-danger"></div>
 
         <div class="mb-2">
             <label asp-for="PhoneNumber" class="form-label"></label>

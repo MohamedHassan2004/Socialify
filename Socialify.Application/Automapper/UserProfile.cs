@@ -14,7 +14,12 @@ namespace Socialify.Application.Automapper
         public UserProfile()
         {
             CreateMap<ApplicationUser, ProfileDto>()
-                .ForMember(dest => dest.FullName, opt => opt.MapFrom(src => src.FullName));
+                .ForMember(dest => dest.FullName, opt => opt.MapFrom(src => src.FullName))
+                .ForMember(dest => dest.JoinedOn, opt => opt.MapFrom(src => src.CreatedAt.Date));
+
+            CreateMap<ApplicationUser, UpdateProfileInfoDto>().ReverseMap();
+
+            CreateMap<ApplicationUser, ProfileBasicInfoDto>();
         }
     }
 }

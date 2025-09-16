@@ -17,7 +17,8 @@ namespace Socialify.Domain.Entities
         public string ProfilePicUrl { get; set; } = "images/profilePics/default-profile-pic.jpg";
         public DateTime BirthDate { get; set; }
         public bool IsActive { get; set; } = true;
-
         public string FullName => $"{FirstName} {LastName}";
+
+        public ICollection<Post> Posts { get; set; } = new List<Post>();
     }
 }

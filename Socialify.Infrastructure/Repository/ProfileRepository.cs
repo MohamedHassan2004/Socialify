@@ -1,10 +1,11 @@
+using Microsoft.EntityFrameworkCore;
 using Socialify.Application.Interfaces;
-using Socialify.Application.RepoInterfaces;
+using Socialify.Application.ReposInterfaces;
 using Socialify.Domain.Entities;
 using Socialify.Infrastructure.Data.Context;
 using System.Threading.Tasks;
 
-namespace Socialify.Infrastructure.Data.Repository
+namespace Socialify.Infrastructure.Repository
 {
     public class ProfileRepository : Repository<ApplicationUser>, IProfileRepository
     {
@@ -15,15 +16,9 @@ namespace Socialify.Infrastructure.Data.Repository
             _context = context;
         }
 
-        public Task<ApplicationUser> GetByIdAsync(string id)
+        public async Task<ApplicationUser?> GetByIdAsync(string userId)
         {
-            throw new NotImplementedException();
-        }
-
-        public async Task UpdateAsync(ApplicationUser user)
-        {
-            _context.Update(user);
-            await _context.SaveChangesAsync();
+            return await _context.FindAsync<ApplicationUser>(userId);
         }
     }
 }

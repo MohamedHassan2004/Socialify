@@ -1,0 +1,81 @@
+﻿:root {
+    --settings-background-color: #f8f9fa; /* Light gray background */
+    --settings-card-background: #ffffff;
+    --settings-border-color: #dee2e6;
+    --settings-danger-color: #dc3545;
+    --settings-danger-background: #f8d7da;
+    --settings-danger-border: #f5c2c7;
+}
+
+body {
+    background-color: var(--settings-background-color);
+}
+
+.settings-container {
+    max-width: 800px;
+    margin: 2rem auto;
+    padding: 1rem;
+}
+
+.settings-header {
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+    .settings-header h1 {
+        font-weight: 600;
+    }
+
+.settings-card {
+    border: 1px solid var(--settings-border-color);
+    border-radius: 0.75rem; /* Softer corners */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    overflow: hidden; /* Ensures child elements conform to border-radius */
+}
+
+    .settings-card .card-header {
+        background-color: var(--settings-background-color);
+        font-weight: 500;
+        padding: 1rem 1.5rem;
+        border-bottom: 1px solid var(--settings-border-color);
+    }
+
+    .settings-card .list-group-item {
+        padding: 1.25rem 1.5rem;
+        transition: background-color 0.2s ease-in-out;
+    }
+
+        .settings-card .list-group-item:hover {
+            background-color: #f8f9fa;
+        }
+
+        .settings-card .list-group-item strong {
+            font-size: 1.1rem;
+            color: #212529;
+        }
+
+        .settings-card .list-group-item p {
+            font-size: 0.9rem;
+        }
+
+    .settings-card .btn {
+        border-radius: 0.5rem;
+        font-weight: 500;
+        min-width: 150px;
+        text-align: center;
+    }
+
+/* Specific styles for the Danger Zone */
+.danger-zone .card-header {
+    background-color: var(--settings-danger-background);
+    color: var(--settings-danger-color);
+    border-bottom: 1px solid var(--settings-danger-border);
+}
+
+.danger-zone .card-body {
+    padding: 1.25rem 1.5rem;
+}
+
+.danger-zone strong {
+    color: var(--settings-danger-color);
+}

@@ -1,0 +1,47 @@
+﻿@using Socialify.Domain.Enums
+@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}
+
+@model RelationshipStatus
+
+<div class="profile-actions">
+    @switch (Model)
+    {
+        case RelationshipStatus.Self:
+            <button class="btn btn-outline-primary" 
+                    onclick="location.href='@Url.Action("UpdateProfileInfo","Profile")'">
+                <i class="fas fa-user-edit"></i> Edit Profile
+            </button>
+            break;
+
+        case RelationshipStatus.Friend:
+            <button class='btn btn-danger delete-friend'>
+                <i class='fas fa-user-minus'></i> Delete Friend</button>
+            break;
+
+        case RelationshipStatus.SentRequest:
+            <button class="btn btn-secondary">
+                <i class="fas fa-user-clock"></i> Cancel
+            </button>
+            break;
+
+        case RelationshipStatus.ReceivedRequest:
+            <div class='requests'>
+                <button class='btn btn-success me-2 accept'><i class='fas fa-check'></i> Accept</button>
+                <button class='btn btn-danger reject'><i class='fas fa-times'></i> Reject</button>
+            </div>
+            break;
+
+        case RelationshipStatus.None:
+            <button class='btn btn-primary add-friend-btn'>
+                <i class='fas fa-user-plus'></i> Add Friend</button>
+            break;
+    }
+</div>
+
+@section scripts{
+    <script src="~/js/profileActions.js"></script>
+}

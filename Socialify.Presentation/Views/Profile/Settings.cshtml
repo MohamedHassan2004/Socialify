@@ -1,0 +1,103 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    ViewData["Title"] = "Settings";
+	ViewData["CssFile"] = "Settings.css";
+}
+
+<main>
+
+
+    <div class="settings-container">
+        <div class="settings-header">
+            <h1>Account Settings</h1>
+            <p class="text-muted">Manage your profile, password, and account preferences.</p>
+        </div>
+
+        @* Add this section to display TempData messages *@
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                @TempData["SuccessMessage"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                @TempData["ErrorMessage"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+
+        <div class="card settings-card">
+            <div class="card-header">
+                <h5>General</h5>
+            </div>
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <div>
+                        <strong>Update Profile</strong>
+                        <p class="text-muted mb-0">Edit your personal information, name, and bio.</p>
+                    </div>
+                    <a asp-action="UpdateProfileInfo" asp-controller="Profile" class="btn btn-outline-primary">
+                        <i class="fas fa-user-edit me-2"></i>Edit Profile
+                    </a>
+                </li>
+
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <div>
+                        <strong>Change Password</strong>
+                        <p class="text-muted mb-0">Update your password for better security.</p>
+                    </div>
+                    <a asp-action="ChangePassword" asp-controller="Account" class="btn btn-outline-primary">
+                        <i class="fas fa-lock me-2"></i>Change Password
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <div class="card settings-card danger-zone mt-4">
+            <div class="card-header">
+                <h5>Danger Zone</h5>
+            </div>
+            <div class="card-body d-flex justify-content-between align-items-center">
+                <div>
+                    <strong>Delete Account</strong>
+                    <p class="text-muted mb-0">Permanently delete your account and all associated data. This action cannot be undone.</p>
+                </div>
+                <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteAccountModal">
+                    <i class="fas fa-trash-alt me-2"></i>Delete Account
+                </button>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="modal fade" id="deleteAccountModal" tabindex="-1" aria-labelledby="deleteAccountModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteAccountModalLabel">
+                        <i class="fas fa-exclamation-triangle text-danger me-2"></i>Confirm Account Deletion
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you absolutely sure you want to delete your account?</p>
+                    <p class="text-danger fw-bold">This action is permanent and cannot be undone. All your posts, comments, and connections will be lost forever.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+
+                    <a asp-action="DeleteAccount" asp-controller="Account" class="btn btn-danger">
+                        Yes, Delete My Account
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</main>

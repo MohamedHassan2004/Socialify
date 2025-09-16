@@ -3,7 +3,7 @@ using System.Linq.Expressions;
 using System;
 using Socialify.Infrastructure.Data.Context;
 using Socialify.Application.Interfaces;
-using Socialify.Application.RepoInterfaces;
+using Socialify.Application.ReposInterfaces;
 
 public class Repository<T> : IRepository<T> where T : class
 {
@@ -18,7 +18,7 @@ public class Repository<T> : IRepository<T> where T : class
 
     public async Task<IEnumerable<T>> GetAllAsync()
     {
-        return await _dbSet.ToListAsync();
+        return await _dbSet.AsNoTracking().ToListAsync();
     }
 
     public async Task<T?> GetByIdAsync(int id)

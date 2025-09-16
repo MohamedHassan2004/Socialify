@@ -1,0 +1,202 @@
+﻿.person-img {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    object-fit: cover;
+    position: relative;
+    z-index: 1;
+}
+
+
+/* Modern Search Bar Styles */
+
+.search-container {
+    position: relative; /* This is the key to positioning the button inside */
+    width: 300px; /* Or set to 100% to fill its parent */
+}
+
+    .search-container form {
+        display: flex; /* Ensures input and button are on the same line if needed */
+    }
+
+.search-input {
+    width: 100%;
+    border-radius: 50px; /* Creates the pill shape */
+    border: 1px solid #ced4da;
+    padding: 0.5rem 2.5rem 0.5rem 1rem; /* Right padding is crucial to make space for the icon */
+    transition: all 0.3s ease-in-out;
+}
+
+    /* Style for when the user clicks into the search bar */
+    .search-input:focus {
+        border-color: #86b7fe;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+        outline: none; /* Removes the default browser outline */
+    }
+
+.search-btn {
+    position: absolute; /* Positions the button relative to .search-container */
+    top: 50%;
+    right: 15px; /* Adjust the position from the right */
+    transform: translateY(-50%); /* Perfectly centers the icon vertically */
+    /* Reset button styles */
+    background: transparent;
+    border: none;
+    padding: 0;
+    margin: 0;
+    /* Icon styling */
+    color: #6c757d; /* A muted gray color */
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+
+    /* Make the icon a bit darker on hover for better user feedback */
+    .search-btn:hover {
+        color: #212529;
+    }
+
+/* ----------------------------- General Styles ----------------------------- */
+
+body {
+    background-color: #ddd;
+}
+
+a {
+    text-decoration: none;
+    color: black;
+}
+
+    a:hover {
+        color: blue;
+        cursor: pointer;
+    }
+
+nav {
+    font-size: 12pt;
+    border-bottom: solid 1px #ddd;
+}
+
+.navbar {
+    background-color: #fff;
+    z-index: 1000;
+}
+
+i {
+    pointer-events: none;
+}
+
+
+/* Modern Tab Navigation */
+.profile-nav .nav-link {
+    font-weight: 600;
+    color: var(--text-secondary-color);
+    border: 0;
+    border-bottom: 3px solid transparent;
+    padding: 1rem;
+    transition: all 0.2s ease-in-out;
+}
+
+    .profile-nav .nav-link.active,
+    .profile-nav .nav-link:hover {
+        color: var(--primary-color);
+        border-bottom: 3px solid var(--primary-color);
+        background-color: transparent;
+    }
+
+.tab-content {
+    padding-top: 1.5rem;
+}
+
+
+/* ----------------------------- Main Content Styles ----------------------------- */
+main {
+    padding: 2rem;
+    background-color: white;
+    width: 40%;
+    margin-left: 30%;
+    min-height: calc(100vh - 4.55rem);
+}
+
+/* ----------------------------- Button Styles ----------------------------- */
+.btn {
+    padding: 8px 20px;
+    font-size: 14px;
+}
+
+.btn-icon {
+    transition: color 0.3s;
+}
+
+    .btn-icon:hover {
+        color: #007bff;
+    }
+
+
+/* ----------------------------- Responsive Styles ----------------------------- */
+
+
+@media (max-width: 1500px) {
+    * {
+        font-size: 14px;
+    }
+
+    main {
+        width: 50%;
+        margin-left: 25%;
+    }
+}
+
+@media (max-width: 1100px) {
+    * {
+        font-size: 13px;
+    }
+
+    main {
+        width: 75%;
+        margin-left: 25%;
+    }
+}
+
+@media (max-width: 992px) {
+    .navbar-nav {
+        flex-direction: column;
+    }
+
+        .navbar-nav .nav-item {
+            width: 100%;
+            text-align: left;
+        }
+
+    main {
+        width: 75%;
+        margin: auto;
+    }
+
+    .edit-post, .delete-post {
+        font-size: 12px;
+        padding: 0.75rem;
+    }
+}
+
+@media (max-width: 768px) {
+    main {
+        width: 85%;
+    }
+}
+
+@media (max-width: 550px) {
+    * {
+        font-size: 12px;
+    }
+
+    main {
+        width: 100%;
+        padding: 0.35rem;
+        padding-top: 0.75rem;
+    }
+
+    .edit-post, .delete-post {
+        font-size: 11px;
+        padding: 0.5rem;
+    }
+}

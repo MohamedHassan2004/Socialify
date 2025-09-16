@@ -1,7 +1,11 @@
+using AspNetCoreGeneratedDocument;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Socialify.Application.DTOs.Account;
 using Socialify.Application.Interfaces;
 using System.Linq;
+using System.Security.Claims;
 using System.Text.Json;
 using System.Threading.Tasks;
 
@@ -31,7 +35,8 @@ namespace Socialify.Presentation.Controllers
                 var result = await _authService.LoginAsync(model);
                 if (result.IsSuccess)
                 {
-                    return RedirectToAction("Index", "Home");
+                    return RedirectToAction(nameof(HomeController.Index), nameof(HomeController).Replace("Controller", ""));
+
                 }
                 ModelState.AddModelError(string.Empty, result.ErrorMessage ?? "Invalid login attempt.");
             }
@@ -51,7 +56,7 @@ namespace Socialify.Presentation.Controllers
             if (ModelState.IsValid)
             {
                 TempData["RegisterModel"] = JsonSerializer.Serialize(model);
-                return RedirectToAction("RegisterStep2");
+                return RedirectToAction(nameof(RegisterStep2));
             }
             return View(model);
         }
@@ -62,7 +67,7 @@ namespace Socialify.Presentation.Controllers
             var step1Data = TempData.Peek("RegisterModel") as string;
             if (string.IsNullOrEmpty(step1Data))
             {
-                return RedirectToAction("RegisterStep1");
+                return RedirectToAction(nameof(RegisterStep1));
             }
 
             return View();
@@ -92,7 +97,7 @@ namespace Socialify.Presentation.Controllers
 
                 if (result.IsSuccess)
                 {
-                    return RedirectToAction("Login", "Account");
+                    return RedirectToAction(nameof(Login));
                 }
 
                 result.Errors.ForEach(error => ModelState.AddModelError(string.Empty, error));
@@ -102,12 +107,60 @@ namespace Socialify.Presentation.Controllers
             return View(model);
         }
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
+        [Authorize]
         public async Task<IActionResult> Logout()
         {
             await _authService.LogoutAsync();
-            return RedirectToAction("Login", "Account");
+            return RedirectToAction(nameof(Login));
+        }
+
+
+        [Authorize]
+        [HttpGet]
+        public IActionResult ChangePassword()
+        {
+            return View();
+        }
+
+        [Authorize]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ChangePassword(ChangePasswordDto model)
+        {
+            if (ModelState.IsValid)
+            {
+                var userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return RedirectToAction(nameof(Login));
+                }
+                var result = await _authService.ChangePasswordAsync(userId, model.CurrentPassword, model.NewPassword);
+                if (result.IsSuccess)
+                {
+                    TempData["SuccessMessage"] = "Password changed successfully.";
+                    return RedirectToAction(nameof(HomeController.Index), nameof(HomeController).Replace("Controller", ""));
+                }
+                TempData["ErrorMessage"] = result.ErrorMessage ?? "An error occurred while changing the password.";
+                result.Errors.ForEach(error => ModelState.AddModelError(string.Empty, error));
+            }
+            return View(model);
+        }
+
+        [Authorize]
+        public async Task<IActionResult> DeleteAccount()
+        { 
+            var userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId))
+            {
+                return RedirectToAction(nameof(Login));
+            }
+            var result = await _authService.DeleteAccountAsync(userId);
+            if(result.IsSuccess)
+            {
+                RedirectToAction(nameof(Login));
+            }
+            TempData["ErrorMessage"] = result.ErrorMessage ?? "An error occurred while deleting the account.";
+            return RedirectToAction(nameof(ProfileController.Settings), nameof(ProfileController).Replace("Controller", ""));
         }
 
     }

@@ -14,17 +14,16 @@ body {
     font-family: 'Segoe UI', system-ui, sans-serif;
 }
 
-.register-card, .login-card {
+.form-card {
     background: rgba(255, 255, 255, 0.95);
     border-radius: 1rem;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
     overflow: hidden;
     width: 500px;
-    margin: 2rem auto;
+    margin: auto;
     transition: transform 0.3s ease;
 }
-
-    .register-card:hover, .login-card:hover {
+    .form-card:hover {
         transform: translateY(-5px);
     }
 
@@ -47,24 +46,24 @@ body {
             color: var(--accent-color);
         }
 
-.registration-form, .login-form {
+.form-card form {
     padding: 2rem;
 }
 
-.form-label {
+.form-card .form-label {
     font-weight: 600;
     color: var(--dark-color);
     margin-bottom: 0.5rem;
 }
 
-.form-control {
+.form-card .form-control {
     border: 2px solid #e2e8f0;
     border-radius: 0.5rem;
     padding: 0.75rem 1rem;
     transition: border-color 0.3s ease;
 }
 
-    .form-control:focus {
+    .form-card .form-control:focus {
         border-color: var(--primary-color);
         box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
     }
@@ -100,19 +99,19 @@ body {
         box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
     }
 
-.login-link {
+.link {
     text-align: center;
-    margin-top: 1.5rem;
+    margin-top: 0.5rem;
     color: var(--dark-color);
 }
 
-    .login-link a {
+    .link a {
         color: var(--primary-color);
         text-decoration: none;
         font-weight: 600;
     }
 
-        .login-link a:hover {
+        .link a:hover {
             text-decoration: underline;
         }
 
@@ -125,8 +124,10 @@ body {
     color: var(--dark-color)
 }
 
+/* Responsive */
+
 @media (max-width: 576px) {
-    .register-card, .login-card {
+    .form-card {
         margin: 2rem auto;
     }
 
@@ -144,11 +145,11 @@ body {
         margin-bottom: 1rem;
     }
 
-    .login-card, .register-card {
+    .form-card {
         width: 95%;
     }
 
-    .registration-form, .login-form {
+    .form-card form {
         padding: 2rem 1rem;
     }
 }

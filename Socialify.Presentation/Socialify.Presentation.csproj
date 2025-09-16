@@ -12,7 +12,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Views\Profile\" />
     <Folder Include="wwwroot\images\uploads\" />
     <Folder Include="wwwroot\lib\bootstrap\dist\" />
   </ItemGroup>
