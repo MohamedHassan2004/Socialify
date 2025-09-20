@@ -92,7 +92,6 @@ namespace Socialify.Infrastructure.Identity
                     return Result.Failure("Email already exists.");
                 }
 
-
                 var user = new ApplicationUser
                 {
                     UserName = registerDto.Email,

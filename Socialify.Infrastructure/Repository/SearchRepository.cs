@@ -21,7 +21,8 @@ namespace Socialify.Infrastructure.Repository
         public async Task<IEnumerable<ApplicationUser>> SearchUsersAsync(string keyword)
         {
             return await _context.Users
-                .Where(u => u.FirstName.ToLower().Contains(keyword) || u.LastName.ToLower().Contains(keyword))
+                .Where(u => u.FirstName.ToLower().Contains(keyword)
+                || u.LastName.ToLower().Contains(keyword))
                 .AsNoTracking().ToListAsync();
         }
 

@@ -35,10 +35,10 @@ namespace Socialify.Presentation.Controllers
                 var result = await _authService.LoginAsync(model);
                 if (result.IsSuccess)
                 {
+                    TempData["SuccessMessage"] = "Welcome back! You have successfully logged in.";
                     return RedirectToAction(nameof(HomeController.Index), nameof(HomeController).Replace("Controller", ""));
-
                 }
-                ModelState.AddModelError(string.Empty, result.ErrorMessage ?? "Invalid login attempt.");
+                TempData["ErrorMessage"] = result.ErrorMessage ?? "Invalid login attempt. Please check your credentials and try again.";
             }
             return View(model);
         }
@@ -97,9 +97,11 @@ namespace Socialify.Presentation.Controllers
 
                 if (result.IsSuccess)
                 {
+                    TempData["SuccessMessage"] = "Account created successfully! Please log in to continue.";
                     return RedirectToAction(nameof(Login));
                 }
 
+                TempData["ErrorMessage"] = result.ErrorMessage ?? "Registration failed. Please try again.";
                 result.Errors.ForEach(error => ModelState.AddModelError(string.Empty, error));
             }
 
@@ -157,9 +159,10 @@ namespace Socialify.Presentation.Controllers
             var result = await _authService.DeleteAccountAsync(userId);
             if(result.IsSuccess)
             {
-                RedirectToAction(nameof(Login));
+                TempData["SuccessMessage"] = "Your account has been successfully deleted.";
+                return RedirectToAction(nameof(Login));
             }
-            TempData["ErrorMessage"] = result.ErrorMessage ?? "An error occurred while deleting the account.";
+            TempData["ErrorMessage"] = result.ErrorMessage ?? "An error occurred while deleting the account. Please try again.";
             return RedirectToAction(nameof(ProfileController.Settings), nameof(ProfileController).Replace("Controller", ""));
         }
 

@@ -14,10 +14,10 @@ namespace Socialify.Application.DTOs.Profile
 {
     public class PatchProfilePicDto
     {
-        [Required]
+        [Required(ErrorMessage = "Profile picture is required.")]
         [ValidateFileSize]
         [ValidateImgExtension]
-        [Display(Name ="Profile Picture")]
+        [Display(Name = "Profile Picture")]
         public IFormFile? ProfilePicture { get; set; }
     }
 }

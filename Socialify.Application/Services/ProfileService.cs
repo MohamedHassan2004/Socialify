@@ -39,17 +39,18 @@ public class ProfileService : IProfileService
                             ?? "images/profilePics/default-profile-pic.jpg";
     }
 
-
     public async Task<Result<ProfileDto>> GetUserProfileAsync(string targetUserId, string currentUserId)
     {
         try
         {
-            var userResult = await GetUserAsync(targetUserId);
-            if (!userResult.IsSuccess)
+            // Use optimized method that loads user with posts in single query
+            var user = await _profileRepository.GetByIdWithPostsAsync(targetUserId);
+            if (user == null)
             {
-                return Result<ProfileDto>.Failure(userResult.ErrorMessage);
+                _logger.LogWarning("User not found: {UserId}", targetUserId);
+                return Result<ProfileDto>.Failure("User not found");
             }
-            var user = userResult.Data;
+
             _logger.LogInformation("Fetched profile for user {UserId} successfully", targetUserId);
 
             var isCurrentUser = targetUserId == currentUserId;
@@ -64,17 +65,17 @@ public class ProfileService : IProfileService
         }
     }
 
-
     public async Task<Result> UpdateProfileInfoAsync(string currentUserId, UpdateProfileInfoDto updateProfileInfoDto)
     {
-        try {
-            var userResult = await GetUserAsync(currentUserId);
-            if (!userResult.IsSuccess)
+        try 
+        {
+            // Use tracking query for updates
+            var user = await _profileRepository.GetByIdAsync(currentUserId);
+            if (user == null)
             {
-                return Result.Failure(userResult.ErrorMessage);
+                return Result.Failure("User not found");
             }
 
-            var user = userResult.Data;
             _mapper.Map(updateProfileInfoDto, user);
             await _profileRepository.SaveChangesAsync();
             _logger.LogInformation("User {UserId} updated profile info successfully", user.Id);
@@ -91,13 +92,15 @@ public class ProfileService : IProfileService
     {
         try
         {
+            // For profile info, we don't need related data, so use simple query
             var user = await _profileRepository.GetByIdAsync(currentUserId);
             if (user == null)
             {
                 return Result<UpdateProfileInfoDto>.Failure("User not found");
             }
+
             var updateProfileInfoDto = _mapper.Map<UpdateProfileInfoDto>(user);
-            _logger.LogInformation("Fetched profile info for user {UserId} successfully", user.Id);
+            _logger.LogInformation("Fetched profile info for user {UserId} successfully", currentUserId);
             return Result<UpdateProfileInfoDto>.Success(updateProfileInfoDto);
         }
         catch (Exception ex)
@@ -111,13 +114,14 @@ public class ProfileService : IProfileService
     {
         try
         {
+            // For basic info, we don't need related data
             var user = await _profileRepository.GetByIdAsync(currentUserId);
             if (user == null)
             {
                 return Result<ProfileBasicInfoDto>.Failure("User not found");
             }
+
             var profileBasicInfoDto = _mapper.Map<ProfileBasicInfoDto>(user);
-            
             _logger.LogInformation("Fetched basic info for user {UserId} successfully", currentUserId);
             return Result<ProfileBasicInfoDto>.Success(profileBasicInfoDto);
         }
@@ -128,16 +132,35 @@ public class ProfileService : IProfileService
         }
     }
 
+    // New method to get multiple profiles efficiently
+    public async Task<Result<IEnumerable<ProfileDto>>> GetMultipleProfilesAsync(
+        IEnumerable<string> userIds, 
+        string currentUserId)
+    {
+        try
+        {
+            var users = await _profileRepository.GetUsersWithPostsAsync(userIds);
+            var profiles = users.Select(user => MapProfile(user, user.Id == currentUserId));
+            
+            _logger.LogInformation("Fetched {Count} profiles successfully", profiles.Count());
+            return Result<IEnumerable<ProfileDto>>.Success(profiles);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error fetching multiple profiles");
+            return Result<IEnumerable<ProfileDto>>.Failure("An error occurred while fetching profiles.");
+        }
+    }
+
     public async Task<Result> RemoveProfilePictureAsync(string currentUserId)
     {
         try
         {
-            var userResult = await GetUserAsync(currentUserId);
-            if (!userResult.IsSuccess)
+            var user = await _profileRepository.GetByIdAsync(currentUserId);
+            if (user == null)
             {
-                return Result.Failure(userResult.ErrorMessage);
+                return Result.Failure("User not found");
             }
-            var user = userResult.Data;
 
             if (user.ProfilePicUrl == _defaultProfilePic)
             {
@@ -170,12 +193,11 @@ public class ProfileService : IProfileService
                 return Result.Failure("No image file provided.");
             }
 
-            var userResult = await GetUserAsync(currentUserId);
-            if (!userResult.IsSuccess)
+            var user = await _profileRepository.GetByIdAsync(currentUserId);
+            if (user == null)
             {
-                return Result.Failure(userResult.ErrorMessage);
+                return Result.Failure("User not found");
             }
-            var user = userResult.Data;
 
             DeleteProfilePictureFile(user);
 
@@ -218,6 +240,7 @@ public class ProfileService : IProfileService
             _logger.LogError(ex, "Error deleting profile picture file for user {UserId} at {Path}", user.Id, fullPath);
         }
     }
+
     private async Task<string> UploadProfilePictureAsync(IFormFile newPicture)
     {
         var uploadsFolder = Path.Combine(_env.WebRootPath, _profilePicsPath);
@@ -235,6 +258,7 @@ public class ProfileService : IProfileService
 
         return Path.Combine(_profilePicsPath, fileName).Replace("\\", "/");
     }
+
     private ProfileDto MapProfile(ApplicationUser user, bool isCurrentUser)
     {
         var profileDto = _mapper.Map<ProfileDto>(user);
@@ -251,14 +275,4 @@ public class ProfileService : IProfileService
         _logger.LogInformation("Mapped ProfileDto to profile entity for user {UserId}", user.Id);
         return profileDto;
     }
-    private async Task<Result<ApplicationUser>> GetUserAsync(string userId)
-    {
-        var user = await _profileRepository.GetByIdAsync(userId);
-        if (user == null)
-        {
-            return Result<ApplicationUser>.Failure("User not found");
-        }
-        return Result<ApplicationUser>.Success(user);
-    }
-
 }

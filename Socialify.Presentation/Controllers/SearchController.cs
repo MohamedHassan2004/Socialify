@@ -22,7 +22,7 @@ public class SearchController : Controller
 
         if (!result.IsSuccess)
         {
-            ViewBag.ErrorMessage = result.ErrorMessage;
+            TempData["ErrorMessage"] = result.ErrorMessage ?? "An error occurred while searching. Please try again.";
             return View(new SearchResultDto());
         }
         return View(result.Data);

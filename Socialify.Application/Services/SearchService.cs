@@ -1,4 +1,5 @@
 using AutoMapper;
+using Microsoft.Extensions.Logging;
 using Socialify.Application.DTOs.Profile;
 using Socialify.Application.DTOs.Search;
 using Socialify.Application.ReposInterfaces;
@@ -9,11 +10,13 @@ public class SearchService : ISearchService
 {
     private readonly ISearchRepository _searchRepository;
     private readonly IMapper _mapper;
+    private readonly ILogger<SearchService> _logger;
 
-    public SearchService(ISearchRepository searchRepository, IMapper mapper)
+    public SearchService(ISearchRepository searchRepository, IMapper mapper, ILogger<SearchService> logger)
     {
         _searchRepository = searchRepository;
         _mapper = mapper;
+        _logger = logger;
     }
 
     public async Task<Result<SearchResultDto>> SearchAsync(string keyword)
@@ -38,7 +41,9 @@ public class SearchService : ISearchService
         }
         catch (Exception ex)
         {
-            return Result<SearchResultDto>.Failure($"Error while searching: {ex.Message}");
+            _logger.LogError(ex, "Error occurred while searching with keyword: {Keyword}", keyword);
+            return Result<SearchResultDto>.Failure($"Error while searching");
+
         }
     }
 }

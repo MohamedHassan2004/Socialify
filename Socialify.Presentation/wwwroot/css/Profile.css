@@ -1,15 +1,4 @@
-﻿:root {
-    --primary-color: #0d6efd;
-    --background-color: #f0f2f5;
-    --card-background-color: #ffffff;
-    --text-color: #1c1e21;
-    --text-secondary-color: #65676b;
-    --border-color: #e0e0e0;
-    --shadow: 0 2px 4px rgba(0, 0, 0, 0.08), 0 8px 16px rgba(0, 0, 0, 0.08);
-}
-
-/* profile header */
-
+﻿/* profile header */
 .profile-header {
     position: relative;
     display: flex;
@@ -73,29 +62,4 @@
     .avatar-action-btn:hover {
         color: #ffc107;
     }
-
-
-
-/* Post Card Styles */
-.post-card {
-    background: var(--card-background-color);
-    border: none;
-    border-radius: 12px;
-    box-shadow: var(--shadow);
-    margin-bottom: 1.5rem;
-}
-
-.post-header { display: flex; align-items: center; padding: 1rem 1.5rem; }
-.post-avatar { width: 45px; height: 45px; border-radius: 50%; margin-right: 1rem; }
-.post-header-info h6 { font-weight: 600; margin: 0; }
-.post-header-info small { color: var(--text-secondary-color); }
-.post-body { padding: 0 1.5rem 1rem 1.5rem; }
-.post-body p { font-size: 1rem; }
-.post-body img { border-radius: 8px; margin-top: 1rem; }
-.post-footer { display: flex; justify-content: space-around; padding: 0.75rem; border-top: 1px solid var(--border-color); }
-.post-action-btn { background: none; border: none; color: var(--text-secondary-color); font-weight: 500; padding: 0.5rem 1rem; border-radius: 8px; transition: background-color 0.2s ease; }
-.post-action-btn:hover { background-color: var(--background-color); }
-.post-action-btn i { margin-right: 0.5rem; }
-
-
 

@@ -1,95 +1,208 @@
-﻿.person-img {
-    width: 70px;
-    height: 70px;
-    border-radius: 50%;
-    object-fit: cover;
-    position: relative;
-    z-index: 1;
+﻿/* Light Theme (Default) */
+html[data-theme="light"] {
+    --navbar-background-color: #ffffff;
+    --background-color: #ddd;
+    --aside-bar-background-color: #f5f5f5;
+    --button-primary-color: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --button-primary-hover: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+    --button-outline-color: #667eea;
+    --nav-active-color: #667eea;
+    --button-text-color: #fff;
+    --card-background-color: #ffffff;
+    --border-color: #e6e2e2;
+    --text-color: #1c1e21;
+    --onhover-text-color: #666666;
+    --muted-text-color: #7e7e7e;
+    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.08);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.12);
+    --danger-text-color: #c51f1f;
+    --danger-header-bg-color: #fff5f5;
+    --danger-border-color: #f7d4d4;
+    --theme-btn-bg: #f8f9fa;
+    --theme-btn-bg-active: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --theme-btn-text-active: #ffffff;
+    --theme-btn-border: #e6e2e2;
 }
 
-
-/* Modern Search Bar Styles */
-
-.search-container {
-    position: relative; /* This is the key to positioning the button inside */
-    width: 300px; /* Or set to 100% to fill its parent */
+/* Modern Dark Theme */
+html[data-theme="dark"] {
+    --navbar-background-color: #18181B;      
+    --background-color: #0A0A0A;             
+    --aside-bar-background-color: #18181B;   
+    --button-primary-color: linear-gradient(135deg, #2DD4BF 0%, #0d9488 100%);
+    --button-primary-hover: linear-gradient(135deg, #14b8a6 0%, #0f766e 100%);
+    --button-outline-color: #2DD4BF;
+    --nav-active-color: #2DD4BF;
+    --button-text-color: #0A0A0A;            
+    --card-background-color: #18181B;        
+    --text-color: #E2E8F0;        
+    --border-color: #27272A; 
+    --onhover-text-color: #6a6a6f;
+    --muted-text-color: #9b9b9b;
+    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.15);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.25);
+    --danger-text-color: #ff8b95;
+    --danger-header-bg-color: #2f1d20;
+    --danger-border-color: #8c3b41;
+    --theme-btn-bg: #27272A;
+    --theme-btn-bg-active: linear-gradient(135deg, #2DD4BF 0%, #0d9488 100%);
+    --theme-btn-text-active: #0A0A0A;
+    --theme-btn-border: #27272A;
 }
 
-    .search-container form {
-        display: flex; /* Ensures input and button are on the same line if needed */
-    }
-
-.search-input {
-    width: 100%;
-    border-radius: 50px; /* Creates the pill shape */
-    border: 1px solid #ced4da;
-    padding: 0.5rem 2.5rem 0.5rem 1rem; /* Right padding is crucial to make space for the icon */
-    transition: all 0.3s ease-in-out;
+/* Dark Blue Theme (You can customize these colors) */
+html[data-theme="blue"] {
+    --button-primary-color: linear-gradient(135deg, #0d6aa4 0%, #1e40af 100%);
+    --button-primary-hover: linear-gradient(135deg, #0c5a94 0%, #1e3a8a 100%);
+    --button-outline-color: #0d6aa4;
+    --nav-active-color: #0d6aa4;
+    --button-text-color: #fff;
+    --background-color: #021223;
+    --navbar-background-color: #021223;
+    --aside-bar-background-color: #0F172B;
+    --card-background-color: #0F172B;
+    --border-color: #0d6aa4;
+    --text-color: #d8dce3;
+    --onhover-text-color: #6a6a6f;
+    --muted-text-color: #9b9b9b;
+    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.15);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.25);
+    --danger-text-color: #ff8b95;
+    --danger-header-bg-color: #2f1d20;
+    --danger-border-color: #8c3b41;
+    --theme-btn-bg: #212e47;
+    --theme-btn-bg-active: linear-gradient(135deg, #0d6aa4 0%, #1e40af 100%);
+    --theme-btn-text-active: #ffffff;
+    --theme-btn-border: #0d6aa4;
 }
 
-    /* Style for when the user clicks into the search bar */
-    .search-input:focus {
-        border-color: #86b7fe;
-        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
-        outline: none; /* Removes the default browser outline */
-    }
-
-.search-btn {
-    position: absolute; /* Positions the button relative to .search-container */
-    top: 50%;
-    right: 15px; /* Adjust the position from the right */
-    transform: translateY(-50%); /* Perfectly centers the icon vertically */
-    /* Reset button styles */
-    background: transparent;
-    border: none;
-    padding: 0;
-    margin: 0;
-    /* Icon styling */
-    color: #6c757d; /* A muted gray color */
-    cursor: pointer;
-    transition: color 0.2s ease;
-}
-
-    /* Make the icon a bit darker on hover for better user feedback */
-    .search-btn:hover {
-        color: #212529;
-    }
-
-/* ----------------------------- General Styles ----------------------------- */
 
 body {
-    background-color: #ddd;
+    color: var(--text-color);
+    background-color: var(--background-color);
+    transition: background-color 0.2s, color 0.2s;
 }
 
-a {
-    text-decoration: none;
-    color: black;
+h1,h2,h3,h4,h5,h6{
+    color: var(--text-color);
 }
 
-    a:hover {
-        color: blue;
-        cursor: pointer;
-    }
-
-nav {
-    font-size: 12pt;
-    border-bottom: solid 1px #ddd;
+.card {
+    background-color: var(--card-background-color);
+    border-color:var(--border-color);
+    box-shadow: var(--shadow-sm);
 }
 
-.navbar {
-    background-color: #fff;
-    z-index: 1000;
+main {
+    background-color: var(--card-background-color);
+    padding: 2rem;
+    margin-left: 30%;
+    margin-top:4.5rem;
+    min-height: calc(100vh - 4.55rem);
+    width: 40%;
 }
+
+
+/* ----------------------------- General Items ----------------------------- */
+.btn {
+    padding: 8px 20px;
+    font-size: 14px;
+    transition: all 0.3s ease; 
+    border: none;
+    border-radius: 0.5rem;
+}
+
+.btn-primary{
+    background: var(--button-primary-color);
+    color: var(--button-text-color);
+    border: 1px solid transparent;
+    font-weight: 600;
+}
+
+.btn-primary:hover{
+    background: var(--button-primary-hover);
+    color: var(--button-text-color);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+}
+
+.btn-outline-primary{
+    background-color: transparent;
+    border: 2px solid var(--button-outline-color);
+    color: var(--button-outline-color);
+    font-weight: 600;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-outline-primary::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--button-primary-color);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: -1;
+}
+
+.btn-outline-primary:hover{
+    color: var(--button-text-color);
+    border-color: var(--button-outline-color);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+}
+
+.btn-outline-primary:hover::before {
+    opacity: 1;
+}
+
 
 i {
     pointer-events: none;
 }
 
+a {
+    color: var(--text-color);
+    text-decoration: none;
+    transition: 0.3s ease;
+
+}
+    a:hover {
+        color: var(--onhover-text-color);
+        cursor: pointer;
+    }
+
+.card-title{
+    color : var(--text-color)
+}
+
+.form-control {
+    background: var(--card-background-color);
+    border-color: var(--border-color);
+}
+
+    .form-control::placeholder{
+        color: var(--text-color);
+    }
+
+    .form-control:focus{
+        background-color: transparent;
+        color: var(--text-color);
+    }
+
+.text-muted{
+    color: var(--muted-text-color) !important;
+}
+
+
 
 /* Modern Tab Navigation */
 .profile-nav .nav-link {
     font-weight: 600;
-    color: var(--text-secondary-color);
+    color: var(--text-color);
     border: 0;
     border-bottom: 3px solid transparent;
     padding: 1rem;
@@ -98,8 +211,8 @@ i {
 
     .profile-nav .nav-link.active,
     .profile-nav .nav-link:hover {
-        color: var(--primary-color);
-        border-bottom: 3px solid var(--primary-color);
+        color: var(--nav-active-color);
+        border-bottom: 3px solid var(--nav-active-color);
         background-color: transparent;
     }
 
@@ -107,29 +220,9 @@ i {
     padding-top: 1.5rem;
 }
 
-
-/* ----------------------------- Main Content Styles ----------------------------- */
-main {
-    padding: 2rem;
-    background-color: white;
-    width: 40%;
-    margin-left: 30%;
-    min-height: calc(100vh - 4.55rem);
+.text-muted {
+    color: var(--muted-text-color)
 }
-
-/* ----------------------------- Button Styles ----------------------------- */
-.btn {
-    padding: 8px 20px;
-    font-size: 14px;
-}
-
-.btn-icon {
-    transition: color 0.3s;
-}
-
-    .btn-icon:hover {
-        color: #007bff;
-    }
 
 
 /* ----------------------------- Responsive Styles ----------------------------- */
@@ -158,23 +251,9 @@ main {
 }
 
 @media (max-width: 992px) {
-    .navbar-nav {
-        flex-direction: column;
-    }
-
-        .navbar-nav .nav-item {
-            width: 100%;
-            text-align: left;
-        }
-
     main {
         width: 75%;
         margin: auto;
-    }
-
-    .edit-post, .delete-post {
-        font-size: 12px;
-        padding: 0.75rem;
     }
 }
 
@@ -194,9 +273,45 @@ main {
         padding: 0.35rem;
         padding-top: 0.75rem;
     }
+}
 
-    .edit-post, .delete-post {
-        font-size: 11px;
-        padding: 0.5rem;
-    }
+/* Professional Error Handling Styles */
+.alert {
+    border: none;
+    border-radius: 0.75rem;
+    box-shadow: var(--shadow-sm);
+    margin-bottom: 1.5rem;
+}
+
+.alert-danger {
+    background: var(--danger-header-bg-color);
+    border-left: 4px solid var(--danger-text-color);
+    color: var(--danger-text-color);
+}
+
+.alert-heading {
+    font-weight: 600;
+    font-size: 1rem;
+    margin-bottom: 0.25rem;
+}
+
+.alert .btn-close {
+    filter: var(--text-color) == #ffffff ? invert(1) : none;
+}
+
+.alert .fas.fa-exclamation-triangle {
+    color: var(--danger-text-color);
+    opacity: 0.8;
+}
+
+/* Error state for form validation */
+.is-invalid {
+    border-color: var(--danger-text-color) !important;
+    box-shadow: 0 0 0 0.2rem rgba(197, 31, 31, 0.25) !important;
+}
+
+.invalid-feedback {
+    color: var(--danger-text-color);
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
 }

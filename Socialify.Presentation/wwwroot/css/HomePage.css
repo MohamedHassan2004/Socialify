@@ -2,7 +2,7 @@
 /* ----------------------------- Aside Bar Styles ----------------------------- */
 .aside-bar-container {
     padding: 25px;
-    background-color: #f7f7f7;
+    background-color: var(--aside-bar-background-color);
     min-height: 100%;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
@@ -17,10 +17,9 @@
 .aside-bar {
     width: 19%;
     position: fixed;
-    top: 0;
+    top: 4.5rem;
     bottom: 0;
     overflow-y: auto;
-    margin-top: 4.55rem;
 }
 
     .aside-bar:first-of-type {
@@ -31,7 +30,7 @@
         right: 10%;
     }
 
-.profile-img {
+.aside-bar .profile-img {
     margin-top: 1rem;
     width: 12rem;
     height: 12rem;
@@ -42,62 +41,14 @@
 .list-group-item {
     padding: 1rem;
     font-size: 1rem;
+    background-color: transparent;
+    border-color: var(--border-color);
 }
 
     .list-group-item:hover {
-        color: #007bff;
+        color:var(--onhover-color-text);
         cursor: pointer;
     }
-
-/* ----------------------------- Post Styles ----------------------------- */
-.post-time {
-    font-size: 12px;
-}
-/* ----------------------------- Suggested Pages and People Styles ----------------------------- */
-.suggested-pages h5,
-.people-you-may-know h5 {
-    color: #333;
-    margin-bottom: 15px;
-}
-
-.page,
-.person {
-    display: flex;
-    align-items: center;
-    margin-bottom: 10px;
-    padding: 10px;
-    background-color: white;
-    border-radius: 5px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
-
-.page-img,
-.person-img {
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    margin-right: 15px;
-    object-fit: cover;
-}
-
-.page-info h6,
-.person-info h6 {
-    font-size: 1rem;
-    color: #555;
-    margin-bottom: 5px;
-}
-
-.page-info p,
-.person-info p {
-    font-size: 0.8rem;
-    color: #777;
-}
-
-.follow-btn,
-.add-friend-btn {
-    margin-left: auto;
-    font-size: 0.7rem;
-}
 
 /* ----------------------------- Notification Styles ----------------------------- */
 

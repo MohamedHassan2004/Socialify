@@ -19,7 +19,8 @@ namespace Socialify.Application.Automapper
 
             CreateMap<ApplicationUser, UpdateProfileInfoDto>().ReverseMap();
 
-            CreateMap<ApplicationUser, ProfileBasicInfoDto>();
+            CreateMap<ApplicationUser, ProfileBasicInfoDto>()
+                .ForMember(dest => dest.RelationshipStatus, opt=> opt.Ignore());
         }
     }
 }

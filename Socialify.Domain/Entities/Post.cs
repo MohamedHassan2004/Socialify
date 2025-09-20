@@ -11,7 +11,7 @@ namespace Socialify.Domain.Entities
         public int Id { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public string? Content { get; set; }
-        public string? mediaUrl { get; set; }
+        public string? MediaUrl { get; set; }
         public string UserId { get; set; } = string.Empty;
         public ApplicationUser User { get; set; } = null!;
         //public ICollection<Like> Likes { get; set; } = new List<Like>();

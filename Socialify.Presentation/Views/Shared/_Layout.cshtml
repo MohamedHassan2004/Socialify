@@ -6,21 +6,19 @@
     <title>@ViewData["Title"] - Socialify</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/all.min.css" />
+    <link rel="stylesheet" href="~/css/Common.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/Navbar.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/@ViewData["CssFile"]" asp-append-version="true" />
-    <link rel="stylesheet" href="~/css/common.css" asp-append-version="true" />
-
+    @* @await RenderSectionAsync("Styles", required: false) *@
 </head>
 <body>
     <header>
             <partial name="_Navbar" />
     </header>
-    <br />
-    <br />
-    <br />
     @RenderBody()
-
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/theme.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

@@ -11,22 +11,31 @@ namespace Socialify.Application.Validation.ImgValidation
     [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field, AllowMultiple = false)]
     public sealed class ValidateFileSizeAttribute : ValidationAttribute
     {
-        private const int DefaultMaxFileSizeInBytes = 5 * 1024 * 1024;
+        private const int DefaultMaxFileSizeInBytes = 5 * 1024 * 1024; // 5MB
 
         public int MaxFileSizeInBytes { get; }
 
         public ValidateFileSizeAttribute(int maxFileSizeInBytes = DefaultMaxFileSizeInBytes)
         {
             MaxFileSizeInBytes = maxFileSizeInBytes;
-            ErrorMessage = $"File size exceeds the maximum limit of {MaxFileSizeInBytes / (1024 * 1024)} MB.";
+            ErrorMessage = $"File size cannot exceed {MaxFileSizeInBytes / (1024 * 1024)} MB.";
         }
 
         protected override ValidationResult? IsValid(object? value, ValidationContext validationContext)
         {
+            if (value == null)
+            {
+                return ValidationResult.Success; // Let Required attribute handle null values
+            }
 
             if (value is not IFormFile file)
             {
-                return new ValidationResult("Invalid data.");
+                return new ValidationResult("Invalid file data.");
+            }
+
+            if (file.Length == 0)
+            {
+                return new ValidationResult("File is empty.");
             }
 
             if (file.Length > MaxFileSizeInBytes)

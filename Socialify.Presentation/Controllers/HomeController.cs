@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Socialify.Application.DTOs.Home;
 using Socialify.Application.Interfaces;
 using Socialify.Application.Services_Interfaces;
 using Socialify.Presentation.Models;
@@ -11,12 +12,10 @@ namespace Socialify.Presentation.Controllers
     [Authorize]
     public class HomeController : Controller
     {
-        private readonly ILogger<HomeController> _logger;
         private readonly IHomePageService _homePageService;
 
-        public HomeController(ILogger<HomeController> logger, IHomePageService homePageService)
+        public HomeController(IHomePageService homePageService)
         {
-            _logger = logger;
             _homePageService = homePageService;
         }
 
@@ -26,12 +25,22 @@ namespace Socialify.Presentation.Controllers
             {
                 return RedirectToAction(nameof(AccountController.Login), nameof(AccountController).Replace("Controller", ""));
             }
+            
             var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(currentUserId))
+            {
+                TempData["ErrorMessage"] = "Unable to identify user. Please log in again.";
+                return RedirectToAction(nameof(AccountController.Login), nameof(AccountController).Replace("Controller", ""));
+            }
+
             var result = await _homePageService.GetHomePageAsync(currentUserId);
 
             if (!result.IsSuccess)
-                return View("Error", result.ErrorMessage);
-
+            {
+                TempData["ErrorMessage"] = result.ErrorMessage ?? "An error occurred while loading the home page. Please try again.";
+                return View(new HomePageDto());
+            }
+            
             ViewData["Title"] = "Home Page";
             return View(result.Data);
         }

@@ -25,19 +25,28 @@ namespace Socialify.Application.Services
 
         public async Task<Result<HomePageDto>> GetHomePageAsync(string currentUserId)
         {
-            var userInfo = await _profileService.GetProfileBasicInfoAsync(currentUserId);
-            //var posts = await _postService.GetFeedPostsAsync(currentUserId);
-            //var peopleYouMayKnow = await _friendService.GetPeopleYouMayKnowAsync(currentUserId);
-
-            var dto = new HomePageDto
+            try
             {
-                User = userInfo.Data,
-                //Posts = posts.Data ?? new List<PostDto>(),
-                //PostForm = new PostFormDto { UserId = currentUserId },
-                //PeopleYouMayKnow = peopleYouMayKnow.Data ?? new List<UserDto>()
-            };
+                if (string.IsNullOrEmpty(currentUserId))
+                    return Result<HomePageDto>.Failure("Invalid user ID.");
+                var userInfo = await _profileService.GetProfileBasicInfoAsync(currentUserId);
+                //var posts = await _postService.GetFeedPostsAsync(currentUserId);
+                //var peopleYouMayKnow = await _friendService.GetPeopleYouMayKnowAsync(currentUserId);
 
-            return Result<HomePageDto>.Success(dto);
+                var dto = new HomePageDto
+                {
+                    User = userInfo.Data,
+                    //Posts = posts.Data ?? new List<PostDto>(),
+                    //PostForm = new PostFormDto { UserId = currentUserId },
+                    //PeopleYouMayKnow = peopleYouMayKnow.Data ?? new List<UserDto>()
+                };
+
+                return Result<HomePageDto>.Success(dto);
+            }
+            catch (Exception ex)
+            {
+                return Result<HomePageDto>.Failure("An error occurred while fetching the home page data.");
+            }
         }
     }
 

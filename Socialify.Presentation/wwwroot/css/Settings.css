@@ -1,17 +1,4 @@
-﻿:root {
-    --settings-background-color: #f8f9fa; /* Light gray background */
-    --settings-card-background: #ffffff;
-    --settings-border-color: #dee2e6;
-    --settings-danger-color: #dc3545;
-    --settings-danger-background: #f8d7da;
-    --settings-danger-border: #f5c2c7;
-}
-
-body {
-    background-color: var(--settings-background-color);
-}
-
-.settings-container {
+﻿.settings-container {
     max-width: 800px;
     margin: 2rem auto;
     padding: 1rem;
@@ -22,60 +9,112 @@ body {
     text-align: center;
 }
 
-    .settings-header h1 {
-        font-weight: 600;
-    }
 
+/* Cards */
 .settings-card {
-    border: 1px solid var(--settings-border-color);
-    border-radius: 0.75rem; /* Softer corners */
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-    overflow: hidden; /* Ensures child elements conform to border-radius */
+    background-color: var(--card-background-color);
+    border: 1px solid var(--border-color);
+    border-radius: 0.75rem;
+    box-shadow: var(--shadow-md);
+    overflow: hidden;
 }
 
     .settings-card .card-header {
-        background-color: var(--settings-background-color);
+        background-color: var(--navbar-background-color);
         font-weight: 500;
         padding: 1rem 1.5rem;
-        border-bottom: 1px solid var(--settings-border-color);
+        border-bottom: 1px solid var(--border-color);
+        color: var(--text-color);
     }
 
-    .settings-card .list-group-item {
-        padding: 1.25rem 1.5rem;
-        transition: background-color 0.2s ease-in-out;
-    }
-
-        .settings-card .list-group-item:hover {
-            background-color: #f8f9fa;
-        }
-
-        .settings-card .list-group-item strong {
-            font-size: 1.1rem;
-            color: #212529;
-        }
-
-        .settings-card .list-group-item p {
-            font-size: 0.9rem;
-        }
-
-    .settings-card .btn {
-        border-radius: 0.5rem;
-        font-weight: 500;
-        min-width: 150px;
-        text-align: center;
-    }
-
-/* Specific styles for the Danger Zone */
-.danger-zone .card-header {
-    background-color: var(--settings-danger-background);
-    color: var(--settings-danger-color);
-    border-bottom: 1px solid var(--settings-danger-border);
+.list-group-flush {
+    border-top: 1px solid var(--border-color);
 }
 
-.danger-zone .card-body {
+.list-group-item {
+    background-color: var(--card-background-color);
     padding: 1.25rem 1.5rem;
+    transition: background-color 0.2s ease-in-out;
+    border-bottom: 1px solid var(--border-color);
+}
+
+    .list-group-item:last-child {
+        border-bottom: none;
+    }
+
+    .list-group-item:hover {
+        background-color: var(--background-color);
+    }
+
+    .list-group-item strong {
+        color: var(--text-color);
+    }
+
+
+/* Danger Zone */
+.danger-zone .card-header {
+    background-color: var(--danger-header-bg-color);
+    color: var(--danger-text-color);
+    border-bottom: 1px solid var(--danger-border-color);
+}
+
+.danger-zone.settings-card {
+    border-color: var(--danger-border-color);
 }
 
 .danger-zone strong {
-    color: var(--settings-danger-color);
+    color: var(--danger-text-color);
+}
+
+/* Modal Styles */
+.modal-content {
+    background-color: var(--card-background-color);
+    border: 1px solid var(--border-color);
+    color: var(--text-color);
+}
+
+.modal-header {
+    border-bottom: 1px solid var(--border-color);
+}
+
+.modal-footer {
+    border-top: 1px solid var(--border-color);
+}
+
+.btn-close {
+    color: var(--text-color);
+}
+
+
+
+.theme-switcher {
+    display: flex;
+    gap: 0.5rem;
+    border: 1px solid var(--border-color);
+    padding: 0.25rem;
+    border-radius: 0.75rem;
+}
+
+.theme-btn {
+    background: var(--theme-btn-bg);
+    border: 1px solid var(--theme-btn-border);
+    color: var(--text-color);
+    padding: 8px 16px;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 500;
+}
+
+.theme-btn:hover {
+    background: var(--theme-btn-bg-active);
+    color: var(--theme-btn-text-active);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
+}
+
+.theme-btn.active {
+    background: var(--theme-btn-bg-active);
+    color: var(--theme-btn-text-active);
+    box-shadow: var(--shadow-sm);
 }

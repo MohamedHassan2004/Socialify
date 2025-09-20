@@ -13,6 +13,7 @@ namespace Socialify.Infrastructure
     {
         public static IServiceCollection AddInfrastructure(this IServiceCollection services)
         {
+            // Core services
             services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<IProfileService, ProfileService>();
             services.AddScoped<IProfileRepository, ProfileRepository>();
@@ -21,7 +22,11 @@ namespace Socialify.Infrastructure
             services.AddScoped<IHomePageService, HomePageService>();
             services.AddScoped<IProfilePageService, ProfilePageService>();
 
-
+            // Add caching
+            services.AddMemoryCache();
+            
+            // Add cached services (optional - use for high-traffic scenarios)
+            // services.Decorate<IProfileService, CachedProfileService>();
 
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             return services;
