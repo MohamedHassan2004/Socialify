@@ -1,0 +1,241 @@
+@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    var daysDiff = (DateTime.UtcNow - Model.CreatedAt).TotalDays;
+}
+@model Socialify.Application.DTOs.Post.PostDto
+
+<div class="card post-card mb-4 shadow-sm border-0" style="border-radius: 12px;">
+    <div class="card-body p-4">
+        <!-- Post Header -->
+        <div class="post-header d-flex align-items-center justify-content-between mb-3">
+            <div class="d-flex align-items-center">
+                <div class="position-relative">
+                    <img src="/@Model.UserProfilePicUrl" 
+                         class="post-avatar rounded-circle border border-2 border-light shadow-sm" 
+                         alt="User Profile Picture"
+                         style="width: 48px; height: 48px; object-fit: cover;">
+                </div>
+                <div class="ms-3">
+                    <a asp-action="Profile" asp-controller="Profile" asp-route-targetUserId="@Model.UserId" 
+                       class="text-decoration-none">
+                        <h6 class="mb-0 fw-semibold text-dark hover-text-primary">@Model.UserName</h6>
+                    </a>
+                    <small class="text-muted d-block" style="font-size: 0.85rem;">
+                        @(daysDiff > 7 ? Model.CreatedAt.ToString("dd MMM yyyy HH:mm") : Model.TimeAgo)
+                    </small>
+                </div>
+            </div>
+            
+            <!-- Options Menu -->
+            <div class="dropdown">
+                <button class="btn btn-link text-muted p-2 rounded-circle hover-bg-light" 
+                        type="button" 
+                        id="postOptions@(Model.Id)" 
+                        data-bs-toggle="dropdown" 
+                        aria-expanded="false"
+                        style="width: 36px; height: 36px; transition: all 0.2s ease;">
+                    <i class="fas fa-ellipsis-h"></i>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0" 
+                    aria-labelledby="postOptions@(Model.Id)"
+                    style="border-radius: 8px; min-width: 160px;">
+                    <li>
+                        <a class="dropdown-item py-2 px-3" href="#" style="font-size: 0.9rem;">
+                            <i class="fas fa-edit me-2 text-primary"></i>Edit Post
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item py-2 px-3 text-danger" href="#" style="font-size: 0.9rem;">
+                            <i class="fas fa-trash me-2"></i>Delete Post
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Post Body -->
+        <div class="post-body mb-3">
+            <p class="mb-3" style="line-height: 1.6; color: #1c1e21;">@Model.Content</p>
+            
+            @if (!string.IsNullOrEmpty(Model.MediaUrl))
+            {
+                <div class="post-media" style="border-radius: 8px; overflow: hidden;">
+                    @switch (Model.MediaType)
+                    {
+                        case "image":
+                            <img src="/@Model.MediaUrl" 
+                                 alt="post image" 
+                                 class="img-fluid w-100" 
+                                 style="max-height: 500px; object-fit: cover;" />
+                            break;
+
+                        case "video":
+                            <video controls class="w-100" style="max-height: 500px;">
+                                <source src="/@Model.MediaUrl" type="video/mp4">
+                                Your browser does not support the video tag.
+                            </video>
+                            break;
+
+                        case "audio":
+                            <div class="p-3 bg-light rounded">
+                                <audio controls class="w-100">
+                                    <source src="/@Model.MediaUrl" type="audio/mpeg">
+                                    Your browser does not support the audio element.
+                                </audio>
+                            </div>
+                            break;
+                    }
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Post Footer -->
+    <div class="card-footer bg-transparent border-0 px-4 py-3">
+        <div class="d-flex justify-content-between align-items-center">
+            <!-- Left Side Actions -->
+            <div class="d-flex align-items-center gap-1">
+                <!-- Like Button -->
+                <button class="post-action-btn btn btn-link text-muted d-flex align-items-center px-3 py-2 rounded-pill hover-bg-light" 
+                        style="transition: all 0.2s ease; font-size: 0.9rem;">
+                    <i class="far fa-thumbs-up me-2"></i>
+                    <span>Like</span>
+                </button>
+                
+                <!-- Like Count (Clickable) -->
+                @if (Model.LikesCount > 0)
+                {
+                    <button class="btn btn-link text-muted p-0 ms-1" 
+                            style="font-size: 0.85rem; text-decoration: none;"
+                            data-bs-toggle="modal" 
+                            data-bs-target="#likesModal@(Model.Id)">
+                        @Model.LikesCount @(Model.LikesCount == 1 ? "like" : "likes")
+                    </button>
+                }
+
+                <!-- Comment Button -->
+                <button class="post-action-btn btn btn-link text-muted d-flex align-items-center px-3 py-2 rounded-pill hover-bg-light ms-2" 
+                        style="transition: all 0.2s ease; font-size: 0.9rem;">
+                    <i class="far fa-comment me-2"></i>
+                    <span>Comment</span>
+                    @if (Model.CommentsCount > 0)
+                    {
+                        <span class="ms-1 text-muted" style="font-size: 0.85rem;">(@Model.CommentsCount)</span>
+                    }
+                </button>
+
+                <!-- Share Button -->
+                <button class="post-action-btn btn btn-link text-muted d-flex align-items-center px-3 py-2 rounded-pill hover-bg-light ms-2" 
+                        style="transition: all 0.2s ease; font-size: 0.9rem;">
+                    <i class="fas fa-share me-2"></i>
+                    <span>Share</span>
+                </button>
+            </div>
+
+            <!-- Right Side Actions -->
+            <div>
+                <button class="post-action-btn btn btn-link text-muted d-flex align-items-center px-3 py-2 rounded-pill hover-bg-light" 
+                        style="transition: all 0.2s ease; font-size: 0.9rem;">
+                    <i class="far fa-bookmark me-2"></i>
+                    <span>Save</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Likes Modal -->
+@if (Model.LikesCount > 0)
+{
+    <div class="modal fade" id="likesModal@(Model.Id)" tabindex="-1" aria-labelledby="likesModalLabel@(Model.Id)" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow" style="border-radius: 12px;">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title fw-semibold" id="likesModalLabel@(Model.Id)">
+                        People who liked this post
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body pt-2">
+                    <div class="likes-list">
+                        <!-- This would be populated via AJAX or server-side rendering -->
+                        <div class="d-flex align-items-center py-2">
+                            <img src="/default-avatar.png" class="rounded-circle me-3" style="width: 40px; height: 40px; object-fit: cover;" alt="User">
+                            <div>
+                                <h6 class="mb-0">Loading users...</h6>
+                                <small class="text-muted">Please wait</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<style>
+    .post-card {
+        transition: all 0.2s ease;
+        background: #ffffff;
+    }
+    
+    .post-card:hover {
+        box-shadow: 0 8px 25px rgba(0,0,0,0.1) !important;
+    }
+    
+    .hover-text-primary:hover {
+        color: #0d6efd !important;
+        transition: color 0.2s ease;
+    }
+    
+    .hover-bg-light:hover {
+        background-color: #f8f9fa !important;
+        transition: background-color 0.2s ease;
+    }
+    
+    .post-action-btn:hover {
+        background-color: #f8f9fa !important;
+        transform: translateY(-1px);
+    }
+    
+    .post-action-btn:active {
+        transform: translateY(0);
+    }
+    
+    .dropdown-item:hover {
+        background-color: #f8f9fa;
+    }
+    
+    .post-media img,
+    .post-media video {
+        transition: transform 0.2s ease;
+    }
+    
+    .post-media:hover img,
+    .post-media:hover video {
+        transform: scale(1.02);
+    }
+    
+    @media (max-width: 768px) {
+        .post-header .d-flex {
+            flex-direction: column;
+            align-items: flex-start !important;
+        }
+        
+        .post-footer .d-flex {
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .post-footer .d-flex > div:first-child {
+            justify-content: center;
+        }
+        
+        .post-action-btn {
+            font-size: 0.8rem !important;
+            padding: 8px 12px !important;
+        }
+    }
+</style>
