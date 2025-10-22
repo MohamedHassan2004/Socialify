@@ -1,0 +1,164 @@
+﻿/* نافذة التنبيه المخصصة */
+.custom-alert-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(8px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    animation: fadeIn 0.3s ease;
+}
+
+    .custom-alert-overlay.active {
+        display: flex;
+    }
+
+.custom-alert {
+    background: var(--card-background-color);
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    padding: 40px;
+    max-width: 450px;
+    width: 90%;
+    box-shadow: var(--shadow-md);
+    animation: slideUp 0.4s ease;
+    position: relative;
+}
+
+.alert-icon {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+    font-size: 40px;
+    color: white;
+}
+
+.alert-icon span {
+    font-size: 40px;
+}
+
+    .alert-icon.info {
+        background: var(--button-primary-color);
+    }
+
+    .alert-icon.success {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    }
+
+    .alert-icon.error {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    }
+
+    .alert-icon.warning {
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    }
+
+.alert-title {
+    font-size: 26px;
+    font-weight: bold;
+    margin-bottom: 15px;
+    color: var(--text-color);
+}
+
+.alert-message {
+    font-size: 16px;
+    color: var(--muted-text-color);
+    line-height: 1.6;
+    margin-bottom: 30px;
+}
+
+.alert-button {
+    background: var(--button-primary-color);
+    color: var(--button-text-color);
+    border: none;
+    padding: 12px 40px;
+    font-size: 16px;
+    border-radius: 50px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow-sm);
+}
+
+    .alert-button:hover {
+        background: var(--button-primary-hover);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+    }
+
+/* أزرار Confirm */
+.confirm-buttons {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.confirm-btn {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    color: white;
+    border: none;
+    padding: 12px 30px;
+    font-size: 16px;
+    border-radius: 50px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow-sm);
+}
+
+    .confirm-btn:hover {
+        background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+    }
+
+.cancel-btn {
+    background: transparent;
+    color: var(--text-color);
+    border: 2px solid var(--border-color);
+    padding: 12px 30px;
+    font-size: 16px;
+    border-radius: 50px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+
+    .cancel-btn:hover {
+        background: var(--theme-btn-bg);
+        border-color: var(--button-outline-color);
+        color: var(--button-outline-color);
+        transform: translateY(-2px);
+    }
+
+@@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@@keyframes slideUp {
+    from {
+        transform: translateY(50px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}

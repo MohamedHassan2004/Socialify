@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Socialify.Application.DTOs.Home;
 using Socialify.Application.Interfaces;
+using Socialify.Application.Services;
 using Socialify.Application.Services_Interfaces;
 using Socialify.Presentation.Models;
 using System.Diagnostics;
@@ -9,48 +10,30 @@ using System.Security.Claims;
 
 namespace Socialify.Presentation.Controllers
 {
-    [Authorize]
-    public class HomeController : Controller
+    public class HomeController : BaseController
     {
         private readonly IHomePageService _homePageService;
+        private const int pageSize = 5;
 
-        public HomeController(IHomePageService homePageService)
+        public HomeController(IHomePageService homePageService, ILogger<HomeController> logger) : base(logger)
         {
             _homePageService = homePageService;
         }
 
         public async Task<IActionResult> Index()
         {
-            if (!(User.Identity?.IsAuthenticated ?? false))
-            {
-                return RedirectToAction(nameof(AccountController.Login), nameof(AccountController).Replace("Controller", ""));
-            }
-            
-            var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (string.IsNullOrEmpty(currentUserId))
-            {
-                TempData["ErrorMessage"] = "Unable to identify user. Please log in again.";
-                return RedirectToAction(nameof(AccountController.Login), nameof(AccountController).Replace("Controller", ""));
-            }
-
-            var result = await _homePageService.GetHomePageAsync(currentUserId);
-
+            var result = await _homePageService.GetHomePageAsync(currentUserId, pageSize);
             if (!result.IsSuccess)
             {
-                TempData["ErrorMessage"] = result.ErrorMessage ?? "An error occurred while loading the home page. Please try again.";
-                return View(new HomePageDto());
+                return HandleServiceError(result, nameof(Index), "Failed to load home page data. Please try again.");
             }
-            
+
             ViewData["Title"] = "Home Page";
             return View(result.Data);
         }
 
         public IActionResult Explore()
         {
-            if (!(User.Identity?.IsAuthenticated ?? false))
-            {
-                return RedirectToAction(nameof(AccountController.Login), nameof(AccountController).Replace("Controller", ""));
-            }
             ViewData["Title"] = "Explore";
             return View();
         }

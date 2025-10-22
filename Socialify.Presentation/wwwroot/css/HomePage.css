@@ -84,4 +84,30 @@
     .aside-bar:last-of-type {
         display: none;
     }
+
+    main {
+        width: 75%;
+        margin-left: 25%;
+    }
+}
+
+@media (max-width: 992px) {
+    main {
+        margin-left: auto;
+        margin-right: auto;
+    }
+}
+
+@media (max-width: 768px) {
+    main {
+        width: 85%;
+    }
+}
+
+@media (max-width: 550px) {
+    main {
+        width: 100%;
+        padding: 0.35rem;
+        padding-top: 0.75rem;
+    }
 }

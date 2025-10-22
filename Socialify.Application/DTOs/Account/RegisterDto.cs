@@ -15,6 +15,8 @@ namespace Socialify.Application.DTOs.Account
 
         [Required]
         [StringLength(100, ErrorMessage = "The {0} must be at least {2} characters long.", MinimumLength = 8)]
+        [RegularExpression(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*\W).{8,}$",
+            ErrorMessage = "Password must contain at least one uppercase letter, one lowercase letter, one number, one special character, and be at least 8 characters long.")]
         [DataType(DataType.Password)]
         public string Password { get; set; } = string.Empty;
 

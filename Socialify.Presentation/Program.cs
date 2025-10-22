@@ -1,10 +1,16 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Serilog;
+using Serilog.Context;
 using Socialify.Application.Automapper;
 using Socialify.Domain.Entities;
-using Socialify.Infrastructure.Data.Context;
+using Socialify.Domain.Events;
 using Socialify.Infrastructure;
+using Socialify.Infrastructure.Data.Context;
 using Socialify.Infrastructure.Data.Seed;
+using Socialify.Infrastructure.Identity;
+using Socialify.Presentation.Filters;
+using Socialify.Presentation.Middlewares;
 
 namespace Socialify.Presentation
 {
@@ -14,97 +20,148 @@ namespace Socialify.Presentation
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // DbContext configuration
-            builder.Services.AddDbContext<SocialifyDbContext>(options =>
-                options.UseSqlServer(builder.Configuration.GetConnectionString("SocialifyDb")));
+            // Create Serilog Logger
+            Log.Logger = new LoggerConfiguration()
+                .ReadFrom.Configuration(builder.Configuration)
+                .CreateLogger();
 
-            // Authentication configuration
-            builder.Services.AddAuthentication(options =>
+            try
             {
-                options.DefaultAuthenticateScheme = IdentityConstants.ApplicationScheme;
-                options.DefaultChallengeScheme = IdentityConstants.ApplicationScheme;
-                options.DefaultSignInScheme = IdentityConstants.ExternalScheme;
-            });
+                Log.Information("Starting web application");
+                builder.Host.UseSerilog();
 
-            // Configure Identity and Authentication using best practices
-            builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
-            {
-                // Password settings
-                options.Password.RequireDigit = true;
-                options.Password.RequireLowercase = true;
-                options.Password.RequireNonAlphanumeric = true;
-                options.Password.RequireUppercase = true;
-                options.Password.RequiredLength = 8;
-                options.Password.RequiredUniqueChars = 1;
+                // DbContext configuration
+                builder.Services.AddDbContext<SocialifyDbContext>(options =>
+                    options.UseSqlServer(builder.Configuration.GetConnectionString("SocialifyDb")));
 
-                // Lockout settings
-                options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(2);
-                options.Lockout.MaxFailedAccessAttempts = 3;
-                options.Lockout.AllowedForNewUsers = true;
+                // Authentication configuration
+                builder.Services.AddAuthentication(options =>
+                {
+                    options.DefaultAuthenticateScheme = IdentityConstants.ApplicationScheme;
+                    options.DefaultChallengeScheme = IdentityConstants.ApplicationScheme;
+                    options.DefaultSignInScheme = IdentityConstants.ExternalScheme;
+                });
 
-                // User settings
-                options.User.AllowedUserNameCharacters =
-                    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
-                options.User.RequireUniqueEmail = true;
+                // Configure Identity and Authentication using best practices
+                builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
+                {
+                    // Password settings
+                    options.Password.RequireDigit = true;
+                    options.Password.RequireLowercase = true;
+                    options.Password.RequireNonAlphanumeric = true;
+                    options.Password.RequireUppercase = true;
+                    options.Password.RequiredLength = 8;
+                    options.Password.RequiredUniqueChars = 1;
 
-                // Sign-in settings
-                options.SignIn.RequireConfirmedEmail = false;
-                options.SignIn.RequireConfirmedPhoneNumber = false;
-            })
-            .AddEntityFrameworkStores<SocialifyDbContext>();
+                    // Lockout settings
+                    options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(2);
+                    options.Lockout.MaxFailedAccessAttempts = 3;
+                    options.Lockout.AllowedForNewUsers = true;
 
-            builder.Services.AddInfrastructure();
+                    // User settings
+                    options.User.AllowedUserNameCharacters =
+                        "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
+                    options.User.RequireUniqueEmail = true;
 
-            builder.Services.ConfigureApplicationCookie(options =>
-            {
-                options.LoginPath = "/Account/Login";
-                options.LogoutPath = "/Account/Logout";
-                options.AccessDeniedPath = "/Account/AccessDenied";
+                    // Sign-in settings
+                    options.SignIn.RequireConfirmedEmail = false;
+                    options.SignIn.RequireConfirmedPhoneNumber = false;
+                })
+                .AddEntityFrameworkStores<SocialifyDbContext>();
 
-                options.Cookie.HttpOnly = true;
-                options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
-                options.Cookie.SameSite = SameSiteMode.Lax;
+                builder.Services.AddInfrastructure();
 
-                options.SlidingExpiration = true;
-                options.ExpireTimeSpan = TimeSpan.FromMinutes(60);
-            });
+                builder.Services.ConfigureApplicationCookie(options =>
+                {
+                    options.LoginPath = "/Account/Login";
+                    options.LogoutPath = "/Account/Logout";
+                    options.AccessDeniedPath = "/Account/AccessDenied";
+
+                    options.Cookie.HttpOnly = true;
+                    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+                    options.Cookie.SameSite = SameSiteMode.Lax;
+
+                    options.SlidingExpiration = true;
+                    options.ExpireTimeSpan = TimeSpan.FromMinutes(60);
+                });
 
 
-            builder.Services.AddControllersWithViews();
+                builder.Services.AddControllersWithViews();
 
-            // Add AutoMapper
-            builder.Services.AddAutoMapper(typeof(UserProfile));
+                // Add AutoMapper
+                builder.Services.AddAutoMapper(typeof(UserProfile));
 
-            var app = builder.Build();
+                // MediatR configuration
+                builder.Services.AddMediatR(cfg =>
+                {
+                    cfg.RegisterServicesFromAssembly(typeof(Program).Assembly);
+                });
 
-            // Seed roles
-            using (var scope = app.Services.CreateScope())
-            {
-                var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-                await RoleSeeder.SeedRolesAsync(roleManager);
+                // ?? ?? ???? multiple assemblies
+                builder.Services.AddMediatR(cfg =>
+                {
+                    cfg.RegisterServicesFromAssemblies(
+                        typeof(DomainEvent).Assembly,
+                        typeof(AuthService).Assembly
+                    );
+                });
+
+                // filter
+                builder.Services.AddScoped<RequireUserIdFilter>();
+
+                var app = builder.Build();
+
+                // Seed roles
+                using (var scope = app.Services.CreateScope())
+                {
+                    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+                    await RoleSeeder.SeedRolesAsync(roleManager);
+                }
+
+                // Configure the HTTP request pipeline.
+                //app.UseMiddleware<ExceptionHandlingMiddleware>();
+
+                if (!app.Environment.IsDevelopment())
+                {
+                    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+                    app.UseHsts();
+                }
+
+                // Middleware ?????? Request ID ??? request
+                app.Use(async (context, next) =>
+                {
+                    using (LogContext.PushProperty("RequestId", context.TraceIdentifier))
+                    using (LogContext.PushProperty("RequestPath", context.Request.Path))
+                    {
+                        await next();
+                    }
+                });
+
+                app.UseHttpsRedirection();
+                app.UseStaticFiles();
+
+                app.UseAntiforgery();
+
+                app.UseRouting();
+
+                app.UseAuthentication();
+                app.UseAuthorization();
+
+
+                app.MapControllerRoute(
+                    name: "default",
+                    pattern: "{controller=Home}/{action=Index}/{id?}");
+
+                app.Run();
             }
-
-            // Configure the HTTP request pipeline.
-            if (!app.Environment.IsDevelopment())
+            catch (Exception ex)
             {
-                app.UseExceptionHandler("/Home/Error");
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-                app.UseHsts();
+                Log.Fatal(ex, "Application terminated unexpectedly");
             }
-
-            app.UseHttpsRedirection();
-            app.UseStaticFiles();
-
-            app.UseRouting();
-
-            app.UseAuthentication();
-            app.UseAuthorization();
-
-            app.MapControllerRoute(
-                name: "default",
-                pattern: "{controller=Home}/{action=Index}/{id?}");
-
-            app.Run();
+            finally
+            {
+                Log.CloseAndFlush();
+            }
         }
     }
 }

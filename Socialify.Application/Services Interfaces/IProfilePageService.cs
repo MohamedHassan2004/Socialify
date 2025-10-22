@@ -10,6 +10,6 @@ namespace Socialify.Application.Services_Interfaces
 {
     public interface IProfilePageService
     {
-        Task<Result<ProfilePageDto>> GetProfilePageAsync(string targetUserId, string currentUserId);
+        Task<Result<ProfilePageDto>> GetProfilePageAsync(string targetUserId, string currentUserId, int pageSize);
     }
 }

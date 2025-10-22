@@ -17,8 +17,8 @@
 }
 
 .profile-avatar {
-    width: 120px;
-    height: 120px;
+    width: 7.5rem;
+    height: 7.5rem;
     border-radius: 50%;
     object-fit: cover;
     position: relative;
@@ -63,3 +63,47 @@
         color: #ffc107;
     }
 
+
+/* Modern Tab Navigation */
+.profile-nav .nav-link {
+    font-weight: 600;
+    color: var(--text-color);
+    border: 0;
+    border-bottom: 3px solid transparent;
+    padding: 1rem;
+    transition: all 0.2s ease-in-out;
+}
+
+    .profile-nav .nav-link.active,
+    .profile-nav .nav-link:hover {
+        color: var(--nav-active-color);
+        border-bottom: 3px solid var(--nav-active-color);
+        background-color: transparent;
+    }
+
+.tab-content {
+    padding-top: 1.5rem;
+}
+
+.text-muted {
+    color: var(--muted-text-color)
+}
+
+/* -------- Responsive Styles --------------*/
+
+@media (max-width: 550px) {
+    .profile-header {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 0.5rem;
+    }
+
+    .profile-details {
+        margin-top: 0.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .profile-actions {
+        margin: 0.5rem auto;
+    }
+}

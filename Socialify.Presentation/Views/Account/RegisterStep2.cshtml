@@ -73,7 +73,12 @@
             <span asp-validation-for="BirthDate" class="text-danger"></span>
         </div>
 
-        <button type="submit" class="btn btn-primary">Create Account</button>
+        <div class="d-flex gap-2 mt-2">
+            <a asp-action="BackToStep1" class="btn btn-secondary flex-fill">
+                <i class="fas fa-arrow-left"></i> Back to Edit Info
+            </a>
+            <button type="submit" class="btn btn-primary flex-fill">Create Account</button>
+        </div>
     </form>
 </div>
 

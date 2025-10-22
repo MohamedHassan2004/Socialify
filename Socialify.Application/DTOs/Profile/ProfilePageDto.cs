@@ -1,4 +1,5 @@
-﻿using Socialify.Application.DTOs.Post;
+﻿using Socialify.Application.DTOs.Common;
+using Socialify.Application.DTOs.Post;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,8 +10,8 @@ namespace Socialify.Application.DTOs.Profile
 {
     public class ProfilePageDto
     {
-        public ProfileDto User { get; set; } = new ProfileDto();
-        public ICollection<PostDto> Posts { get; set; } = new List<PostDto>();
-        public ICollection<ProfileBasicInfoDto> Friends { get; set; } = new List<ProfileBasicInfoDto>();
+        public ProfileDto ProfileInfo { get; set; } = new();
+        public PagedResult<PostDto> Posts { get; set; } = new();
+        public PagedResult<ProfileBasicInfoDto> Friends { get; set; } = new();
     }
 }

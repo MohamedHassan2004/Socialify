@@ -1,13 +1,18 @@
 using AutoMapper;
-using Microsoft.AspNetCore.Identity;
+using MediatR;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Socialify.Application.Interfaces;
-using Socialify.Domain.Common;
-using Socialify.Domain.Entities;
-using System.Security.Claims;
 using Socialify.Application.DTOs.Account;
 using Socialify.Application.DTOs.Profile;
+using Socialify.Application.Interfaces;
+using Socialify.Application.Repos_Interfaces;
+using Socialify.Application.Services_Interfaces;
+using Socialify.Domain.Common;
+using Socialify.Domain.Entities;
+using Socialify.Domain.Events;
+using System.Security.Claims;
 
 namespace Socialify.Infrastructure.Identity
 {
@@ -17,17 +22,23 @@ namespace Socialify.Infrastructure.Identity
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly IMapper _mapper;
         private readonly ILogger<AuthService> _logger;
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly IMediator _mediator;
 
         public AuthService(
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
             IMapper mapper,
-            ILogger<AuthService> logger)
+            ILogger<AuthService> logger,
+            IUnitOfWork unitOfWork,
+            IMediator mediator)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _mapper = mapper;
             _logger = logger;
+            _unitOfWork = unitOfWork;
+            _mediator = mediator;
         }
 
         public async Task<Result> LoginAsync(LoginDto loginDto)
@@ -140,7 +151,6 @@ namespace Socialify.Infrastructure.Identity
             }
         }
 
-
         public async Task<Result> ChangePasswordAsync(string userId, string currentPassword, string newPassword)
         {
             try
@@ -190,6 +200,7 @@ namespace Socialify.Infrastructure.Identity
 
         public async Task<Result> DeleteAccountAsync(string userId)
         {
+            await _unitOfWork.BeginTransactionAsync();
             try
             {
                 var user = await _userManager.FindByIdAsync(userId);
@@ -197,20 +208,32 @@ namespace Socialify.Infrastructure.Identity
                 {
                     return Result.Failure("User not found.");
                 }
-                var result = _userManager.DeleteAsync(user);
-                if (result.Result.Succeeded)
+
+                await _mediator.Publish(new UserDeletingEvent(userId));
+                var result = await _userManager.DeleteAsync(user);
+
+                if (result.Succeeded)
                 {
+                    await _unitOfWork.CommitTransactionAsync();
                     await _signInManager.SignOutAsync();
                     return Result.Success();
                 }
-                var errors = result.Result.Errors.Select(e => e.Description).ToList();
+
+                var errors = result.Errors.Select(e => e.Description).ToList();
                 return Result.Failure(errors);
             }
             catch (Exception ex)
             {
+                await _unitOfWork.RollbackTransactionAsync();
                 _logger.LogError(ex, "Error occurred during account deletion for user {UserId}", userId);
                 return Result.Failure("An error occurred during account deletion.");
             }
+        }
+
+        public async Task<bool> IsEmailExistsAsync(string email)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+            return user != null;
         }
     }
 }

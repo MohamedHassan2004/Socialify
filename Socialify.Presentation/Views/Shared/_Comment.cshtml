@@ -1,0 +1,42 @@
+﻿@using Socialify.Application.DTOs.Comment
+@{
+    var currentUserId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+}
+@model CommentDto
+
+<div class='comment'>
+    <div class="user-info">
+        <img class="post-avatar rounded-circle me-3"
+                src="/@Model.UserProfilePictureUrl" alt='not found'>
+        <div class='comment-body'>
+            <div class='comment-header'>
+                <a asp-action="Profile"
+                   asp-controller="Profile"
+                   asp-route-targetUserId="@Model.UserId"
+                   class="text-decoration-none">
+                    <h6 class="mb-0 fw-semibold">@Model.UserName</h6>
+                </a>
+                <small class="text-muted d-block">@Model.TimeAgo</small>
+            </div>
+            <div class='comment-content-container'>
+                <div class='comment-content'>
+                    <p>@Model.Content</p>
+                    @if (Model.IsEdited)
+                    {
+                        <small class="text-muted d-block px-2">
+                                <em>(Edited)</em>
+                        </small>
+                    }
+                    </div>
+                @if (Model.UserId == currentUserId)
+                {
+                    @Html.AntiForgeryToken()
+                    <div class="comment-buttons">
+                        <a class='edit-comment' data-comment-id="@Model.Id" onclick="editComment(this);"><i class='fas fa-edit'></i></a>
+                        <a class='delete-comment' data-comment-id="@Model.Id" onclick="deleteComment(this);return false;"><i class='fas fa-trash-alt'></i></a>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>

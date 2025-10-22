@@ -1,0 +1,14 @@
+@model List<Socialify.Application.DTOs.Post.PostDto>
+
+@if(TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger" role="alert">
+        @TempData["ErrorMessage"]
+    </div>
+}
+else{
+    @foreach (var post in Model)
+    {
+        <partial name="_Post" model="post" />
+    }
+}

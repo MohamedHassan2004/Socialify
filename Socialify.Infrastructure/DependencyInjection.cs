@@ -6,6 +6,7 @@ using Socialify.Infrastructure.Identity;
 using Socialify.Infrastructure.Repository;
 using Socialify.Application.Services_Interfaces;
 using Socialify.Application.ReposInterfaces;
+using Socialify.Application.Repos_Interfaces;
 
 namespace Socialify.Infrastructure
 {
@@ -18,16 +19,29 @@ namespace Socialify.Infrastructure
             services.AddScoped<IProfileService, ProfileService>();
             services.AddScoped<IProfileRepository, ProfileRepository>();
             services.AddScoped<ISearchService, SearchService>();
-            services.AddScoped<ISearchRepository, SearchRepository>();
             services.AddScoped<IHomePageService, HomePageService>();
+            services.AddScoped<IPostService, PostService>();
+            services.AddScoped<IPostRepository, PostRepository>();
             services.AddScoped<IProfilePageService, ProfilePageService>();
+            services.AddScoped<ILikeRepository, LikeRepository>();
+            services.AddScoped<ILikeService, LikeService>();
+            services.AddScoped<ISavedPostService, SavedPostService>();
+            services.AddScoped<ISavedPostRepository, SavedPostRepository>();
+            services.AddScoped<ICommentRepository, CommentRepository>();
+            services.AddScoped<ICommentService, CommentService>();
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
 
-            // Add caching
-            services.AddMemoryCache();
-            
-            // Add cached services (optional - use for high-traffic scenarios)
-            // services.Decorate<IProfileService, CachedProfileService>();
 
+
+
+
+
+
+
+
+
+
+            services.AddScoped<IFileManager, FileManager>();
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             return services;
         }

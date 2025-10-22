@@ -1,4 +1,6 @@
-﻿using Socialify.Application.DTOs.Home;
+﻿using Microsoft.Extensions.Logging;
+using Socialify.Application.DTOs.Home;
+using Socialify.Application.DTOs.Post;
 using Socialify.Application.Interfaces;
 using Socialify.Application.Services_Interfaces;
 using Socialify.Domain.Common;
@@ -12,32 +14,37 @@ namespace Socialify.Application.Services
 {
     public class HomePageService : IHomePageService
     {
+        private readonly ILogger<HomePageService> _logger;
         private readonly IProfileService _profileService;
-        //private readonly IPostService _postService;
+        private readonly IPostService _postService;
         //private readonly IFriendService _friendService;
 
-        public HomePageService(IProfileService profileService)//, IPostService postService, IFriendService friendService)
+        public HomePageService(ILogger<HomePageService> logger, IProfileService profileService, IPostService postService)// IFriendService friendService)
         {
+            _logger = logger;
             _profileService = profileService;
-            //_postService = postService;
+            _postService = postService;
             //_friendService = friendService;
         }
 
-        public async Task<Result<HomePageDto>> GetHomePageAsync(string currentUserId)
+        public async Task<Result<HomePageDto>> GetHomePageAsync(string currentUserId, int pageSize)
         {
             try
             {
                 if (string.IsNullOrEmpty(currentUserId))
                     return Result<HomePageDto>.Failure("Invalid user ID.");
+
                 var userInfo = await _profileService.GetProfileBasicInfoAsync(currentUserId);
-                //var posts = await _postService.GetFeedPostsAsync(currentUserId);
+                var posts = await _postService.GetPagedPostsAsync(1, pageSize, userInfo.Data.Id);
                 //var peopleYouMayKnow = await _friendService.GetPeopleYouMayKnowAsync(currentUserId);
+
+                if (!posts.IsSuccess || !userInfo.IsSuccess)
+                    return Result<HomePageDto>.Failure("Failed to fetch posts or user info.");
 
                 var dto = new HomePageDto
                 {
                     User = userInfo.Data,
-                    //Posts = posts.Data ?? new List<PostDto>(),
-                    //PostForm = new PostFormDto { UserId = currentUserId },
+                    Posts = posts.Data
                     //PeopleYouMayKnow = peopleYouMayKnow.Data ?? new List<UserDto>()
                 };
 
@@ -45,6 +52,7 @@ namespace Socialify.Application.Services
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Error fetching home page data for user {UserId}", currentUserId);
                 return Result<HomePageDto>.Failure("An error occurred while fetching the home page data.");
             }
         }

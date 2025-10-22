@@ -8,29 +8,11 @@
 
 <main>
 
-
     <div class="settings-container">
         <div class="settings-header">
             <h1>Account Settings</h1>
             <p class="text-muted">Manage your profile, password, and account preferences.</p>
         </div>
-
-        @* Add this section to display TempData messages *@
-        @if (TempData["SuccessMessage"] != null)
-        {
-            <div class="alert alert-success alert-dismissible fade show" role="alert">
-                @TempData["SuccessMessage"]
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        }
-
-        @if (TempData["ErrorMessage"] != null)
-        {
-            <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                @TempData["ErrorMessage"]
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        }
 
         <div class="card settings-card">
             <div class="card-header">

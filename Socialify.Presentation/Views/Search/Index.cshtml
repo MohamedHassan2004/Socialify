@@ -1,83 +1,54 @@
 @using Socialify.Application.DTOs.Search
-@model SearchResultDto
+@model SearchDto
 
 @{
     ViewData["Title"] = $"Search for \"{ViewBag.Query}\"";
-    ViewData["CssFile"] = "Search-results.css";
+
+    var pageSize = ViewBag.PageSize;
+    var initialProfileCount = Model.Profiles?.TotalCount ?? 0;
+    var initialPostCount = Model.Posts?.TotalCount ?? 0;
+    var hasMoreProfiles = initialProfileCount > pageSize;
+    var hasMorePosts = initialPostCount > pageSize;
 }
-<main>
+
+<main data-query="@ViewBag.Query" data-page-size="@pageSize">
     <h2 class="mb-4 fw-light">Search results for <strong>"@ViewBag.Query"</strong></h2>
 
-    @* Error Handling Block *@
     @if (TempData["ErrorMessage"] != null)
     {
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            <i class="fas fa-exclamation-triangle me-2"></i>
-            @TempData["ErrorMessage"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
+        <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
     }
     else
-    {                
-        @if (Model.Users != null && Model.Users.Any())
+    {
+        @if (Model?.Profiles != null && Model.Profiles.Data.Any())
         {
             <h4 class="section-title">Users</h4>
-            <div class="search-results-list">
-                @foreach (var user in Model.Users)
-                {
-                    <div class="card search-result-card mb-3">
-                        <div class="card-body d-flex align-items-center justify-content-between">
-                            <a asp-action="Profile" asp-controller="Profile" asp-route-targetUserId="@user.Id" class="d-flex align-items-center text-decoration-none text-dark flex-grow-1">
-                                <img class="result-avatar me-3" src="@user.ProfilePicUrl" alt="profile picture">
-                                <div>
-                                    <h5 class="mb-0 fw-bold">@user.FullName</h5>
-                                </div>
-                            </a>
-                            <div class="ms-3">
-                                @await Html.PartialAsync("_ProfileActions", user.RelationshipStatus)
-                            </div>
-                        </div>
-                    </div>
-                }
+            <div id="profiles-container" class="search-results-list">
+                <partial name="_ProfileList" model="Model.Profiles.Data" />
             </div>
+            @if (hasMoreProfiles)
+            {
+                <div id="load-more-profiles-container" class="text-center mt-3">
+                    <button id="load-more-profiles" class="btn btn-primary">Show More</button>
+                </div>
+            }
         }
 
-        @if (Model.Posts != null && Model.Posts.Any())
+        @if (Model?.Posts != null && Model.Posts.Data.Any())
         {
             <h4 class="section-title mt-5">Posts</h4>
-            <div class="search-results-list">
-                @foreach (var post in Model.Posts)
-                {
-                    <div class="card post-card mb-3">
-                        <div class="card-body">
-                            <div class="post-header d-flex align-items-center mb-3">
-                                <img src="/@post.UserProfilePictureUrl" class="post-avatar me-3" alt="User Profile Picture">
-                                <div class="post-header-info">
-                                    <h6 class="mb-0 fw-bold">@post.UserName</h6>
-                                    <small class="text-muted">@post.CreatedAt</small>
-                                </div>
-                            </div>
-                            <div class="post-body">
-                                <p>@post.Content</p>
-                            </div>
-                        </div>
-                        <div class="card-footer post-footer d-flex justify-content-around">
-                            <button class="post-action-btn d-flex align-items-center">
-                                <i class="far fa-thumbs-up me-2"></i> <span>152 Likes</span>
-                            </button>
-                            <button class="post-action-btn d-flex align-items-center">
-                                <i class="far fa-comment me-2"></i> <span>23 Comments</span>
-                            </button>
-                            <button class="post-action-btn d-flex align-items-center">
-                                <i class="far fa-share-square me-2"></i> <span>Share</span>
-                            </button>
-                        </div>
-                    </div>
-                }
-            </div>  
+            <div id="posts-container" class="search-results-list">
+                <partial name="_PostList" model="Model.Posts.Data" />
+            </div>
+            @if (hasMorePosts)
+            {
+                <div id="load-more-posts-container" class="text-center mt-3">
+                    <button id="load-more-posts" class="btn btn-primary">Show More</button>
+                </div>
+            }
         }
 
-        @if ((Model.Users == null || !Model.Users.Any()) && (Model.Posts == null || !Model.Posts.Any()))
+        @if ((Model?.Profiles == null || !Model.Profiles.Data.Any()) && (Model?.Posts == null || !Model.Posts.Data.Any()))
         {
             <div class="text-center py-5 mt-4 no-results-container">
                 <i class="fas fa-search fa-3x text-muted mb-3"></i>
@@ -88,3 +59,60 @@
     }
 
 </main>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            let profilePage = 2;
+            let postPage = 2;
+
+            // get main element to access data attributes
+            const main = document.querySelector("main");
+            const query = main.dataset.query;
+            const pageSize = parseInt(main.dataset.pageSize); // ??????? ???
+
+            // get profiles elements
+            const loadMoreProfilesBtn = document.getElementById("load-more-profiles");
+            const profilesContainer = document.getElementById("profiles-container");
+            const loadMoreProfilesContainer = document.getElementById("load-more-profiles-container");
+
+            // get posts elements
+            const loadMorePostsBtn = document.getElementById("load-more-posts");
+            const postsContainer = document.getElementById("posts-container");
+            const loadMorePostsContainer = document.getElementById("load-more-posts-container");
+
+            // load more Profiles
+            loadMoreProfilesBtn?.addEventListener("click", async () => {
+                const response = await fetch(`/Search/SearchMoreProfiles?query=${query}&pageNumber=${profilePage}`);
+                const data = await response.text();
+
+                if (data.trim().length > 0) {
+                    profilesContainer.insertAdjacentHTML("beforeend", data);
+                    profilePage++;
+                    if ((new DOMParser().parseFromString(data, "text/html")).querySelectorAll(".user-card").length < pageSize) {
+                        loadMoreProfilesContainer.style.display = "none";
+                    }
+                } else {
+                    loadMoreProfilesContainer.style.display = "none";
+                }
+            });
+
+            // load more posts
+            loadMorePostsBtn?.addEventListener("click", async () => {
+                const response = await fetch(`/Search/SearchMorePosts?query=${query}&pageNumber=${postPage}`);
+                const data = await response.text();
+				console.log(data);
+
+                if (data.trim().length > 0) {
+                    postsContainer.insertAdjacentHTML("beforeend", data);
+                    postPage++;
+                    if ((new DOMParser().parseFromString(data, "text/html")).querySelectorAll(".post-card").length < pageSize) {
+                        loadMorePostsContainer.style.display = "none";
+                    }
+                } else {
+                    loadMorePostsContainer.style.display = "none";
+                }
+            });
+        });
+    </script>
+}

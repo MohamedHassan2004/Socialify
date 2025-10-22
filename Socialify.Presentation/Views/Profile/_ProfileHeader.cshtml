@@ -17,7 +17,7 @@
                 </button>
                 @if (!Model.ProfilePicUrl.Contains("default"))
                 {
-                    <button class="avatar-action-btn delete-btn" title="Delete Picture" onclick="onDeleteProfilePic()">
+                    <button class="avatar-action-btn delete-btn" title="Delete Picture" onclick="DeleteProfilePic()">
                         <i class="fas fa-trash"></i>
                     </button>
                 }
@@ -28,7 +28,7 @@
             <h2>@Model.FullName</h2>
             @if (!string.IsNullOrEmpty(Model.Bio))
             {
-                <p>@Model.Bio</p>
+                <p class="text-muted">@Model.Bio</p>
             }
             <span>Joined on: @Model.JoinedOn.ToString("dd-MM-yyyy")</span>
         </div>
@@ -39,9 +39,3 @@
 
 </div>
 
-@* confirm delete profile picture *@
-<div id="confirm-deletion" style="display:none">
-    <h6>Confirm deletion your profile picture</h6>
-    <button class="btn btn-success">Yes</button>
-    <button class="btn btn-danger">No</button>
-</div>

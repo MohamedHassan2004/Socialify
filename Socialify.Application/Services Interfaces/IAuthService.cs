@@ -18,5 +18,6 @@ namespace Socialify.Application.Interfaces
         Task<Result> ChangePasswordAsync(string userId, string currentPassword, string newPassword);
         Task<Result> DeleteAccountAsync(string userId);
         Task<Result<ProfileDto>> GetCurrentUserAsync();
+        Task<bool> IsEmailExistsAsync(string email);
     }
 }

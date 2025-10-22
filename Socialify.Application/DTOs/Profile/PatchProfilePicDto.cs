@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Socialify.Application.Validation;
+using Socialify.Application.Validation.FileValidation;
 using Socialify.Application.Validation.ImgValidation;
 using System;
 using System.Collections.Generic;
@@ -16,7 +17,7 @@ namespace Socialify.Application.DTOs.Profile
     {
         [Required(ErrorMessage = "Profile picture is required.")]
         [ValidateFileSize]
-        [ValidateImgExtension]
+        [ValidateFileType(FileType.Image)]
         [Display(Name = "Profile Picture")]
         public IFormFile? ProfilePicture { get; set; }
     }

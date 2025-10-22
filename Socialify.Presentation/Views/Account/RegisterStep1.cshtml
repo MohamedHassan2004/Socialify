@@ -76,4 +76,26 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script>
+        // Real-time email validation
+        $('#Email').on('blur', function() {
+            var email = $(this).val();
+            if (email) {
+                $.ajax({
+                    url: '@Url.Action("CheckEmailExists", "Account")',
+                    type: 'GET',
+                    data: { email: email },
+                    success: function(exists) {
+                        if (exists) {
+                            $('#Email').addClass('is-invalid');
+                            $('#Email').siblings('.text-danger').text('This email is already registered.');
+                        } else {
+                            $('#Email').removeClass('is-invalid');
+                            $('#Email').siblings('.text-danger').text('');
+                        }
+                    }
+                });
+            }
+        });
+    </script>
 }

@@ -1,0 +1,42 @@
+﻿@using Socialify.Application.DTOs.Common
+@using Socialify.Application.DTOs.Profile
+
+@{
+	ViewData["Title"] = "People Who Liked This";
+}
+
+@model PagedResult<ProfileBasicInfoDto>
+
+<main>
+    <section class="container mx-auto my-8 px-4">
+        <h4 class="section-title">People who liked this post</h4>
+        @if (Model != null && Model.Data.Count() > 0)
+        {
+            <div id="profiles-container" class="search-results-list"
+                 data-total-pages="@Model.TotalPages"
+                 data-page-size="@Model.PageSize">
+                <partial name="_ProfileList" model="Model.Data" />
+            </div>
+            <div id="observer"></div>
+        }
+        else
+        {
+            <p class="text-gray-600">No one has liked this yet.</p>
+        }
+	</section>
+</main>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const section = document.getElementById("profiles-container");
+            initInfiniteScroll({
+                sectionId: "profiles-container",
+                containerId: "profiles-container",
+                observerId: "observer",
+                apiUrl: "/Likes/LoadLikesOnPost",
+                queryParams: { postId: '@ViewData["PostId"]' }
+            });
+        });
+    </script>
+}

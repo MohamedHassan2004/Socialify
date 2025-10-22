@@ -25,7 +25,7 @@ namespace Socialify.Application.Validation.ImgValidation
         {
             if (value == null)
             {
-                return ValidationResult.Success; // Let Required attribute handle null values
+                return ValidationResult.Success;
             }
 
             if (value is not IFormFile file)

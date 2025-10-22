@@ -13,7 +13,9 @@ nav {
         color: var(--onhover-text-color);
     }
 
-
+.navbar-toggler-icon {
+    background-image: var(--toggler-icon);
+}
 /* ----------------- Search Form ----------------- */
 .search-container form {
     display: flex;

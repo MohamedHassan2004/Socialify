@@ -1,49 +1,57 @@
 using AutoMapper;
 using Microsoft.Extensions.Logging;
-using Socialify.Application.DTOs.Profile;
 using Socialify.Application.DTOs.Search;
-using Socialify.Application.ReposInterfaces;
+using Socialify.Application.Interfaces;
 using Socialify.Application.Services_Interfaces;
 using Socialify.Domain.Common;
 
-public class SearchService : ISearchService
+namespace Socialify.Application.Services
 {
-    private readonly ISearchRepository _searchRepository;
-    private readonly IMapper _mapper;
-    private readonly ILogger<SearchService> _logger;
-
-    public SearchService(ISearchRepository searchRepository, IMapper mapper, ILogger<SearchService> logger)
+    public class SearchService : ISearchService
     {
-        _searchRepository = searchRepository;
-        _mapper = mapper;
-        _logger = logger;
-    }
+        private readonly IProfileService _profileService;
+        private readonly IPostService _postService;
+        private readonly ILogger<SearchService> _logger;
 
-    public async Task<Result<SearchResultDto>> SearchAsync(string keyword)
-    {
-        try
+        public SearchService(IProfileService profileService, IPostService postService, ILogger<SearchService> logger)
         {
-            if (string.IsNullOrWhiteSpace(keyword))
-            {
-                return Result<SearchResultDto>.Failure("The keyword is empty!");
-            }
-
-            keyword = keyword.Trim().ToLower();
-
-            var users = await _searchRepository.SearchUsersAsync(keyword);
-
-            var dto = new SearchResultDto
-            {
-                Users = _mapper.Map<IEnumerable<ProfileBasicInfoDto>>(users)
-            };
-
-            return Result<SearchResultDto>.Success(dto);
+            _profileService = profileService;
+            _postService = postService;
+            _logger = logger;
         }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error occurred while searching with keyword: {Keyword}", keyword);
-            return Result<SearchResultDto>.Failure($"Error while searching");
 
+        public async Task<Result<SearchDto>> SearchAsync(string keyword, int page, int pageSize, string currentUserId)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(keyword))
+                {
+                    return Result<SearchDto>.Failure("The keyword is empty!");
+                }
+
+                keyword = keyword.Trim().ToLower();
+
+                var profilesResult = await _profileService.SearchProfilesAsync(keyword, page, pageSize);
+                var postsResult = await _postService.SearchPostsAsync(keyword, page, pageSize, currentUserId);
+
+                if (!profilesResult.IsSuccess || !postsResult.IsSuccess)
+                {
+                    return Result<SearchDto>.Failure("An error occurred during search.");
+                }
+
+                var dto = new SearchDto
+                {
+                    Profiles = profilesResult.Data,
+                    Posts = postsResult.Data
+                };
+
+                return Result<SearchDto>.Success(dto);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while searching with keyword: {Keyword}", keyword);
+                return Result<SearchDto>.Failure($"Error while searching");
+            }
         }
     }
 }

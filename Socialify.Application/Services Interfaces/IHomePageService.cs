@@ -10,6 +10,6 @@ namespace Socialify.Application.Services_Interfaces
 {
     public interface IHomePageService
     {
-        Task<Result<HomePageDto>> GetHomePageAsync(string currentUserId);
+        Task<Result<HomePageDto>> GetHomePageAsync(string currentUserId, int pageSize);
     }
 }

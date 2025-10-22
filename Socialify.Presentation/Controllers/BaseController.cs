@@ -1,28 +1,21 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Socialify.Domain.Common;
+using Socialify.Presentation.Filters;
 using System.Security.Claims;
 
 namespace Socialify.Presentation.Controllers
 {
     [Authorize]
+    [ServiceFilter(typeof(RequireUserIdFilter))]
     public abstract class BaseController : Controller
     {
         protected readonly ILogger _logger;
+        protected string currentUserId => HttpContext.Items["CurrentUserId"]?.ToString()!;
 
         protected BaseController(ILogger logger)
         {
             _logger = logger;
-        }
-
-        protected string? GetCurrentUserId()
-        {
-            var userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
-            if (string.IsNullOrEmpty(userId))
-            {
-                _logger.LogWarning("No user ID found in claims for user {User}", User.Identity?.Name);
-            }
-            return userId;
         }
 
         protected IActionResult HandleUnauthorizedAccess(string actionName)
@@ -35,21 +28,14 @@ namespace Socialify.Presentation.Controllers
         {
             _logger.LogError("Service error in {ActionName}: {ErrorMessage}", actionName, result.ErrorMessage);
             TempData["ErrorMessage"] = result.ErrorMessage ?? fallbackMessage ?? "An error occurred. Please try again.";
-            return View();
+            return View("Error");
         }
 
         protected IActionResult HandleServiceError(Result result, string actionName, string? fallbackMessage = null)
         {
             _logger.LogError("Service error in {ActionName}: {ErrorMessage}", actionName, result.ErrorMessage);
             TempData["ErrorMessage"] = result.ErrorMessage ?? fallbackMessage ?? "An error occurred. Please try again.";
-            return View();
-        }
-
-        protected IActionResult HandleUnexpectedError(Exception ex, string actionName, string? fallbackMessage = null)
-        {
-            _logger.LogError(ex, "Unexpected error in {ActionName}", actionName);
-            TempData["ErrorMessage"] = fallbackMessage ?? "An unexpected error occurred. Please try again.";
-            return View();
+            return View("Error");
         }
 
         protected bool ValidateModelAndLogErrors<T>(T model, string actionName)
@@ -63,8 +49,10 @@ namespace Socialify.Presentation.Controllers
 
             if (!ModelState.IsValid)
             {
+                var errors = string.Join("\n", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage));
                 _logger.LogWarning("Model validation failed in {ActionName}. Errors: {Errors}", 
-                    actionName, string.Join(", ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage)));
+                    actionName, errors);
+                TempData["ErrorMessage"] = errors;
                 return false;
             }
 

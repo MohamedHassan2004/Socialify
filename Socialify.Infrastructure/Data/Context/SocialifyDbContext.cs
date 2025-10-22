@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Socialify.Domain.Entities;
+using System.Runtime.InteropServices;
 
 namespace Socialify.Infrastructure.Data.Context
 {
@@ -12,17 +13,22 @@ namespace Socialify.Infrastructure.Data.Context
         }
 
         public DbSet<Post> Posts { get; set; }
+        public DbSet<SavedPost> SavedPosts { get; set; }
+        public DbSet<Like> Likes { get; set; }
+        public DbSet<Comment> Comments { get; set; }
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
-            // Configure Post relationship
-            modelBuilder.Entity<Post>()
-                .HasOne(p => p.User)
-                .WithMany(u => u.Posts)
-                .HasForeignKey(p => p.UserId)
-                .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<ApplicationUser>()
+                .Property(u => u.FullName)
+                .HasComputedColumnSql("[FirstName] + ' ' + [LastName]", stored: true);
+
+            modelBuilder.Entity<ApplicationUser>()
+                .HasIndex(u => u.FullName)
+                .HasDatabaseName("IX_Users_FullName");
 
             // Add indexes for better query performance
             modelBuilder.Entity<Post>()
@@ -33,29 +39,54 @@ namespace Socialify.Infrastructure.Data.Context
                 .HasIndex(p => p.CreatedAt)
                 .HasDatabaseName("IX_Posts_CreatedAt");
 
-            // Configure ApplicationUser for better queries
-            modelBuilder.Entity<ApplicationUser>()
-                .HasIndex(u => u.Email)
-                .IsUnique()
-                .HasDatabaseName("IX_Users_Email");
+            modelBuilder.Entity<Like>()
+                .HasIndex(l => new { l.PostId, l.UserId })
+                .HasDatabaseName("IX_Likes_PostId_UserId")
+                .IsUnique();
 
-            modelBuilder.Entity<ApplicationUser>()
-                .HasIndex(u => new { u.FirstName, u.LastName })
-                .HasDatabaseName("IX_Users_FirstName_LastName");
+            modelBuilder.Entity<SavedPost>()
+                .HasIndex(p => p.SavedAt)
+                .HasDatabaseName("IX_SavedPosts_SavedAt");
 
-            // Configure query splitting for better performance
-            modelBuilder.Entity<ApplicationUser>()
-                .Navigation(u => u.Posts)
-                .UsePropertyAccessMode(PropertyAccessMode.Property);
-        }
+            modelBuilder.Entity<SavedPost>()
+                .HasIndex(sp => new { sp.PostId, sp.UserId })
+                .HasDatabaseName("IX_SavedPosts_PostId_UserId")
+                .IsUnique();
 
-        // Enable query splitting for better performance
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            base.OnConfiguring(optionsBuilder);
-            
-            // Enable query splitting for better performance
-            optionsBuilder.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
+            modelBuilder.Entity<Like>()
+                .HasOne(l => l.Post)
+                .WithMany(p => p.Likes)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Comment>()
+                .HasOne(c => c.Post)
+                .WithMany(p => p.Comments)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<SavedPost>()
+                .HasOne(sp => sp.Post)
+                .WithMany(p => p.SavedPosts)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Like>()
+                .HasOne(l => l.User)
+                .WithMany(u => u.Likes)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Comment>()
+                .HasOne(c => c.User)
+                .WithMany(u => u.Comments)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<SavedPost>()
+                .HasOne(sp => sp.User)
+                .WithMany(u => u.SavedPosts)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Post>()
+                .HasOne(p => p.User)
+                .WithMany(u => u.Posts)
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

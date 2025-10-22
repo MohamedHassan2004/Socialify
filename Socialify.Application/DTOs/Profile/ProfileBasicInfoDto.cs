@@ -12,6 +12,7 @@ namespace Socialify.Application.DTOs.Profile
         public string Id { get; set; }
         public string FullName { get; set; }
         public string ProfilePicUrl { get; set; }
+        public string? Bio { get; set; }
         public RelationshipStatus RelationshipStatus { get; set; }
     }
 }

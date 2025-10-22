@@ -1,37 +1,31 @@
-﻿@{
-    ViewData["CssFile"] = "HomePage.css";
-}
+﻿@using Socialify.Application.DTOs.Search
 @model Socialify.Application.DTOs.Home.HomePageDto
 
+@{
+
+    ViewData["CssFile"] = "HomePage.css";
+    var pageSize = Model.Posts.PageSize;
+    var pageNumber = Model.Posts.PageNumber;
+}
+
 <div class='home-page-container'>
-    @if (TempData["ErrorMessage"] != null)
-    {
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            <i class="fas fa-exclamation-triangle me-2"></i>
-            @TempData["ErrorMessage"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    }
-    
-    @if (TempData["SuccessMessage"] != null)
-    {
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            <i class="fas fa-check-circle me-2"></i>
-            @TempData["SuccessMessage"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    }
 
     @if (Model?.User != null)
     {
         @await Html.PartialAsync("_AsideBarLeft", Model.User)
     }
-    
+
     <main>
-        @await Html.PartialAsync("_PostForm")
+
+        <div class="mb-3" onclick="location.href='@Url.Action("UploadPost", "Posts")'">
+            <input class="form-control p-3 rounded-4" placeholder="What's on your mind?" />
+        </div>        
+
         @if (Model?.Posts != null)
         {
-            @await Html.PartialAsync("_PostContainer", Model.Posts)
+            <div id="posts-section" data-page-size="@Model.Posts.PageSize" data-total-pages="@Model.Posts.TotalPages">
+                @await Html.PartialAsync("_PostContainer", Model.Posts)
+            </div>
         }
         else
         {
@@ -41,6 +35,23 @@
             </div>
         }
     </main>
-    
+
     @await Html.PartialAsync("_AsideBarRight")
 </div>
+
+
+@section Scripts {
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            initInfiniteScroll({
+                sectionId: "posts-section",
+                containerId: "posts-container",
+                observerId: "observer",
+                apiUrl: "/Posts/LoadPosts"
+            });
+        });
+    </script>
+
+    }
+

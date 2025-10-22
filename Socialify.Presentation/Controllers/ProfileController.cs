@@ -1,8 +1,10 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Socialify.Application.DTOs.Post;
 using Socialify.Application.DTOs.Profile;
 using Socialify.Application.Interfaces;
+using Socialify.Application.Services;
 using Socialify.Application.Services_Interfaces;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -14,6 +16,8 @@ namespace Socialify.Presentation.Controllers
     {
         private readonly IProfileService _profileService;
         private readonly IProfilePageService _profilePageService;
+        private readonly int PageSize = 5;
+
 
         public ProfileController(
             IProfileService profileService, 
@@ -27,50 +31,24 @@ namespace Socialify.Presentation.Controllers
         [HttpGet("MyProfile")]
         public async Task<IActionResult> MyProfile()
         {
-            try
-            {
-                var currentUserId = GetCurrentUserId();
-                if (string.IsNullOrEmpty(currentUserId))
-                    return HandleUnauthorizedAccess(nameof(MyProfile));
+            var profileResult = await _profilePageService.GetProfilePageAsync(currentUserId, currentUserId, PageSize);
+            if (!profileResult.IsSuccess)
+                return HandleServiceError(profileResult, nameof(MyProfile));
 
-                var profileResult = await _profilePageService.GetProfilePageAsync(currentUserId, currentUserId);
-                if (!profileResult.IsSuccess)
-                    return HandleServiceError(profileResult, nameof(MyProfile));
-
-                return View("Index", profileResult.Data);
-            }
-            catch (Exception ex)
-            {
-                return HandleUnexpectedError(ex, nameof(MyProfile));
-            }
+            return View("Index", profileResult.Data);
         }
 
         [HttpGet("{targetUserId}")]
         public async Task<IActionResult> Profile(string targetUserId)
         {
-            try
-            {
-                if (string.IsNullOrWhiteSpace(targetUserId))
-                {
-                    _logger.LogWarning("Invalid targetUserId provided: {TargetUserId}", targetUserId);
-                    TempData["ErrorMessage"] = "Invalid profile requested.";
-                    return RedirectToAction(nameof(MyProfile));
-                }
+            if (string.IsNullOrEmpty(currentUserId))
+                return HandleUnauthorizedAccess(nameof(Profile));
 
-                var currentUserId = GetCurrentUserId();
-                if (string.IsNullOrEmpty(currentUserId))
-                    return HandleUnauthorizedAccess(nameof(Profile));
+            var profileResult = await _profilePageService.GetProfilePageAsync(targetUserId, currentUserId, PageSize);
+            if (!profileResult.IsSuccess)
+                return HandleServiceError(profileResult, nameof(Profile));
 
-                var profileResult = await _profilePageService.GetProfilePageAsync(targetUserId, currentUserId);
-                if (!profileResult.IsSuccess)
-                    return HandleServiceError(profileResult, nameof(Profile));
-
-                return View("Index", profileResult.Data);
-            }
-            catch (Exception ex)
-            {
-                return HandleUnexpectedError(ex, nameof(Profile));
-            }
+            return View("Index", profileResult.Data);
         }
 
         [HttpGet("Settings")]
@@ -82,86 +60,51 @@ namespace Socialify.Presentation.Controllers
         [HttpGet("UpdateProfileInfo")]
         public async Task<IActionResult> UpdateProfileInfo()
         {
-            try
+            var profileInfoResult = await _profileService.GetProfileInfoAsync(currentUserId);
+            if (!profileInfoResult.IsSuccess)
             {
-                var currentUserId = GetCurrentUserId();
-                if (string.IsNullOrEmpty(currentUserId))
-                    return HandleUnauthorizedAccess(nameof(UpdateProfileInfo));
-
-                var profileInfoResult = await _profileService.GetProfileInfoAsync(currentUserId);
-                if (!profileInfoResult.IsSuccess)
-                {
-                    _logger.LogError("Failed to load profile info for user {UserId}: {ErrorMessage}", 
-                        currentUserId, profileInfoResult.ErrorMessage);
-                    TempData["ErrorMessage"] = profileInfoResult.ErrorMessage ?? "An error occurred while loading profile information. Please try again.";
-                    return RedirectToAction(nameof(MyProfile));
-                }
-
-                return View(profileInfoResult.Data);
+                _logger.LogError("Failed to load profile info for user {UserId}: {ErrorMessage}", 
+                    currentUserId, profileInfoResult.ErrorMessage);
+                TempData["ErrorMessage"] = profileInfoResult.ErrorMessage ?? "An error occurred while loading profile information. Please try again.";
+                return RedirectToAction(nameof(MyProfile));
             }
-            catch (Exception ex)
-            {
-                return HandleUnexpectedError(ex, nameof(UpdateProfileInfo));
-            }
+
+            return View(profileInfoResult.Data);
         }
 
         [HttpPost("UpdateProfileInfo")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> UpdateProfileInfoAsync(UpdateProfileInfoDto updateProfileInfoDto)
         {
-            try
-            {
-                if (!ValidateModelAndLogErrors(updateProfileInfoDto, nameof(UpdateProfileInfoAsync)))
-                    return View(updateProfileInfoDto);
-
-                var currentUserId = GetCurrentUserId();
-                if (string.IsNullOrEmpty(currentUserId))
-                    return HandleUnauthorizedAccess(nameof(UpdateProfileInfoAsync));
-
-                var result = await _profileService.UpdateProfileInfoAsync(currentUserId, updateProfileInfoDto);
-                if (result.IsSuccess)
-                {
-                    _logger.LogInformation("Profile info updated successfully for user {UserId}", currentUserId);
-                    TempData["SuccessMessage"] = "Profile information updated successfully!";
-                    return RedirectToAction(nameof(MyProfile));
-                }
-
-                _logger.LogError("Failed to update profile info for user {UserId}: {ErrorMessage}", 
-                    currentUserId, result.ErrorMessage);
-                TempData["ErrorMessage"] = result.ErrorMessage ?? "Failed to update profile info. Please try again.";
+            if (!ValidateModelAndLogErrors(updateProfileInfoDto, nameof(UpdateProfileInfoAsync)))
                 return View(updateProfileInfoDto);
-            }
-            catch (Exception ex)
+
+            var result = await _profileService.UpdateProfileInfoAsync(currentUserId, updateProfileInfoDto);
+            if (result.IsSuccess)
             {
-                return HandleUnexpectedError(ex, nameof(UpdateProfileInfoAsync));
+                _logger.LogInformation("Profile info updated successfully for user {UserId}", currentUserId);
+                TempData["SuccessMessage"] = "Profile information updated successfully!";
+                return RedirectToAction(nameof(MyProfile));
             }
+
+            _logger.LogError("Failed to update profile info for user {UserId}: {ErrorMessage}", 
+                currentUserId, result.ErrorMessage);
+            TempData["ErrorMessage"] = result.ErrorMessage ?? "Failed to update profile info. Please try again.";
+            return View(updateProfileInfoDto);
         }
 
         [HttpPost("RemoveProfilePic")]
         public async Task<IActionResult> RemoveProfilePicAsync()
         {
-            try
+            var result = await _profileService.RemoveProfilePictureAsync(currentUserId);
+            if (result.IsSuccess)
             {
-                var currentUserId = GetCurrentUserId();
-                if (string.IsNullOrEmpty(currentUserId))
-                    return HandleUnauthorizedAccess(nameof(RemoveProfilePicAsync));
-
-                var result = await _profileService.RemoveProfilePictureAsync(currentUserId);
-                if (result.IsSuccess)
-                {
-                    _logger.LogInformation("Profile picture removed successfully for user {UserId}", currentUserId);
-                    return NoContent();
-                }
-
-                _logger.LogError("Failed to remove profile picture for user {UserId}: {ErrorMessage}", 
-                    currentUserId, result.ErrorMessage);
-                return BadRequest(result.ErrorMessage ?? "Failed to remove profile picture. Please try again.");
+                _logger.LogInformation("Profile picture removed successfully for user {UserId}", currentUserId);
+                return Ok();
             }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Unexpected error removing profile picture for user {UserId}", GetCurrentUserId());
-                return StatusCode(500, "An unexpected error occurred. Please try again.");
-            }
+
+            _logger.LogError("Failed to remove profile picture for user {UserId}: {ErrorMessage}", currentUserId, result.ErrorMessage);
+            return BadRequest(result.ErrorMessage ?? "Failed to remove profile picture. Please try again.");
         }
 
         [HttpGet("UpdateProfilePic")]
@@ -174,32 +117,21 @@ namespace Socialify.Presentation.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> UpdateProfilePicAsync(PatchProfilePicDto patchProfilePicDto)
         {
-            try
-            {
-                if (!ValidateModelAndLogErrors(patchProfilePicDto, nameof(UpdateProfilePicAsync)))
-                    return View(patchProfilePicDto);
-
-                var currentUserId = GetCurrentUserId();
-                if (string.IsNullOrEmpty(currentUserId))
-                    return HandleUnauthorizedAccess(nameof(UpdateProfilePicAsync));
-
-                var result = await _profileService.UpdateProfilePictureAsync(currentUserId, patchProfilePicDto);
-                if (result.IsSuccess)
-                {
-                    _logger.LogInformation("Profile picture updated successfully for user {UserId}", currentUserId);
-                    TempData["SuccessMessage"] = "Profile picture updated successfully!";
-                    return RedirectToAction(nameof(MyProfile));
-                }
-
-                _logger.LogError("Failed to update profile picture for user {UserId}: {ErrorMessage}", 
-                    currentUserId, result.ErrorMessage);
-                TempData["ErrorMessage"] = result.ErrorMessage ?? "Failed to update profile picture. Please try again.";
+            if (!ValidateModelAndLogErrors(patchProfilePicDto, nameof(UpdateProfilePicAsync)))
                 return View(patchProfilePicDto);
-            }
-            catch (Exception ex)
+
+            var result = await _profileService.UpdateProfilePictureAsync(currentUserId, patchProfilePicDto);
+            if (result.IsSuccess)
             {
-                return HandleUnexpectedError(ex, nameof(UpdateProfilePicAsync));
+                _logger.LogInformation("Profile picture updated successfully for user {UserId}", currentUserId);
+                TempData["SuccessMessage"] = "Profile picture updated successfully!";
+                return RedirectToAction(nameof(MyProfile));
             }
+
+            _logger.LogError("Failed to update profile picture for user {UserId}: {ErrorMessage}", 
+                currentUserId, result.ErrorMessage);
+            TempData["ErrorMessage"] = result.ErrorMessage ?? "Failed to update profile picture. Please try again.";
+            return View(patchProfilePicDto);
         }
     }
 }

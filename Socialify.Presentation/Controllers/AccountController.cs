@@ -35,7 +35,6 @@ namespace Socialify.Presentation.Controllers
                 var result = await _authService.LoginAsync(model);
                 if (result.IsSuccess)
                 {
-                    TempData["SuccessMessage"] = "Welcome back! You have successfully logged in.";
                     return RedirectToAction(nameof(HomeController.Index), nameof(HomeController).Replace("Controller", ""));
                 }
                 TempData["ErrorMessage"] = result.ErrorMessage ?? "Invalid login attempt. Please check your credentials and try again.";
@@ -51,14 +50,24 @@ namespace Socialify.Presentation.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult RegisterStep1(RegisterDto model)
+        public async Task<IActionResult> RegisterStep1(RegisterDto model)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                TempData["RegisterModel"] = JsonSerializer.Serialize(model);
-                return RedirectToAction(nameof(RegisterStep2));
+                return View(model);
             }
-            return View(model);
+
+            // Check if email already exists BEFORE moving to step 2
+            var emailExists = await _authService.IsEmailExistsAsync(model.Email);
+            if (emailExists)
+            {
+                ModelState.AddModelError("Email", "This email is already registered.");
+                return View(model);
+            }
+
+            // Store data in TempData to use in Step2
+            TempData["RegisterModel"] = JsonSerializer.Serialize(model);
+            return RedirectToAction(nameof(RegisterStep2));
         }
 
         [HttpGet]
@@ -70,6 +79,10 @@ namespace Socialify.Presentation.Controllers
                 return RedirectToAction(nameof(RegisterStep1));
             }
 
+            // Deserialize to show step1 data if needed
+            var registerModel = JsonSerializer.Deserialize<RegisterDto>(step1Data);
+            ViewBag.RegisterEmail = registerModel?.Email; // Optional: to display in Step2
+
             return View();
         }
 
@@ -77,36 +90,74 @@ namespace Socialify.Presentation.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> RegisterStep2(CompleteProfileDto model)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                var registerModelJson = TempData["RegisterModel"] as string;
-                if (string.IsNullOrEmpty(registerModelJson))
-                {
-                    ModelState.AddModelError(string.Empty, "Registration session expired. Please register again.");
-                    return View(model);
-                }
-
-                var registerModel = JsonSerializer.Deserialize<RegisterDto>(registerModelJson);
-                if (registerModel == null)
-                {
-                    ModelState.AddModelError(string.Empty, "An error occurred. Please register again.");
-                    return View(model);
-                }
-
-                var result = await _authService.RegisterAsync(registerModel, model);
-
-                if (result.IsSuccess)
-                {
-                    TempData["SuccessMessage"] = "Account created successfully! Please log in to continue.";
-                    return RedirectToAction(nameof(Login));
-                }
-
-                TempData["ErrorMessage"] = result.ErrorMessage ?? "Registration failed. Please try again.";
-                result.Errors.ForEach(error => ModelState.AddModelError(string.Empty, error));
+                TempData.Keep("RegisterModel");
+                return View(model);
             }
 
+            var registerModelJson = TempData["RegisterModel"] as string;
+            if (string.IsNullOrEmpty(registerModelJson))
+            {
+                TempData["ErrorMessage"] = "Registration session expired. Please start again.";
+                return RedirectToAction(nameof(RegisterStep1));
+            }
+
+            var registerModel = JsonSerializer.Deserialize<RegisterDto>(registerModelJson);
+            if (registerModel == null)
+            {
+                TempData["ErrorMessage"] = "An error occurred. Please start again.";
+                return RedirectToAction(nameof(RegisterStep1));
+            }
+
+            var result = await _authService.RegisterAsync(registerModel, model);
+
+            if (result.IsSuccess)
+            {
+                TempData["SuccessMessage"] = "Account created successfully! Please log in to continue.";
+                return RedirectToAction(nameof(Login));
+            }
+
+            // If registration fails, show errors
+            TempData["ErrorMessage"] = result.ErrorMessage ?? "Registration failed. Please try again.";
+
+            // Check if errors are related to Step1 data
+            if (result.Errors.Any(e => e.Contains("email", StringComparison.OrdinalIgnoreCase) ||
+                                        e.Contains("password", StringComparison.OrdinalIgnoreCase)))
+            {
+                // Redirect back to Step1 with errors
+                TempData["Step1Errors"] = JsonSerializer.Serialize(result.Errors);
+                return RedirectToAction(nameof(RegisterStep1));
+            }
+
+            // Step2 errors - stay on Step2
+            result.Errors.ForEach(error => ModelState.AddModelError(string.Empty, error));
             TempData.Keep("RegisterModel");
             return View(model);
+        }
+
+        // Add "Back to Step 1" action
+        [HttpGet]
+        public IActionResult BackToStep1()
+        {
+            var step1Data = TempData.Peek("RegisterModel") as string;
+            if (string.IsNullOrEmpty(step1Data))
+            {
+                return RedirectToAction(nameof(RegisterStep1));
+            }
+
+            var registerModel = JsonSerializer.Deserialize<RegisterDto>(step1Data);
+            return View("RegisterStep1", registerModel);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> CheckEmailExists(string email)
+        {
+            if (string.IsNullOrEmpty(email))
+                return Json(false);
+
+            var exists = await _authService.IsEmailExistsAsync(email);
+            return Json(exists);
         }
 
         [Authorize]
@@ -115,7 +166,6 @@ namespace Socialify.Presentation.Controllers
             await _authService.LogoutAsync();
             return RedirectToAction(nameof(Login));
         }
-
 
         [Authorize]
         [HttpGet]

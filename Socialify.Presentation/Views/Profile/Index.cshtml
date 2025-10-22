@@ -2,33 +2,16 @@
 
 @{
     ViewData["Title"] = "Profile";
-	ViewData["CssFile"] = "Profile.css";
+    ViewData["CssFile"] = "Profile.css";
 }
 @model Socialify.Application.DTOs.Profile.ProfilePageDto
 
 
 <main>
-    @if (TempData["ErrorMessage"] != null)
-    {
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            <i class="fas fa-exclamation-triangle me-2"></i>
-            @TempData["ErrorMessage"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    }
-    
-    @if (TempData["SuccessMessage"] != null)
-    {
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            <i class="fas fa-check-circle me-2"></i>
-            @TempData["SuccessMessage"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    }
 
-    @if (Model?.User != null)
+    @if (Model != null)
     {
-        @await Html.PartialAsync("_ProfileHeader", Model.User)
+        @await Html.PartialAsync("_ProfileHeader", Model.ProfileInfo)
     }
 
     <ul class="nav nav-tabs profile-nav" id="profileTab" role="tablist">
@@ -41,21 +24,50 @@
     </ul>
 
     <div class="tab-content" id="profileTabContent">
+
         <div class="tab-pane fade show active" id="posts" role="tabpanel" aria-labelledby="posts-tab">
-            @* @await Html.PartialAsync("_PostContainer", Model.Posts) *@
+            <div id="posts-section"
+                 data-total-pages="@Model.Posts.TotalPages"
+                 data-page-size="@Model.Posts.PageSize"
+                 data-user-id="@Model.ProfileInfo.Id">
+
+                @await Html.PartialAsync("_PostContainer", Model.Posts)
+            </div>
         </div>
 
         <div class="tab-pane fade" id="friends" role="tabpanel" aria-labelledby="friends-tab">
-            <div class="card post-card p-4">
-                <h5>Friends</h5>
-            </div>
-			@* @await Html.PartialAsync("_FriendsList", Model.Friends) *@
+            <h5>Friends</h5>
+            @if (Model.Friends != null && Model.Friends.Data.Any())
+            {
+                foreach (var friend in Model.Friends.Data)
+                {
+                    @await Html.PartialAsync("_UserCard", friend)
+                }
+            }
+            else
+            {
+                <strong>No friends yet.</strong>
+            }
         </div>
     </div>
 </main>
 
-@section Scripts {
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/deleteProfilePic.js"></script>
 
+@section Scripts {
+    <script src="~/js/deleteProfilePicture.js"></script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const section = document.getElementById("posts-section");
+            const userId = section.dataset.userId;
+
+            initInfiniteScroll({
+                sectionId: "posts-section",
+                containerId: "posts-container",
+                observerId: "observer",
+                apiUrl: "/Posts/LoadUserPosts",
+                queryParams: { userId }
+            });
+        });
+    </script>
 }

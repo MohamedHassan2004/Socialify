@@ -1,4 +1,5 @@
-﻿using Socialify.Domain.Enums;
+﻿using Socialify.Application.DTOs.Post;
+using Socialify.Domain.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;

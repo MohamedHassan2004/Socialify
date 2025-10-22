@@ -1,7 +1,7 @@
-﻿using AutoMapper;
-using Socialify.Application.DTOs.Post;
+﻿using Microsoft.Extensions.Logging;
 using Socialify.Application.DTOs.Profile;
 using Socialify.Application.Interfaces;
+using Socialify.Application.ReposInterfaces;
 using Socialify.Application.Services_Interfaces;
 using Socialify.Domain.Common;
 using System;
@@ -9,60 +9,40 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
 
 namespace Socialify.Application.Services
 {
     public class ProfilePageService : IProfilePageService
     {
-        private readonly IMapper _mapper;
-        private readonly IProfileService _profileService;
         private readonly ILogger<ProfilePageService> _logger;
+        private readonly IProfileService _profileService;
+        private readonly IPostService _postService;
 
-        public ProfilePageService(
-            IMapper mapper,
-            IProfileService profileService,
-            ILogger<ProfilePageService> logger)
+        public ProfilePageService(ILogger<ProfilePageService> logger,IProfileService profileService, IPostService postService)
         {
-            _mapper = mapper;
-            _profileService = profileService;
             _logger = logger;
+            _profileService = profileService;
+            _postService = postService;
         }
 
-        public async Task<Result<ProfilePageDto>> GetProfilePageAsync(string targetUserId, string currentUserId)
+        public async Task<Result<ProfilePageDto>> GetProfilePageAsync(string targetUserId, string currentUserId, int pageSize)
         {
-            try
+            var profileInfoResult = await _profileService.GetUserProfileAsync(targetUserId, currentUserId);
+            var postsResult = await _postService.GetPostsByUserIdAsync(targetUserId, currentUserId, 1, pageSize);
+
+            if (!profileInfoResult.IsSuccess || !postsResult.IsSuccess)
             {
-                // Single optimized call that loads user with posts
-                var profileResult = await _profileService.GetUserProfileAsync(targetUserId, currentUserId);
-                if (!profileResult.IsSuccess)
-                {
-                    _logger.LogError("Failed to load profile for user {TargetUserId}: {ErrorMessage}", 
-                        targetUserId, profileResult.ErrorMessage);
-                    return Result<ProfilePageDto>.Failure(profileResult.ErrorMessage);
-                }
-
-                var profileInfo = profileResult.Data;
-
-                // TODO: Implement these when Post and Friend services are ready
-                //var postsResult = await _postService.GetPostsForUserAsync(targetUserId);
-                //var friendsResult = await _friendService.GetFriendsForUserAsync(targetUserId);
-
-                var dto = new ProfilePageDto
-                {
-                    User = profileInfo
-                    //Posts = postsResult.IsSuccess ? postsResult.Data : new List<PostDto>(),
-                    //Friends = friendsResult.IsSuccess ? friendsResult.Data : new List<ProfileBasicInfoDto>()
-                };
-
-                _logger.LogInformation("Successfully loaded profile page for user {TargetUserId}", targetUserId);
-                return Result<ProfilePageDto>.Success(dto);
+                _logger.LogError("Failed to get profile info for user {UserId}: {Error}", targetUserId, profileInfoResult.ErrorMessage);
+                return Result<ProfilePageDto>.Failure("Failed to fetch user profile");
             }
-            catch (Exception ex)
+
+            var profilePageDto = new ProfilePageDto
             {
-                _logger.LogError(ex, "Unexpected error loading profile page for user {TargetUserId}", targetUserId);
-                return Result<ProfilePageDto>.Failure("An error occurred while fetching the profile page data.");
-            }
+                ProfileInfo = profileInfoResult.Data!,
+                Posts = postsResult.Data!
+            };
+
+            return Result<ProfilePageDto>.Success(profilePageDto);
         }
     }
 }
