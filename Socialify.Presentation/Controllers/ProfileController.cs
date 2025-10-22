@@ -16,9 +16,6 @@ namespace Socialify.Presentation.Controllers
     {
         private readonly IProfileService _profileService;
         private readonly IProfilePageService _profilePageService;
-        private readonly int PageSize = 5;
-
-
         public ProfileController(
             IProfileService profileService, 
             IProfilePageService profilePageService,
@@ -74,7 +71,7 @@ namespace Socialify.Presentation.Controllers
 
         [HttpPost("UpdateProfileInfo")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> UpdateProfileInfoAsync(UpdateProfileInfoDto updateProfileInfoDto)
+        public async Task<IActionResult> UpdateProfileInfoAsync([FromBody]UpdateProfileInfoDto updateProfileInfoDto)
         {
             if (!ValidateModelAndLogErrors(updateProfileInfoDto, nameof(UpdateProfileInfoAsync)))
                 return View(updateProfileInfoDto);
@@ -115,7 +112,7 @@ namespace Socialify.Presentation.Controllers
 
         [HttpPost("UpdateProfilePic")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> UpdateProfilePicAsync(PatchProfilePicDto patchProfilePicDto)
+        public async Task<IActionResult> UpdateProfilePicAsync([FromBody]PatchProfilePicDto patchProfilePicDto)
         {
             if (!ValidateModelAndLogErrors(patchProfilePicDto, nameof(UpdateProfilePicAsync)))
                 return View(patchProfilePicDto);

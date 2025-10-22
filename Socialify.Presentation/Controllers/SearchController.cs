@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Socialify.Application.DTOs.Common;
 using Socialify.Application.DTOs.Post;
 using Socialify.Application.DTOs.Profile;
 using Socialify.Application.DTOs.Search;
@@ -13,8 +14,6 @@ namespace Socialify.Presentation.Controllers
         private readonly ISearchService _searchService;
         private readonly IPostService _postService;
         private readonly IProfileService _profileService;
-        private const int PageSize = 3;
-
         public SearchController(ISearchService searchService,
             ILogger<SearchController> logger,
             IPostService postService,
@@ -29,7 +28,9 @@ namespace Socialify.Presentation.Controllers
         [HttpGet]
         public async Task<IActionResult> Index(string query)
         {
-            var result = await _searchService.SearchAsync(query, 1, PageSize, currentUserId);
+            var paramsDto = CreatePaginationParams(1);
+
+            var result = await _searchService.SearchAsync(query, paramsDto);
 
             if (!result.IsSuccess)
                 HandleServiceError(result, nameof(Index), "Failed to load search results. Please try again.");
@@ -45,7 +46,9 @@ namespace Socialify.Presentation.Controllers
             if (string.IsNullOrWhiteSpace(query))
                 return BadRequest("This endpoint does not support search queries.");
 
-            var result = await _postService.SearchPostsAsync(query, pageNumber, PageSize, currentUserId);
+            var paramsDto = CreatePaginationParams(pageNumber);
+
+            var result = await _postService.SearchPostsAsync(query, paramsDto);
             if (!result.IsSuccess)
             {
                 TempData["ErrorMessage"] = result.ErrorMessage;
@@ -61,7 +64,9 @@ namespace Socialify.Presentation.Controllers
             if (string.IsNullOrWhiteSpace(query))
                 return BadRequest("This endpoint does not support search queries.");
 
-            var result = await _profileService.SearchProfilesAsync(query, pageNumber, PageSize, currentUserId);
+            var paramsDto = CreatePaginationParams(pageNumber);
+
+            var result = await _profileService.SearchProfilesAsync(query, paramsDto);
 
             if (!result.IsSuccess)
                 return PartialView("_ProfileList", new List<ProfileBasicInfoDto>());

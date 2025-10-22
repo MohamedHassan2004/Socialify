@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using Socialify.Application.DTOs.Common;
 using Socialify.Application.DTOs.Home;
 using Socialify.Application.DTOs.Post;
 using Socialify.Application.Interfaces;
@@ -34,8 +35,15 @@ namespace Socialify.Application.Services
                 if (string.IsNullOrEmpty(currentUserId))
                     return Result<HomePageDto>.Failure("Invalid user ID.");
 
+                var paramsDto = new PaginationParamsDto
+                {
+                    PageNumber = 1,
+                    PageSize = pageSize,
+                    CurrentUserId = currentUserId
+                };
+
                 var userInfo = await _profileService.GetProfileBasicInfoAsync(currentUserId);
-                var posts = await _postService.GetPagedPostsAsync(1, pageSize, userInfo.Data.Id);
+                var posts = await _postService.GetPagedPostsAsync(paramsDto);
                 //var peopleYouMayKnow = await _friendService.GetPeopleYouMayKnowAsync(currentUserId);
 
                 if (!posts.IsSuccess || !userInfo.IsSuccess)

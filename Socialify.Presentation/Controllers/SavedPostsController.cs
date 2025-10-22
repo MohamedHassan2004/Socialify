@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Socialify.Application.DTOs.Common;
 using Socialify.Application.DTOs.Post;
 using Socialify.Application.Services_Interfaces;
 
@@ -7,8 +8,6 @@ namespace Socialify.Presentation.Controllers
     public class SavedPostsController : BaseController
     {
         private readonly ISavedPostService _savedPostService;
-        private readonly int PageSize = 5;
-
         public SavedPostsController(ILogger<SavedPostsController> logger, ISavedPostService savedPostService) : base(logger)
         {
             _savedPostService = savedPostService;
@@ -26,9 +25,11 @@ namespace Socialify.Presentation.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetSavedPosts(int pageNumber = 1)
+        public async Task<IActionResult> GetSavedPosts()
         {
-            var result = await _savedPostService.GetSavedPostsAsync(currentUserId, pageNumber, PageSize);
+            var paramsDto = CreatePaginationParams(1);
+
+            var result = await _savedPostService.GetSavedPostsAsync(paramsDto);
             if (!result.IsSuccess)
             {
                 TempData["ErrorMessage"] = result.ErrorMessage;
@@ -38,9 +39,11 @@ namespace Socialify.Presentation.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> LoadSavedPosts(int pageNumber)
+        public async Task<IActionResult> LoadSavedPosts([FromQuery]int pageNumber)
         {
-            var result = await _savedPostService.GetSavedPostsAsync(currentUserId, pageNumber, PageSize);
+            var paramsDto = CreatePaginationParams(pageNumber);
+
+            var result = await _savedPostService.GetSavedPostsAsync(paramsDto);
             if (!result.IsSuccess)
             {
                 TempData["ErrorMessage"] = result.ErrorMessage;

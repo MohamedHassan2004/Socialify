@@ -13,8 +13,6 @@ namespace Socialify.Presentation.Controllers
     public class HomeController : BaseController
     {
         private readonly IHomePageService _homePageService;
-        private const int pageSize = 5;
-
         public HomeController(IHomePageService homePageService, ILogger<HomeController> logger) : base(logger)
         {
             _homePageService = homePageService;
@@ -22,7 +20,7 @@ namespace Socialify.Presentation.Controllers
 
         public async Task<IActionResult> Index()
         {
-            var result = await _homePageService.GetHomePageAsync(currentUserId, pageSize);
+            var result = await _homePageService.GetHomePageAsync(currentUserId, PageSize);
             if (!result.IsSuccess)
             {
                 return HandleServiceError(result, nameof(Index), "Failed to load home page data. Please try again.");

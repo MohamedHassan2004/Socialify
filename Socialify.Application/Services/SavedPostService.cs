@@ -26,25 +26,25 @@ namespace Socialify.Application.Services
             _logger = logger;
         }
 
-        public async Task<Result<PagedResult<PostDto>>> GetSavedPostsAsync(string userId, int pageNumber, int pageSize)
+        public async Task<Result<PagedResult<PostDto>>> GetSavedPostsAsync(PaginationParamsDto paramsDto)
         {
             try
             {
-                var savedPosts = await _savedPostRepository.GetSavedPostsAsync(userId, pageNumber, pageSize);
+                var savedPosts = await _savedPostRepository.GetSavedPostsAsync(paramsDto.CurrentUserId, paramsDto.PageNumber, paramsDto.PageSize);
                 if (savedPosts == null || !savedPosts.Data.Any())
                 {
                     return Result<PagedResult<PostDto>>.Success(new PagedResult<PostDto>
                     {
                         Data = new List<PostDto>(),
-                        PageNumber = pageNumber,
-                        PageSize = pageSize,
+                        PageNumber = paramsDto.PageNumber,
+                        PageSize = paramsDto.PageSize,
                         TotalCount = 0
                     });
                 }
 
                 var savedPostsDto = savedPosts.Data.Select(sp =>
                 {
-                    var postDto = sp.Post.ToPostDto(userId);
+                    var postDto = sp.Post.ToPostDto(paramsDto.CurrentUserId);
                     postDto.TimeAgo = sp.Post.CreatedAt.Humanize(false);
                     postDto.IsSavedByCurrentUser = true;
                     return postDto;

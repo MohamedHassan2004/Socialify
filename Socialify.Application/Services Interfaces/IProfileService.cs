@@ -10,12 +10,12 @@ namespace Socialify.Application.Interfaces
 {
     public interface IProfileService
     {
+        Task<Result> UpdateProfileInfoAsync(string currentUserId, UpdateProfileInfoDto updateProfileInfoDto);
         Task<Result> UpdateProfilePictureAsync(string currentUserId, PatchProfilePicDto patchProfilePicDto);
         Task<Result> RemoveProfilePictureAsync(string currentUserId);
+        Task<Result<UpdateProfileInfoDto>> GetProfileInfoAsync(string currentUserId);
         Task<Result<ProfileBasicInfoDto>> GetProfileBasicInfoAsync(string currentUserId);
         Task<Result<ProfileDto>> GetUserProfileAsync(string targetUserId, string currentUserId);
-        Task<Result> UpdateProfileInfoAsync(string currentUserId, UpdateProfileInfoDto updateProfileInfoDto);
-        Task<Result<UpdateProfileInfoDto>> GetProfileInfoAsync(string currentUserId);
-        Task<Result<PagedResult<ProfileBasicInfoDto>>> SearchProfilesAsync(string query, int pageNumber, int pageSize, string currentUserId);
+        Task<Result<PagedResult<ProfileBasicInfoDto>>> SearchProfilesAsync(string query, PaginationParamsDto paramsDto);
     }
 }

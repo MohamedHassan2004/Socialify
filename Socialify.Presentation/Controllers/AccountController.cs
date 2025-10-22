@@ -57,7 +57,6 @@ namespace Socialify.Presentation.Controllers
                 return View(model);
             }
 
-            // Check if email already exists BEFORE moving to step 2
             var emailExists = await _authService.IsEmailExistsAsync(model.Email);
             if (emailExists)
             {
@@ -65,7 +64,6 @@ namespace Socialify.Presentation.Controllers
                 return View(model);
             }
 
-            // Store data in TempData to use in Step2
             TempData["RegisterModel"] = JsonSerializer.Serialize(model);
             return RedirectToAction(nameof(RegisterStep2));
         }
@@ -79,9 +77,8 @@ namespace Socialify.Presentation.Controllers
                 return RedirectToAction(nameof(RegisterStep1));
             }
 
-            // Deserialize to show step1 data if needed
             var registerModel = JsonSerializer.Deserialize<RegisterDto>(step1Data);
-            ViewBag.RegisterEmail = registerModel?.Email; // Optional: to display in Step2
+            ViewBag.RegisterEmail = registerModel?.Email;
 
             return View();
         }
@@ -118,25 +115,20 @@ namespace Socialify.Presentation.Controllers
                 return RedirectToAction(nameof(Login));
             }
 
-            // If registration fails, show errors
             TempData["ErrorMessage"] = result.ErrorMessage ?? "Registration failed. Please try again.";
 
-            // Check if errors are related to Step1 data
             if (result.Errors.Any(e => e.Contains("email", StringComparison.OrdinalIgnoreCase) ||
                                         e.Contains("password", StringComparison.OrdinalIgnoreCase)))
             {
-                // Redirect back to Step1 with errors
                 TempData["Step1Errors"] = JsonSerializer.Serialize(result.Errors);
                 return RedirectToAction(nameof(RegisterStep1));
             }
 
-            // Step2 errors - stay on Step2
             result.Errors.ForEach(error => ModelState.AddModelError(string.Empty, error));
             TempData.Keep("RegisterModel");
             return View(model);
         }
 
-        // Add "Back to Step 1" action
         [HttpGet]
         public IActionResult BackToStep1()
         {
@@ -186,7 +178,7 @@ namespace Socialify.Presentation.Controllers
                 {
                     return RedirectToAction(nameof(Login));
                 }
-                var result = await _authService.ChangePasswordAsync(userId, model.CurrentPassword, model.NewPassword);
+                var result = await _authService.ChangePasswordAsync(model, userId);
                 if (result.IsSuccess)
                 {
                     TempData["SuccessMessage"] = "Password changed successfully.";

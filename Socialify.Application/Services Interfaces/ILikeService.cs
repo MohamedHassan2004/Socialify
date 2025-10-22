@@ -13,6 +13,6 @@ namespace Socialify.Application.Services_Interfaces
     public interface ILikeService
     {
         Task<Result> ToggleLikeAsync(string userId, int postId);
-        Task<Result<PagedResult<ProfileBasicInfoDto>>> GetLikesOnPostAsync(int postId, string currentUserId, int pageNumber, int pageSize);
+        Task<Result<PagedResult<ProfileBasicInfoDto>>> GetLikesOnPostAsync(int postId, PaginationParamsDto paramsDto);
     }
 }

@@ -54,17 +54,17 @@ namespace Socialify.Application.Services
             }
         }
 
-        public async Task<Result<PagedResult<ProfileBasicInfoDto>>> GetLikesOnPostAsync(int postId, string currentUserId, int pageNumber, int pageSize)
+        public async Task<Result<PagedResult<ProfileBasicInfoDto>>> GetLikesOnPostAsync(int postId, PaginationParamsDto paramsDto)
         {
             try
             {
-                var result = await _unitOfWork.Likes.GetLikesOnPostAsync(postId, currentUserId, pageNumber, pageSize);
+                var result = await _unitOfWork.Likes.GetLikesOnPostAsync(postId, paramsDto.CurrentUserId, paramsDto.PageNumber, paramsDto.PageSize);
                 if (result == null)
                 {
                     return Result<PagedResult<ProfileBasicInfoDto>>.Failure("No likes found for the specified post.");
                 }
 
-                var profilesDto = result.Data.Select(like => like.User.ToProfileBasicInfoDto(currentUserId)).ToList();
+                var profilesDto = result.Data.Select(like => like.User.ToProfileBasicInfoDto(paramsDto.CurrentUserId)).ToList();
 
                 var pagedResult = new PagedResult<ProfileBasicInfoDto>
                 {

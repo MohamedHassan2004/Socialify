@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using Socialify.Application.DTOs.Common;
 using Socialify.Application.DTOs.Profile;
 using Socialify.Application.Interfaces;
 using Socialify.Application.ReposInterfaces;
@@ -27,8 +28,15 @@ namespace Socialify.Application.Services
 
         public async Task<Result<ProfilePageDto>> GetProfilePageAsync(string targetUserId, string currentUserId, int pageSize)
         {
+            var paramDto = new PaginationParamsDto
+            {
+                PageNumber = 1,
+                PageSize = pageSize,
+                CurrentUserId = currentUserId
+            };
+
             var profileInfoResult = await _profileService.GetUserProfileAsync(targetUserId, currentUserId);
-            var postsResult = await _postService.GetPostsByUserIdAsync(targetUserId, 1, pageSize, currentUserId);
+            var postsResult = await _postService.GetPostsByUserIdAsync(targetUserId, paramDto);
 
             if (!profileInfoResult.IsSuccess || !postsResult.IsSuccess)
             {

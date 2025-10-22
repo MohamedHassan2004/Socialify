@@ -148,7 +148,7 @@ namespace Socialify.Infrastructure.Identity
             }
         }
 
-        public async Task<Result> ChangePasswordAsync(string userId, string currentPassword, string newPassword)
+        public async Task<Result> ChangePasswordAsync(ChangePasswordDto changePasswordDto, string userId)
         {
             try
             {
@@ -158,7 +158,7 @@ namespace Socialify.Infrastructure.Identity
                     return Result.Failure("User not found.");
                 }
 
-                var result = await _userManager.ChangePasswordAsync(user, currentPassword, newPassword);
+                var result = await _userManager.ChangePasswordAsync(user, changePasswordDto.CurrentPassword, changePasswordDto.NewPassword);
 
                 if (result.Succeeded)
                 {
@@ -173,26 +173,6 @@ namespace Socialify.Infrastructure.Identity
                 _logger.LogError(ex, "Error occurred during password change for user {UserId}", userId);
                 return Result.Failure("An error occurred during password change.");
             }
-        }
-
-        public async Task<Result<ProfileDto>> GetCurrentUserAsync()
-        {
-            try
-            {
-                var user = await _userManager.GetUserAsync(_signInManager.Context.User);
-                if (user == null)
-                {
-                    return Result<ProfileDto>.Failure("User not found.");
-                }
-                var dto = user.ToProfileDto();
-                return Result<ProfileDto>.Success(dto);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error occurred while fetching current user");
-                return Result<ProfileDto>.Failure("An error occurred while fetching user data.");
-            }
-
         }
 
         public async Task<Result> DeleteAccountAsync(string userId)

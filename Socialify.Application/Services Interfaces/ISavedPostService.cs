@@ -15,6 +15,6 @@ namespace Socialify.Application.Services_Interfaces
     public interface ISavedPostService
     {
         Task<Result> ToggleSavePost(string userId, int postId);
-        Task<Result<PagedResult<PostDto>>> GetSavedPostsAsync(string userId, int pageNumber, int pageSize);
+        Task<Result<PagedResult<PostDto>>> GetSavedPostsAsync(PaginationParamsDto paramsDto);
     }
 }

@@ -134,18 +134,18 @@ public class ProfileService : IProfileService
         }
     }
 
-    public async Task<Result<PagedResult<ProfileBasicInfoDto>>> SearchProfilesAsync(string query, int pageNumber, int pageSize, string currentUserId)
+    public async Task<Result<PagedResult<ProfileBasicInfoDto>>> SearchProfilesAsync(string query, PaginationParamsDto paramsDto)
     {
         try
         {
-            var profiles = await _profileRepository.SearchUsersAsync(query, pageNumber, pageSize);
-            var profileDtos = profiles.Data.Select(p => p.ToProfileBasicInfoDto(currentUserId)).ToList();
+            var profiles = await _profileRepository.SearchUsersAsync(query, paramsDto.PageNumber, paramsDto.PageSize);
+            var profileDtos = profiles.Data.Select(p => p.ToProfileBasicInfoDto(paramsDto.CurrentUserId)).ToList();
 
             var pagedResult = new PagedResult<ProfileBasicInfoDto>
             {
                 Data = profileDtos,
-                PageNumber = pageNumber,
-                PageSize = pageSize,
+                PageNumber = paramsDto.PageNumber,
+                PageSize = paramsDto.PageSize,
                 TotalCount = profiles.TotalCount
             };
 

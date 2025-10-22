@@ -79,17 +79,17 @@ public class PostService : IPostService
         }
     }
 
-    public async Task<Result> UpdatePostAsync(UpdatePostDto updatePostDto)
+    public async Task<Result> UpdatePostAsync(string userId, UpdatePostDto updatePostDto, bool removeMedia)
     {
         try
         {
             var post = await _postRepository.GetByIdAsync(updatePostDto.Id);
-            if (post == null || post.UserId != updatePostDto.UserId)
+            if (post == null || post.UserId != userId)
                 return Result.Failure("Post not found.");
 
             post.Content = updatePostDto.Content;
 
-            if (updatePostDto.RemoveMedia)
+            if (removeMedia)
             {
                 if (!string.IsNullOrEmpty(post.MediaUrl))
                 {
@@ -155,14 +155,14 @@ public class PostService : IPostService
         }
     }
 
-    public Task<Result<PagedResult<PostDto>>> GetPagedPostsAsync(int pageNumber, int pageSize, string currentUserId) =>
-        HandlePagedOperation(() => _postRepository.GetPagedPostsAsync(pageNumber, pageSize),"fetching paged posts", currentUserId);
+    public Task<Result<PagedResult<PostDto>>> GetPagedPostsAsync(PaginationParamsDto paramsDto) =>
+        HandlePagedOperation(() => _postRepository.GetPagedPostsAsync(paramsDto.PageNumber, paramsDto.PageSize),"fetching paged posts", paramsDto.CurrentUserId);
 
-    public Task<Result<PagedResult<PostDto>>> SearchPostsAsync(string query, int pageNumber, int pageSize,string currentUserId) =>
-        HandlePagedOperation(() => _postRepository.SearchPostsAsync(query, pageNumber, pageSize),"searching posts", currentUserId);
+    public Task<Result<PagedResult<PostDto>>> SearchPostsAsync(string query, PaginationParamsDto paramsDto) =>
+        HandlePagedOperation(() => _postRepository.SearchPostsAsync(query, paramsDto.PageNumber, paramsDto.PageSize),"searching posts", paramsDto.CurrentUserId);
 
-    public Task<Result<PagedResult<PostDto>>> GetPostsByUserIdAsync(string userId, int pageNumber, int pageSize, string currentUserId) =>
-        HandlePagedOperation(() => _postRepository.GetPostsByUserId(userId, pageNumber, pageSize),"fetching posts by user", currentUserId);
+    public Task<Result<PagedResult<PostDto>>> GetPostsByUserIdAsync(string userId, PaginationParamsDto paramsDto) =>
+        HandlePagedOperation(() => _postRepository.GetPostsByUserId(userId, paramsDto.PageNumber, paramsDto.PageSize), "fetching posts by user", paramsDto.CurrentUserId);
 
     public async Task<Result<UpdatePostDto>> GetPostByIdAsync(int postId, string currentUserId)
     {
@@ -210,6 +210,7 @@ public class PostService : IPostService
             return Result<PostWithDetailsDto>.Failure("Error occurred while fetching post with comments.");
         }
     }
+
     // ---------- Private Helpers ----------
     private async Task<Result<PagedResult<PostDto>>> HandlePagedOperation(
         Func<Task<PagedResult<Post>>> repositoryCall,
@@ -219,7 +220,7 @@ public class PostService : IPostService
         try
         {
             var postsPaged = await repositoryCall();
-            var postDtos = postsPaged.Data.Select(p=> p.ToPostDto(currentUserId)).ToList();
+            var postDtos = postsPaged.Data.Select(p => p.ToPostDto(currentUserId)).ToList();
 
             var dtoPaged = new PagedResult<PostDto>
             {

@@ -21,9 +21,10 @@ namespace Socialify.Application.Mappers
             dto.TimeAgo = post.CreatedAt.Humanize(false);
             dto.IsLikedByCurrentUser = post.Likes.Any(l => l.UserId == currentUserId);
             dto.IsSavedByCurrentUser = post.SavedPosts.Any(sp => sp.UserId == currentUserId);
+            dto.IsOwnedByCurrentUser = post.UserId == currentUserId;
             dto.MediaType = GetMediaType(post.MediaUrl);
             dto.MediaUrl = post.MediaUrl;
-            dto.IsOwnedByCurrentUser = post.UserId == currentUserId;
+            dto.Content = post.Content;
             return dto;
         }
 

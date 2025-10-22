@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Socialify.Application.DTOs.Common;
 using Socialify.Domain.Common;
 using Socialify.Presentation.Filters;
 using System.Security.Claims;
@@ -12,6 +13,8 @@ namespace Socialify.Presentation.Controllers
     {
         protected readonly ILogger _logger;
         protected string currentUserId => HttpContext.Items["CurrentUserId"]?.ToString()!;
+
+        protected readonly int PageSize = 5;
 
         protected BaseController(ILogger logger)
         {
@@ -57,6 +60,16 @@ namespace Socialify.Presentation.Controllers
             }
 
             return true;
+        }
+
+        protected PaginationParamsDto CreatePaginationParams(int pageNumber)
+        {
+            return new PaginationParamsDto
+            {
+                PageNumber = pageNumber,
+                PageSize = PageSize,
+                CurrentUserId = currentUserId
+            };
         }
     }
 }

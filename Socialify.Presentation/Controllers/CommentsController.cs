@@ -15,7 +15,7 @@ namespace Socialify.Presentation.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> AddComment(AddCommentDto dto)
+        public async Task<IActionResult> AddComment([FromBody] AddCommentDto dto)
         {
             if(!ValidateModelAndLogErrors(dto, nameof(AddComment)))
                 return BadRequest("Invalid comment data.");
