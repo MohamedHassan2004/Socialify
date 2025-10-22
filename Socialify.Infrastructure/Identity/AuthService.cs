@@ -1,4 +1,3 @@
-using AutoMapper;
 using MediatR;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
@@ -7,6 +6,7 @@ using Microsoft.Extensions.Logging;
 using Socialify.Application.DTOs.Account;
 using Socialify.Application.DTOs.Profile;
 using Socialify.Application.Interfaces;
+using Socialify.Application.Mappers;
 using Socialify.Application.Repos_Interfaces;
 using Socialify.Application.Services_Interfaces;
 using Socialify.Domain.Common;
@@ -20,7 +20,6 @@ namespace Socialify.Infrastructure.Identity
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
-        private readonly IMapper _mapper;
         private readonly ILogger<AuthService> _logger;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMediator _mediator;
@@ -28,14 +27,12 @@ namespace Socialify.Infrastructure.Identity
         public AuthService(
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
-            IMapper mapper,
             ILogger<AuthService> logger,
             IUnitOfWork unitOfWork,
             IMediator mediator)
         {
             _userManager = userManager;
             _signInManager = signInManager;
-            _mapper = mapper;
             _logger = logger;
             _unitOfWork = unitOfWork;
             _mediator = mediator;
@@ -187,7 +184,7 @@ namespace Socialify.Infrastructure.Identity
                 {
                     return Result<ProfileDto>.Failure("User not found.");
                 }
-                var dto = _mapper.Map<ProfileDto>(user);
+                var dto = user.ToProfileDto();
                 return Result<ProfileDto>.Success(dto);
             }
             catch (Exception ex)

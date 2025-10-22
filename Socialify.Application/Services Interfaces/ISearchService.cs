@@ -6,6 +6,6 @@ namespace Socialify.Application.Services_Interfaces
 {
     public interface ISearchService
     {
-        Task<Result<SearchDto>> SearchAsync(string keyword, int page, int pageSize, string currentUserId);
+        Task<Result<SearchDto>> SearchAsync(string keyword, int pageNumber, int pageSize, string currentUserId);
     }
 }

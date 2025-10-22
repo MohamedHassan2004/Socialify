@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Socialify.Application.DTOs.Common;
 using Socialify.Application.DTOs.Post;
@@ -40,7 +39,7 @@ namespace Socialify.Presentation.Controllers
         [HttpGet]
         public async Task<IActionResult> LoadUserPosts(string userId, int pageNumber)
         {
-            var result = await _postService.GetPostsByUserIdAsync(userId, currentUserId, pageNumber, PageSize);
+            var result = await _postService.GetPostsByUserIdAsync(userId, pageNumber, PageSize, currentUserId);
 
             if (!result.IsSuccess)
             {

@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Logging;
 using Socialify.Application.DTOs.Common;
 using Socialify.Application.DTOs.Profile;
+using Socialify.Application.Mappers;
 using Socialify.Application.Repos_Interfaces;
 using Socialify.Application.Services_Interfaces;
 using Socialify.Domain.Common;
@@ -63,13 +64,7 @@ namespace Socialify.Application.Services
                     return Result<PagedResult<ProfileBasicInfoDto>>.Failure("No likes found for the specified post.");
                 }
 
-                var profilesDto = result.Data.Select(like => new ProfileBasicInfoDto
-                {
-                    Id = like.User.Id,
-                    FullName = like.User.FullName,
-                    ProfilePicUrl = like.User.ProfilePicUrl,
-                    Bio = like.User.Bio,
-                }).ToList();
+                var profilesDto = result.Data.Select(like => like.User.ToProfileBasicInfoDto(currentUserId)).ToList();
 
                 var pagedResult = new PagedResult<ProfileBasicInfoDto>
                 {

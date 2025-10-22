@@ -1,12 +1,11 @@
-﻿using AutoMapper;
-using Humanizer;
+﻿using Humanizer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using Socialify.Application.Automapper;
 using Socialify.Application.DTOs.Comment;
 using Socialify.Application.DTOs.Common;
 using Socialify.Application.DTOs.Post;
 using Socialify.Application.Interfaces;
+using Socialify.Application.Mappers;
 using Socialify.Application.Repos_Interfaces;
 using Socialify.Application.Services_Interfaces;
 using Socialify.Domain.Common;
@@ -16,16 +15,14 @@ namespace Socialify.Application.Services;
 public class PostService : IPostService
 {
     private readonly IPostRepository _postRepository;
-    private readonly IMapper _mapper;
     private readonly ILogger<PostService> _logger;
     private readonly IFileManager _fileManager;
     private readonly IConfiguration _config;
     private readonly string _postMediaPath;
 
-    public PostService(IPostRepository postRepository, IMapper mapper, ILogger<PostService> logger, IFileManager fileManager, IConfiguration config)
+    public PostService(IPostRepository postRepository, ILogger<PostService> logger, IFileManager fileManager, IConfiguration config)
     {
         _postRepository = postRepository;
-        _mapper = mapper;
         _logger = logger;
         _fileManager = fileManager;
         _config = config;
@@ -164,7 +161,7 @@ public class PostService : IPostService
     public Task<Result<PagedResult<PostDto>>> SearchPostsAsync(string query, int pageNumber, int pageSize,string currentUserId) =>
         HandlePagedOperation(() => _postRepository.SearchPostsAsync(query, pageNumber, pageSize),"searching posts", currentUserId);
 
-    public Task<Result<PagedResult<PostDto>>> GetPostsByUserIdAsync(string userId, string currentUserId, int pageNumber, int pageSize) =>
+    public Task<Result<PagedResult<PostDto>>> GetPostsByUserIdAsync(string userId, int pageNumber, int pageSize, string currentUserId) =>
         HandlePagedOperation(() => _postRepository.GetPostsByUserId(userId, pageNumber, pageSize),"fetching posts by user", currentUserId);
 
     public async Task<Result<UpdatePostDto>> GetPostByIdAsync(int postId, string currentUserId)
@@ -177,13 +174,7 @@ public class PostService : IPostService
                 return Result<UpdatePostDto>.Failure("Post not found.");
             }
 
-            var updatePostDto = new UpdatePostDto
-            {
-                Id = post.Id,
-                Content = post.Content,
-                MediaUrl = post.MediaUrl,
-                MediaType = PostMapper.GetMediaType(post.MediaUrl),
-            };
+            var updatePostDto = post.ToUpdatePostDto();
 
             return Result<UpdatePostDto>.Success(updatePostDto);
         }
@@ -195,6 +186,30 @@ public class PostService : IPostService
     }
 
 
+    public async Task<Result<PostWithDetailsDto>> GetPostWithCommentsAsync(int postId, string currentUserId)
+    {
+        try
+        {
+            var post = await _postRepository.GetPostWithCommentsAsync(postId);
+            if (post == null)
+            {
+                return Result<PostWithDetailsDto>.Failure("Post not found.");
+            }
+            var postDto = post.ToPostDto(currentUserId);
+            var commentsDto = post.Comments.Select(c => c.ToCommentDtoWithCurrentUser(currentUserId)).ToList();
+
+            return Result<PostWithDetailsDto>.Success(new PostWithDetailsDto()
+            {
+                Post = postDto,
+                Comments = commentsDto
+            }); 
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error occurred while fetching post with comments.");
+            return Result<PostWithDetailsDto>.Failure("Error occurred while fetching post with comments.");
+        }
+    }
     // ---------- Private Helpers ----------
     private async Task<Result<PagedResult<PostDto>>> HandlePagedOperation(
         Func<Task<PagedResult<Post>>> repositoryCall,
@@ -204,7 +219,7 @@ public class PostService : IPostService
         try
         {
             var postsPaged = await repositoryCall();
-            var postDtos = postsPaged.Data.Select(p=> PostMapper.MapPost(p,currentUserId)).ToList();
+            var postDtos = postsPaged.Data.Select(p=> p.ToPostDto(currentUserId)).ToList();
 
             var dtoPaged = new PagedResult<PostDto>
             {
@@ -223,38 +238,4 @@ public class PostService : IPostService
         }
     }
 
-    public async Task<Result<PostWithDetailsDto>> GetPostWithCommentsAsync(int postId, string currentUserId)
-    {
-        try
-        {
-            var post = await _postRepository.GetPostWithCommentsAsync(postId);
-            if (post == null)
-            {
-                return Result<PostWithDetailsDto>.Failure("Post not found.");
-            }
-            var postDto = PostMapper.MapPost(post, currentUserId);
-            var commentsDto = post.Comments.Select(c => new CommentDto
-            {
-                Id = c.Id,
-                Content = c.Content,
-                UserId = c.UserId,
-                UserName = c.User.FullName,
-                UserProfilePictureUrl = c.User.ProfilePicUrl,
-                TimeAgo = c.CreatedAt.Humanize(false),
-                IsEdited = c.IsEdited,
-                CanEditOrDelete = c.UserId == currentUserId
-            }).ToList();
-
-            return Result<PostWithDetailsDto>.Success(new PostWithDetailsDto()
-            {
-                Post = postDto,
-                Comments = commentsDto
-            }); 
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error occurred while fetching post with comments.");
-            return Result<PostWithDetailsDto>.Failure("Error occurred while fetching post with comments.");
-        }
-    }
 }

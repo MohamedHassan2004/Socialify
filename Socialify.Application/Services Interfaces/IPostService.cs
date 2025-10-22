@@ -9,8 +9,8 @@ namespace Socialify.Application.Interfaces;
 public interface IPostService
 {
     Task<Result<PagedResult<PostDto>>> GetPagedPostsAsync(int pageNumber, int pageSize, string currentUserId);
-    Task<Result<PagedResult<PostDto>>> GetPostsByUserIdAsync(string userId, string currentUserId, int pageNumber, int pageSize);
-    Task<Result<PagedResult<PostDto>>> SearchPostsAsync(string query, int page, int pageSize, string currentUserId);
+    Task<Result<PagedResult<PostDto>>> GetPostsByUserIdAsync(string userId, int pageNumber, int pageSize, string currentUserId);
+    Task<Result<PagedResult<PostDto>>> SearchPostsAsync(string query, int pageNumber, int pageSize, string currentUserId);
     Task<Result> UploadPostAsync(string userId, UploadPostDto uploadPostDto);
     Task<Result> DeletePostAsync(string userId, int postId);
     Task<Result<UpdatePostDto>> GetPostByIdAsync(int postId, string currentUserId);

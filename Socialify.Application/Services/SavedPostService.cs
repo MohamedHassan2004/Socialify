@@ -1,8 +1,8 @@
 ﻿using Humanizer;
 using Microsoft.Extensions.Logging;
-using Socialify.Application.Automapper;
 using Socialify.Application.DTOs.Common;
 using Socialify.Application.DTOs.Post;
+using Socialify.Application.Mappers;
 using Socialify.Application.Repos_Interfaces;
 using Socialify.Application.Services_Interfaces;
 using Socialify.Domain.Common;
@@ -42,22 +42,12 @@ namespace Socialify.Application.Services
                     });
                 }
 
-                var savedPostsDto = savedPosts.Data.Select(sp => new PostDto
+                var savedPostsDto = savedPosts.Data.Select(sp =>
                 {
-                    Id = sp.Post.Id,
-                    TimeAgo = sp.Post.CreatedAt.Humanize(false),
-                    CreatedAt = sp.Post.CreatedAt,
-                    Content = sp.Post.Content,
-                    MediaUrl = sp.Post.MediaUrl,
-                    MediaType = PostMapper.GetMediaType(sp.Post.MediaUrl),
-                    UserId = sp.Post.UserId,
-                    UserName = sp.Post.User.FullName,
-                    UserProfilePicUrl = sp.Post.User.ProfilePicUrl,
-                    LikesCount = sp.Post.LikesCount,
-                    CommentsCount = sp.Post.CommentsCount,
-                    IsOwnedByCurrentUser = sp.Post.UserId == userId,
-                    IsLikedByCurrentUser = sp.Post.Likes.Any(l => l.UserId == userId),
-                    IsSavedByCurrentUser = true
+                    var postDto = sp.Post.ToPostDto(userId);
+                    postDto.TimeAgo = sp.Post.CreatedAt.Humanize(false);
+                    postDto.IsSavedByCurrentUser = true;
+                    return postDto;
                 }).ToList();
 
                 var pagedResult = new PagedResult<PostDto>

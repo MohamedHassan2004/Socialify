@@ -28,7 +28,7 @@ namespace Socialify.Application.Services
         public async Task<Result<ProfilePageDto>> GetProfilePageAsync(string targetUserId, string currentUserId, int pageSize)
         {
             var profileInfoResult = await _profileService.GetUserProfileAsync(targetUserId, currentUserId);
-            var postsResult = await _postService.GetPostsByUserIdAsync(targetUserId, currentUserId, 1, pageSize);
+            var postsResult = await _postService.GetPostsByUserIdAsync(targetUserId, 1, pageSize, currentUserId);
 
             if (!profileInfoResult.IsSuccess || !postsResult.IsSuccess)
             {

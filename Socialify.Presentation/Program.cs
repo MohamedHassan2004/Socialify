@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 using Serilog.Context;
-using Socialify.Application.Automapper;
 using Socialify.Domain.Entities;
 using Socialify.Domain.Events;
 using Socialify.Infrastructure;
@@ -87,9 +86,6 @@ namespace Socialify.Presentation
 
 
                 builder.Services.AddControllersWithViews();
-
-                // Add AutoMapper
-                builder.Services.AddAutoMapper(typeof(UserProfile));
 
                 // MediatR configuration
                 builder.Services.AddMediatR(cfg =>

@@ -1,4 +1,3 @@
-using AutoMapper;
 using Microsoft.Extensions.Logging;
 using Socialify.Application.DTOs.Search;
 using Socialify.Application.Interfaces;
@@ -20,7 +19,7 @@ namespace Socialify.Application.Services
             _logger = logger;
         }
 
-        public async Task<Result<SearchDto>> SearchAsync(string keyword, int page, int pageSize, string currentUserId)
+        public async Task<Result<SearchDto>> SearchAsync(string keyword, int pageNumber, int pageSize, string currentUserId)
         {
             try
             {
@@ -31,8 +30,8 @@ namespace Socialify.Application.Services
 
                 keyword = keyword.Trim().ToLower();
 
-                var profilesResult = await _profileService.SearchProfilesAsync(keyword, page, pageSize);
-                var postsResult = await _postService.SearchPostsAsync(keyword, page, pageSize, currentUserId);
+                var profilesResult = await _profileService.SearchProfilesAsync(keyword, pageNumber, pageSize, currentUserId);
+                var postsResult = await _postService.SearchPostsAsync(keyword, pageNumber, pageSize, currentUserId);
 
                 if (!profilesResult.IsSuccess || !postsResult.IsSuccess)
                 {

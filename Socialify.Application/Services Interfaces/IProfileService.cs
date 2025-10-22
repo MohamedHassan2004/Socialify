@@ -16,6 +16,6 @@ namespace Socialify.Application.Interfaces
         Task<Result<ProfileDto>> GetUserProfileAsync(string targetUserId, string currentUserId);
         Task<Result> UpdateProfileInfoAsync(string currentUserId, UpdateProfileInfoDto updateProfileInfoDto);
         Task<Result<UpdateProfileInfoDto>> GetProfileInfoAsync(string currentUserId);
-        Task<Result<PagedResult<ProfileBasicInfoDto>>> SearchProfilesAsync(string query, int page, int pageSize);
+        Task<Result<PagedResult<ProfileBasicInfoDto>>> SearchProfilesAsync(string query, int pageNumber, int pageSize, string currentUserId);
     }
 }

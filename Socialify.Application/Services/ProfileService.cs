@@ -1,4 +1,3 @@
-using AutoMapper;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
@@ -7,6 +6,7 @@ using Socialify.Application.DTOs.Common;
 using Socialify.Application.DTOs.Post;
 using Socialify.Application.DTOs.Profile;
 using Socialify.Application.Interfaces;
+using Socialify.Application.Mappers;
 using Socialify.Application.ReposInterfaces;
 using Socialify.Application.Services_Interfaces;
 using Socialify.Domain.Common;
@@ -15,6 +15,7 @@ using Socialify.Domain.Enums;
 using System;
 using System.Diagnostics.Eventing.Reader;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Socialify.Application.Services;
@@ -22,7 +23,6 @@ namespace Socialify.Application.Services;
 public class ProfileService : IProfileService
 {
     private readonly IProfileRepository _profileRepository;
-    private readonly IMapper _mapper;
     private readonly ILogger<ProfileService> _logger;
     private readonly IFileManager _fileManager;
     private readonly string _defaultProfilePic;
@@ -30,13 +30,11 @@ public class ProfileService : IProfileService
 
     public ProfileService(
         IProfileRepository profileRepository,
-        IMapper mapper,
         ILogger<ProfileService> logger,
         IConfiguration config,
         IFileManager fileManager)
     {
         _profileRepository = profileRepository;
-        _mapper = mapper;
         _logger = logger;
         _fileManager = fileManager;
         _profilePicsPath = config["FileSettings:ProfilePicsPath"]
@@ -57,11 +55,10 @@ public class ProfileService : IProfileService
                 return Result<ProfileDto>.Failure("User not found");
             }
 
+            var IsCurrentUser = targetUserId == currentUserId;
+            var profileDto = user.ToProfileDtoWithCurrentUser(currentUserId);
 
-            var isCurrentUser = targetUserId == currentUserId;
-            var profileDto = MapProfile(user, currentUserId);
-
-            if(isCurrentUser)
+            if(IsCurrentUser)
                 _logger.LogInformation("Fetched profile for user {UserId} successfully", targetUserId);
             else
                 _logger.LogInformation("Fetched profile for user {UserId} by user {CurrentUserId} successfully", targetUserId, currentUserId);
@@ -84,7 +81,7 @@ public class ProfileService : IProfileService
                 return Result.Failure("User not found");
             }
 
-            _mapper.Map(updateProfileInfoDto, user);
+            updateProfileInfoDto.ToApplicationUser(user);
             await _profileRepository.SaveChangesAsync();
             _logger.LogInformation("User {UserId} updated profile info successfully", user.Id);
             return Result.Success();
@@ -106,7 +103,7 @@ public class ProfileService : IProfileService
                 return Result<UpdateProfileInfoDto>.Failure("User not found");
             }
 
-            var updateProfileInfoDto = _mapper.Map<UpdateProfileInfoDto>(user);
+            var updateProfileInfoDto = user.ToUpdateProfileInfoDto();
             _logger.LogInformation("Fetched profile info for user {UserId} successfully", currentUserId);
             return Result<UpdateProfileInfoDto>.Success(updateProfileInfoDto);
         }
@@ -127,7 +124,7 @@ public class ProfileService : IProfileService
                 return Result<ProfileBasicInfoDto>.Failure("User not found");
             }
 
-            var profileBasicInfoDto = _mapper.Map<ProfileBasicInfoDto>(user);
+            var profileBasicInfoDto = user.ToProfileBasicInfoDto();
             return Result<ProfileBasicInfoDto>.Success(profileBasicInfoDto);
         }
         catch(Exception ex)
@@ -137,17 +134,17 @@ public class ProfileService : IProfileService
         }
     }
 
-    public async Task<Result<PagedResult<ProfileBasicInfoDto>>> SearchProfilesAsync(string query, int page, int pageSize)
+    public async Task<Result<PagedResult<ProfileBasicInfoDto>>> SearchProfilesAsync(string query, int pageNumber, int pageSize, string currentUserId)
     {
         try
         {
-            var profiles = await _profileRepository.SearchUsersAsync(query,page,pageSize);
-            var profileDtos = _mapper.Map<List<ProfileBasicInfoDto>>(profiles.Data);
+            var profiles = await _profileRepository.SearchUsersAsync(query, pageNumber, pageSize);
+            var profileDtos = profiles.Data.Select(p => p.ToProfileBasicInfoDto(currentUserId)).ToList();
 
             var pagedResult = new PagedResult<ProfileBasicInfoDto>
             {
                 Data = profileDtos,
-                PageNumber = page,
+                PageNumber = pageNumber,
                 PageSize = pageSize,
                 TotalCount = profiles.TotalCount
             };
@@ -241,25 +238,6 @@ public class ProfileService : IProfileService
             _logger.LogError(ex, "Error updating profile picture for user {UserId}", currentUserId);
             return Result.Failure("An error occurred while updating the profile picture.");
         }   
-    }
-
-    private ProfileDto MapProfile(ApplicationUser user, string currentUserId)
-    {
-        var profileDto = _mapper.Map<ProfileDto>(user);
-        profileDto.IsCurrentUser = currentUserId == user.Id;
-        profileDto.Status = GetRelationshipStatus(user.Id, currentUserId);
-        return profileDto;
-    }
-
-    private RelationshipStatus GetRelationshipStatus(string userId, string currentUserId) {
-        if (currentUserId == userId)
-        {
-            return RelationshipStatus.Self;
-        }
-        //else if()
-        //{ 
-        //}
-        return RelationshipStatus.None;
     }
 
 }

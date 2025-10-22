@@ -61,7 +61,7 @@ namespace Socialify.Presentation.Controllers
             if (string.IsNullOrWhiteSpace(query))
                 return BadRequest("This endpoint does not support search queries.");
 
-            var result = await _profileService.SearchProfilesAsync(query, pageNumber, PageSize);
+            var result = await _profileService.SearchProfilesAsync(query, pageNumber, PageSize, currentUserId);
 
             if (!result.IsSuccess)
                 return PartialView("_ProfileList", new List<ProfileBasicInfoDto>());
