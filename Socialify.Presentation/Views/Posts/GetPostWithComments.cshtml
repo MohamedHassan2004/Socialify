@@ -31,10 +31,13 @@
 			@Html.AntiForgeryToken()
             <div class="input-group mt-3">
                 <input type="text" class="form-control" id="comment_content" name="Content"
-                       placeholder="Write a comment" aria-label="Write a comment" aria-describedby="button-addon2" required />
+                        placeholder="Write a comment" aria-label="Write a comment" aria-describedby="button-addon2" required />
                 <button type="submit" class="btn btn-primary" id="button-addon2">
                     <i class="fas fa-paper-plane"></i>
                 </button>
+            </div>
+            <div class="text-muted">
+                <span id="charCountAdding">0</span>/200 characters
             </div>
         </form>
     </div>
@@ -42,4 +45,19 @@
 
 @section Scripts{
     <script src="~/js/commentOperations.js"></script>
+     <script>
+        // Character counter
+        const comment_content = document.getElementById('comment_content');
+        const charCountAdding = document.getElementById('charCountAdding');
+        if (comment_content && charCountAdding) {
+            comment_content.addEventListener('input', function() {
+                charCountAdding.textContent = this.value.length;
+            });
+        }
+
+		const submitButton = document.querySelector('.add-comment').querySelector('button[type="submit"]');
+		submitButton.addEventListener('click', function() {
+			charCountAdding.textContent = '0';
+			});
+    </script>
 }

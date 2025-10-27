@@ -1,4 +1,3 @@
-
 using Humanizer;
 using Riok.Mapperly.Abstractions;
 using Socialify.Application.DTOs.Post;
@@ -6,13 +5,14 @@ using Socialify.Domain.Entities;
 using System.Collections.Generic;
 using System.Linq;
 
-
 namespace Socialify.Application.Mappers
 {
     [Mapper]
     public static partial class PostMapper
     {
+        [MapProperty(nameof(Post.Content),nameof(PostDto.Content))]
         public static partial PostDto ToPostDto(this Post post);
+        
         public static PostDto ToPostDto(this Post post, string currentUserId)
         {
             var dto = post.ToPostDto();
@@ -21,18 +21,44 @@ namespace Socialify.Application.Mappers
             dto.TimeAgo = post.CreatedAt.Humanize(false);
             dto.IsLikedByCurrentUser = post.Likes.Any(l => l.UserId == currentUserId);
             dto.IsSavedByCurrentUser = post.SavedPosts.Any(sp => sp.UserId == currentUserId);
+            dto.IsSharedByCurrentUser = post.SharedPosts.Any(sp => sp.SharedByUserId == currentUserId);
             dto.IsOwnedByCurrentUser = post.UserId == currentUserId;
             dto.MediaType = GetMediaType(post.MediaUrl);
             dto.MediaUrl = post.MediaUrl;
             dto.Content = post.Content;
+            dto.SharesCount = post.SharesCount;
+            dto.IsShared = post.IsShared;
+  
+            // Map original post with only essential information
+            if (post.IsShared && post.OriginalPost != null)
+            {
+                var originalPost = post.OriginalPost;
+               
+                dto.OriginalPost = new OriginalPostDto
+                {
+                    Id = originalPost.Id,
+                    CreatedAt = originalPost.CreatedAt,
+                    TimeAgo = originalPost.CreatedAt.Humanize(false),
+                    IsEdited = originalPost.IsEdited,
+                    Content = originalPost.Content,
+                    MediaUrl = originalPost.MediaUrl,
+                    MediaType = GetMediaType(originalPost.MediaUrl),
+                    UserId = originalPost.UserId,
+                    UserName = originalPost.User?.FullName ?? "Unknown User",
+                    UserProfilePicUrl = originalPost.User?.ProfilePicUrl ?? ""
+                };
+             }
+                
             return dto;
-        }
+         }
+
 
         public static partial UpdatePostDto ToUpdatePostDtoCore(this Post post);
 
         public static UpdatePostDto ToUpdatePostDto(this Post post)
         {
             var dto = post.ToUpdatePostDtoCore();
+            dto.Content = post.Content;
             dto.MediaType = GetMediaType(post.MediaUrl);
             dto.MediaUrl = post.MediaUrl;
             return dto;

@@ -9,7 +9,7 @@ namespace Socialify.Domain.Entities
     public class SavedPost
     {
         public int Id { get; set; }
-        public DateTime SavedAt { get; set; } = DateTime.UtcNow;
+        public DateTime SavedAt { get; set; } = DateTime.Now;
         public string UserId { get; set; } = string.Empty;
         public ApplicationUser User { get; set; } = null!;
         public int PostId { get; set; }

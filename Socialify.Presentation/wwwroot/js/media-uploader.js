@@ -109,8 +109,6 @@
         img.src = URL.createObjectURL(file);
         img.className = "img-fluid rounded mb-2";
         img.style.maxHeight = "800px";
-        img.style.objectFit = "cover";
-        img.style.width = "100%";
         this.previewContainer.appendChild(img);
     }
 
@@ -123,8 +121,6 @@
         video.controls = true;
         video.className = "w-100 mb-2 rounded";
         video.style.maxHeight = "800px";
-        video.style.objectFit = "cover";
-        video.style.width = "100%";
         this.previewContainer.appendChild(video);
     }
 

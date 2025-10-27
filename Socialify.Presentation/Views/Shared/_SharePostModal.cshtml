@@ -1,0 +1,155 @@
+@model Socialify.Application.DTOs.Post.PostDto
+
+<div class="modal fade" id="sharePostModal-@Model.Id" tabindex="-1">
+	<div class="modal-dialog modal-dialog-centered">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title">
+					<i class="bi bi-share"></i> Share Post
+				</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+			</div>
+			<form id="sharePostForm-@Model.Id" onsubmit="return false;">
+				@Html.AntiForgeryToken()
+				<div class="modal-body">
+					<input type="hidden" name="OriginalPostId" value="@Model.Id" />
+
+					<div class="mb-3">
+						<label for="additionalComment-@Model.Id" class="form-label">Add your thoughts (optional)</label>
+						<textarea class="form-control"
+								  id="additionalComment-@Model.Id"
+								  name="AdditionalComment"
+								  rows="3"
+								  maxlength="500"
+								  placeholder="What do you think about this?"></textarea>
+						<div class="text-muted">
+							<span id="charCount-@Model.Id">0</span>/500 characters
+						</div>
+					</div>
+
+					<!-- Original Post Preview -->
+					<div class="card border">
+						<div class="card-body p-3">
+							<div class="d-flex align-items-center mb-2">
+								<img src="@Model.UserProfilePicUrl"
+									 alt="@Model.UserName"
+									 class="rounded-circle me-2"
+									 style="width: 32px; height: 32px; object-fit: cover;">
+								<div>
+									<strong>@Model.UserName</strong>
+									<br />
+									<small class="text-muted">@Model.TimeAgo</small>
+								</div>
+							</div>
+
+							@if (!string.IsNullOrEmpty(Model.Content))
+							{
+								<p class="card-text small mb-2">@Model.Content</p>
+							}
+
+							@if (!string.IsNullOrEmpty(Model.MediaUrl))
+							{
+								@if (Model.MediaType == "image")
+								{
+									<img src="@Model.MediaUrl" alt="Post media" class="img-fluid rounded" style="max-height: 200px;" />
+								}
+								else if (Model.MediaType == "video")
+								{
+									<video class="w-100 rounded" style="max-height: 200px;">
+										<source src="@Model.MediaUrl" type="video/mp4">
+									</video>
+								}
+							}
+						</div>
+					</div>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+					<button type="button" class="btn btn-primary" data-post-id="@Model.Id" onclick="handleSharePost(this)">
+						<i class="bi bi-share"></i> Share Post
+					</button>
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
+
+<script>
+	(function() {
+		const postId = @Model.Id;
+		
+		// Wait for DOM to be ready
+		function initializeShareModal() {
+			const form = document.getElementById('sharePostForm-' + postId);
+			const textarea = document.getElementById('additionalComment-' + postId);
+			const charCount = document.getElementById('charCount-' + postId);
+
+			// Character counter
+			if (textarea && charCount) {
+				textarea.addEventListener('input', function() {
+					charCount.textContent = this.value.length;
+				});
+			}
+		}
+
+		if (document.readyState === 'loading') {
+			document.addEventListener('DOMContentLoaded', initializeShareModal);
+		} else {
+			initializeShareModal();
+		}
+	})();
+
+	// Global function for share button click
+	async function handleSharePost(button) {
+		const postId = parseInt(button.getAttribute('data-post-id'));
+
+		const form = document.getElementById('sharePostForm-' + postId);
+		if (!form) {
+			showAlert('error','','Error: Form not found');
+			return;
+		}
+
+		const formData = new FormData(form);
+		const originalBtnText = button.innerHTML;
+
+		button.disabled = true;
+		button.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Sharing...';
+
+		try {			
+			const response = await fetch('/Posts/SharePost', {
+				method: 'POST',
+				body: formData,
+				credentials: 'same-origin'
+			});
+
+			if (response.ok) {				
+				const modal = bootstrap.Modal.getInstance(document.getElementById('sharePostModal-' + postId));
+				if (modal) modal.hide();
+
+				if (typeof showAlert === 'function') {
+					showAlert('success', 'Success', 'Post shared successfully!');
+				} else {
+					alert('Post shared successfully!');
+				}
+			} else {
+				const error = await response.text();				
+				if (typeof showAlert === 'function') {
+					showAlert('error', 'Error', 'Error sharing post: ' + error);
+				} else {
+					showAlert('error','Error','Error sharing post: ' + error);
+				}
+				
+				button.disabled = false;
+				button.innerHTML = originalBtnText;
+			}
+		} catch (error) {
+			if (typeof showAlert === 'function') {
+				showAlert('error', 'Error', 'An error occurred: ' + error.message);
+			} else {
+				showAlert('error','Error!','An error occurred: ' + error.message);
+			}
+			button.disabled = false;
+			button.innerHTML = originalBtnText;
+		}
+	}
+</script>

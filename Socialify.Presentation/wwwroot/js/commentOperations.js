@@ -85,7 +85,7 @@ document.getElementById('comment_form').addEventListener('submit', async functio
             commentsCount.textContent = (count + 1).toString();
         }
     } else {
-        showAlert('error', 'Errror','Error occured while adding comment');
+        showAlert('error', 'Error', await response.text());
     }
 });
 
@@ -101,7 +101,7 @@ function editComment(element) {
 
     const editedTag = document.createElement("small");
     editedTag.className = "text-muted d-block px-2";
-    editedTag.innerHTML = "<em>(Edited)</em>";
+    editedTag.innerHTML = "(edited)";
 
     // إخفاء المحتوى الأصلي والأزرار
     contentDiv.style.display = 'none';
@@ -112,10 +112,14 @@ function editComment(element) {
     const editForm = document.createElement('div');
     editForm.className = 'edit-comment-form';
     editForm.innerHTML = `
-        <textarea class="form-control mb-2" rows="2">${originalContent}</textarea>
+        <textarea class="form-control mb-2" rows="2" maxlength="200">${originalContent}</textarea>
         <div class="d-flex gap-2">
             <button type="button" class="btn btn-primary btn-sm save-edit-btn">Save</button>
             <button type="button" class="btn btn-secondary btn-sm cancel-edit-btn">Cancel</button>
+        </div>
+
+        <div class="text-muted">
+            <span id="charCountEditing">${originalContent.length}</span>/200 characters
         </div>
     `;
 
@@ -123,6 +127,12 @@ function editComment(element) {
 
     const textarea = editForm.querySelector('textarea');
     textarea.focus();
+
+    // تحديث عداد الأحرف أثناء الكتابة
+    const charCountEditing = editForm.querySelector('#charCountEditing');
+    textarea.addEventListener('input', function () {
+        charCountEditing.textContent = this.value.length;
+    });
 
     // زر Cancel
     editForm.querySelector('.cancel-edit-btn').addEventListener('click', function () {
@@ -161,8 +171,8 @@ function editComment(element) {
                     'RequestVerificationToken': token
                 },
                 body: JSON.stringify({
-                    id: commentId,
-                    content: newContent
+                    Id: commentId,
+                    Content: newContent
                 })
             });
 
@@ -181,13 +191,13 @@ function editComment(element) {
                 showAlert('success','Success!' ,'Comment updated successfully');
             } else {
                 const errorText = await response.text();
-                showAlert(errorText || 'Failed to update comment', 'danger');
+                showAlert('error','Error!',errorText || 'Failed to update comment');
                 saveBtn.disabled = false;
                 saveBtn.textContent = 'Save';
             }
         } catch (error) {
             console.error('Error:', error);
-            showAlert('error','Error!','An error occurred while updating the comment', 'danger');
+            showAlert('error','Error!','An error occurred while updating the comment');
             saveBtn.disabled = false;
             saveBtn.textContent = 'Save';
         }

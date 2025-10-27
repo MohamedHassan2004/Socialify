@@ -79,6 +79,14 @@ html[data-theme="blue"] {
     --toggler-icon: url("data:image/svg+xml;charset=utf8,%3Csvg viewBox='0 0 30 30' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath stroke='white' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3E%3C/svg%3E");
 }
 
+html[data-theme="dark"] .btn-close, html[data-theme="blue"] .btn-close {
+    filter: invert(1) grayscale(100%) brightness(200%);
+}
+
+html[data-theme="light"] .btn-close {
+    filter: none;
+}
+
 *{
     padding: 0;
     margin: 0;
@@ -95,7 +103,7 @@ body {
     transition: background-color 0.2s, color 0.2s;
 }
 
-h1,h2,h3,h4,h5,h6{
+h1,h2,h3,h4,h5,h6, strong{
     color: var(--text-color);
 }
 
@@ -123,6 +131,9 @@ main {
     margin-bottom: 1.5rem;
 }
 
+.modal-content {
+    background: var(--background-color);
+}
 
 /* ----------------------------- General Items ----------------------------- */
 .btn {
@@ -196,7 +207,7 @@ a {
         cursor: pointer;
     }
 
-.card-title{
+.card-title, .card-text{
     color : var(--text-color)
 }
 

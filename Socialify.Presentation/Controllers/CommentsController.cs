@@ -15,10 +15,10 @@ namespace Socialify.Presentation.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> AddComment([FromBody] AddCommentDto dto)
+        public async Task<IActionResult> AddComment(AddCommentDto dto)
         {
             if(!ValidateModelAndLogErrors(dto, nameof(AddComment)))
-                return BadRequest("Invalid comment data.");
+                return BadRequest(TempData["ErrorMessage"]);
 
             var result = await _commentService.AddCommentAsync(dto, currentUserId);
             if(!result.IsSuccess)
@@ -31,7 +31,7 @@ namespace Socialify.Presentation.Controllers
         public async Task<IActionResult> EditComment([FromBody] EditCommentDto dto)
         {
             if (!ValidateModelAndLogErrors(dto, nameof(EditComment)))
-                return BadRequest("Invalid comment data.");
+                return BadRequest(TempData["ErrorMessage"]);
 
             var result = await _commentService.EditCommentAsync(dto, currentUserId);
 

@@ -39,7 +39,8 @@ namespace Socialify.Application.Services
                 }
 
                 _logger.LogInformation("File uploaded: {Path}", filePath);
-                return Result<string>.Success(Path.Combine(folderPath, fileName).Replace("\\", "/"));
+                var relativePath = Path.Combine(folderPath, fileName).Replace("\\", "/");
+                return Result<string>.Success(relativePath);
             }
             catch (Exception ex)
             {
@@ -75,7 +76,8 @@ namespace Socialify.Application.Services
 
         public string GetAbsolutePath(string relativePath)
         {
-            return Path.Combine(_env.WebRootPath, relativePath).Replace("\\","/");
+            var normalizedPath = relativePath.Replace("/", "\\");
+            return Path.Combine(_env.WebRootPath, normalizedPath);
         }
     }
 

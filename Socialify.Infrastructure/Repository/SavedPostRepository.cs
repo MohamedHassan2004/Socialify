@@ -28,6 +28,9 @@ namespace Socialify.Infrastructure.Repository
                     .ThenInclude(p => p.User)
                 .Include(sp => sp.Post)
                     .ThenInclude(p => p.Likes.Where(l => l.UserId == userId))
+                .Include(sp => sp.Post)
+                    .ThenInclude(p => p.OriginalPost)
+                        .ThenInclude(op => op!.User)
                 .AsNoTracking()
                 .AsSplitQuery()
                 .ToPagedResultAsync(pageNumber, pageSize);

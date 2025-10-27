@@ -1,4 +1,5 @@
 ﻿using Humanizer;
+using MediatR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Socialify.Application.DTOs.Comment;
@@ -10,6 +11,7 @@ using Socialify.Application.Repos_Interfaces;
 using Socialify.Application.Services_Interfaces;
 using Socialify.Domain.Common;
 using Socialify.Domain.Entities;
+using Socialify.Domain.Events;
 
 namespace Socialify.Application.Services;
 public class PostService : IPostService
@@ -18,15 +20,24 @@ public class PostService : IPostService
     private readonly ILogger<PostService> _logger;
     private readonly IFileManager _fileManager;
     private readonly IConfiguration _config;
+    private readonly ISharedPostRepository _sharedPostRepository;
+    private readonly IMediator _mediator;
     private readonly string _postMediaPath;
 
-    public PostService(IPostRepository postRepository, ILogger<PostService> logger, IFileManager fileManager, IConfiguration config)
+    public PostService(
+        IPostRepository postRepository, 
+        ILogger<PostService> logger, 
+        IFileManager fileManager, 
+        IConfiguration config,
+        ISharedPostRepository sharedPostRepository,
+        IMediator mediator)
     {
         _postRepository = postRepository;
         _logger = logger;
         _fileManager = fileManager;
         _config = config;
-        
+        _sharedPostRepository = sharedPostRepository;
+        _mediator = mediator;
         _postMediaPath = config["FileSettings:PostMediaPath"] ?? "posts";
     }
 
@@ -61,16 +72,15 @@ public class PostService : IPostService
             }
 
             await _postRepository.AddAsync(post);
-            var IsAdded = await _postRepository.SaveChangesAsync() > 0;
-            if (IsAdded)
+            var isAdded = await _postRepository.SaveChangesAsync() > 0;
+            if (!isAdded)
             {
-                _logger.LogInformation("User {UserId} uploaded a new post {PostId}.", userId, post.Id);
-                return Result.Success();
+                _logger.LogError("Failed to save post to database for user {UserId}", userId);
+                return Result.Failure("Failed to save post. Please try again.");
             }
-            else
-            {
-                return Result.Failure("Error occurred while uploading post");
-            }
+
+            _logger.LogInformation("User {UserId} uploaded a new post {PostId}.", userId, post.Id);
+            return Result.Success();
         }
         catch(Exception ex)
         {
@@ -143,6 +153,9 @@ public class PostService : IPostService
                     _logger.LogWarning("Failed to delete media file at {MediaUrl}: {ErrorMessage}", post.MediaUrl, deleteFileResult.ErrorMessage);
                 }
             }
+
+            await _mediator.Publish(new OriginalPostDeletingEvent(post.Id));
+
             _postRepository.Remove(post);
             await _postRepository.SaveChangesAsync();
             _logger.LogInformation("Post {PostId} deleted successfully by user {UserId}.", post.Id, currentUserId);
@@ -239,4 +252,121 @@ public class PostService : IPostService
         }
     }
 
+
+    public async Task<Result> SharePostAsync(string userId, SharePostDto sharePostDto)
+    {
+        try
+        {
+            if (string.IsNullOrWhiteSpace(userId))
+                return Result.Failure("User ID is required.");
+
+            // Get the original post
+            var originalPost = await _postRepository.GetByIdAsync(sharePostDto.OriginalPostId);
+            if (originalPost == null)
+                return Result.Failure("Original post not found.");
+
+            // Prevent sharing own post
+            if (originalPost.UserId == userId)
+                return Result.Failure("You cannot share your own post.");
+
+            // Check if already shared - FIXED: Check against the actual original post ID
+            var actualOriginalPostId = originalPost.IsShared && originalPost.OriginalPostId.HasValue
+                ? originalPost.OriginalPostId.Value
+                : originalPost.Id;
+
+            var alreadyShared = await _sharedPostRepository.UserHasSharedPostAsync(actualOriginalPostId, userId);
+            if (alreadyShared)
+                return Result.Failure("You have already shared this post.");
+
+            // Create the shared post
+            var sharedPost = new Post
+            {
+                Content = sharePostDto.AdditionalComment,
+                UserId = userId,
+                IsShared = true,
+                OriginalPostId = actualOriginalPostId, 
+                CreatedAt = DateTime.Now
+            };
+
+            await _postRepository.AddAsync(sharedPost);
+            var saved = await _postRepository.SaveChangesAsync() > 0;
+
+            if (!saved)
+            {
+                _logger.LogError("Failed to save shared post to database for user {UserId}", userId);
+                return Result.Failure("Failed to share post. Please try again.");
+            }
+
+            // Create SharedPost tracking entry
+            var sharedPostTracking = new SharedPost
+            {
+                OriginalPostId = actualOriginalPostId,
+                SharedPostId = sharedPost.Id,
+                SharedByUserId = userId,
+                SharedAt = DateTime.Now
+            };
+
+            await _sharedPostRepository.AddAsync(sharedPostTracking);
+
+            // Increment share count on the actual original post
+            var postToUpdate = await _postRepository.GetByIdAsync(actualOriginalPostId);
+            if (postToUpdate != null)
+            {
+                postToUpdate.IncrementSharesCount();
+                _postRepository.Update(postToUpdate);
+            }
+
+            await _postRepository.SaveChangesAsync();
+
+            _logger.LogInformation("User {UserId} shared post {PostId}.", userId, sharePostDto.OriginalPostId);
+            return Result.Success();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error occurred while sharing post.");
+            return Result.Failure("Error occurred while sharing post.");
+        }
+    }
+
+    public async Task<Result> UnsharePostAsync(string userId, int sharedPostId)
+    {
+        try
+        {
+            var sharedPost = await _postRepository.GetByIdAsync(sharedPostId);
+            if (sharedPost == null || !sharedPost.IsShared)
+                return Result.Failure("Shared post not found.");
+
+            if (sharedPost.UserId != userId)
+                return Result.Failure("You are not authorized to unshare this post.");
+
+            // Get the tracking entry
+            var sharedPostTracking = await _sharedPostRepository.GetByOriginalAndSharedPostIdsAsync(
+            sharedPost.OriginalPostId!.Value, sharedPostId);
+
+            if (sharedPostTracking != null)
+            {
+                _sharedPostRepository.Remove(sharedPostTracking);
+            }
+
+            // Decrement share count
+            var originalPost = await _postRepository.GetByIdAsync(sharedPost.OriginalPostId!.Value);
+            if (originalPost != null)
+            {
+                originalPost.DecrementSharesCount();
+                _postRepository.Update(originalPost);
+            }
+
+            // Delete the shared post
+            _postRepository.Remove(sharedPost);
+            await _postRepository.SaveChangesAsync();
+
+            _logger.LogInformation("User {UserId} unshared post {PostId}.", userId, sharedPostId);
+            return Result.Success();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error occurred while unsharing post.");
+            return Result.Failure("Error occurred while unsharing post.");
+        }
+    }
 }

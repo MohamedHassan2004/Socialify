@@ -1,153 +1,270 @@
 ﻿@* For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860 *@
 @{
-    var daysDiff = (DateTime.UtcNow - Model.CreatedAt).TotalDays;
+    var daysDiff = (DateTime.Now - Model.CreatedAt).TotalDays;
 }
 @model Socialify.Application.DTOs.Post.PostDto
 
 <div class="card post-card mb-4">
-    <div class="card-body p-4">
-        <!-- Post Header -->
-        <div class="post-header d-flex align-items-start justify-content-between mb-3">
-            <div class="d-flex align-items-center flex-grow-1">
-                <img src="/@Model.UserProfilePicUrl"
-                     class="post-avatar rounded-circle me-3"
-                     alt="@Model.UserName Profile Picture">
-                <div class="post-header-info">
-                    <a asp-action="Profile"
-                       asp-controller="Profile"
-                       asp-route-targetUserId="@Model.UserId"
-                       class="text-decoration-none">
-                        <h6 class="mb-0 fw-semibold post-username">@Model.UserName</h6>
-                    </a>
-                    <small class="text-muted d-block">
-                        @(daysDiff > 7 ? Model.CreatedAt.ToString("dd MMM yyyy HH:mm") : Model.TimeAgo)
-                    </small>
+	<div class="card-body p-4">
+		<!-- Post Header -->
+		<div class="post-header d-flex align-items-start justify-content-between mb-3">
+			<div class="d-flex align-items-center flex-grow-1">
+				<img src="/@Model.UserProfilePicUrl"
+					 class="post-avatar rounded-circle me-3"
+					 alt="@Model.UserName Profile Picture">
+				<div class="post-header-info">
+					<a asp-action="Profile"
+					   asp-controller="Profile"
+					   asp-route-targetUserId="@Model.UserId"
+					   class="text-decoration-none">
+						<h6 class="mb-0 fw-semibold post-username">@Model.UserName</h6>
+					</a>
+					@if (Model.IsShared)
+					{
+						<small class="text-muted d-block">
+							<i class="bi bi-share-fill"></i> shared a post
+						</small>
+					}
+					<small class="text-muted d-block">
+						@(daysDiff > 7 ? Model.CreatedAt.ToString("dd MMM yyyy HH:mm") : Model.TimeAgo)
+						@if (Model.IsEdited)
+						{
+							<span> • (edited)</span>
+						}
+					</small>
+				</div>
+			</div>
 
-                    @if (Model.IsEdited)
-                    {
-                        <small class="text-muted d-block">
-                                <em>(Edited)</em>
-                        </small>
-				    }
-                </div>
-            </div>
+			@if (Model.IsOwnedByCurrentUser)
+			{
+				<!-- Options Dropdown -->
+				<div class="dropdown">
+					<button class="btn btn-link text-muted p-0 dropdown-toggle-no-caret"
+							type="button"
+							id="postOptions@(Model.Id)"
+							data-bs-toggle="dropdown"
+							aria-expanded="false"
+							style="font-size: 1.25rem; line-height: 1;">
+						<i class="fas fa-ellipsis-h"></i>
+					</button>
+					<ul class="dropdown-menu dropdown-menu-end shadow-sm" aria-labelledby="postOptions@(Model.Id)">
+						@if (Model.IsShared)
+						{
+							<li>
+								<a class="dropdown-item text-danger" href="#" onclick="unsharePost(@Model.Id); return false;">
+									<i class="fas fa-trash-alt me-2"></i>Remove Share
+								</a>
+							</li>
+						}
+						else
+						{
+							<li>
+								<a class="dropdown-item edit-post" asp-action="UpdatePost" asp-controller="Posts" asp-route-postId="@Model.Id" data-post-id="@Model.Id">
+									<i class="fas fa-edit me-2 text-primary"></i>Edit Post
+								</a>
+							</li>
+							<li><hr class="dropdown-divider"></li>
+							<li>
+								<a class="dropdown-item text-danger delete-post" data-post-id="@Model.Id" onclick="deletePost(this); return false;">
+									<i class="fas fa-trash-alt me-2"></i>Delete Post
+								</a>
+							</li>
+						}
+					</ul>
+				</div>
+			}
 
-            @if (Model.IsOwnedByCurrentUser)
-            {
-                <!-- Options Dropdown -->
-                <div class="dropdown">
-                    <button class="btn btn-link text-muted p-0 dropdown-toggle-no-caret"
-                        type="button"
-                        id="postOptions@(Model.Id)"
-                        data-bs-toggle="dropdown"
-                        aria-expanded="false"
-                        style="font-size: 1.25rem; line-height: 1;">
-                        <i class="fas fa-ellipsis-h"></i>
-                    </button>
-                    <ul class="dropdown-menu dropdown-menu-end shadow-sm" aria-labelledby="postOptions@(Model.Id)">
-                        <li>
-                            <a class="dropdown-item edit-post" asp-action="UpdatePost" asp-controller="Posts" asp-route-postId="@Model.Id" data-post-id="@Model.Id">
-                                <i class="fas fa-edit me-2 text-primary"></i>Edit Post
-                            </a>
-                        </li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li>
-                            <a class="dropdown-item text-danger delete-post" data-post-id="@Model.Id" onclick="deletePost(this); return false;">
-                                <i class="fas fa-trash-alt me-2"></i>Delete Post
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-            }
+		</div>
 
-        </div>
+		<!-- Post Body -->
+		<div class="post-body">
+			@if (Model.IsShared)
+			{
+				<!-- Additional comment from person who shared -->
+				@if (!string.IsNullOrEmpty(Model.Content))
+				{
+					<p class="post-content mb-3" style="line-height: 1.6; white-space: pre-wrap;">@Model.Content</p>
+				}
 
-        <!-- Post Body -->
-        <div class="post-body">
-            <p class="post-content" style="line-height: 1.6; white-space: pre-wrap;">@Model.Content</p>
+				<!-- Original Post (Nested) -->
+				@if (Model.OriginalPost != null)
+				{
+					<div class="card">
+						<div class="card-body p-3">
+							<!-- Original Post Header -->
+							<div class="d-flex align-items-center mb-2">
+								<img src="/@Model.OriginalPost.UserProfilePicUrl"
+									 alt="@Model.OriginalPost.UserName"
+									 class="rounded-circle me-2"
+									 style="width: 36px; height: 36px; object-fit: cover;" />
+								<div>
+									<a asp-action="Profile"
+									   asp-controller="Profile"
+									   asp-route-targetUserId="@Model.OriginalPost.UserId"
+									   class="text-decoration-none">
+										<strong>@Model.OriginalPost.UserName</strong>
+									</a>
+									<br />
+									<small class="text-muted">
+										@Model.OriginalPost.TimeAgo
+										@if (Model.OriginalPost.IsEdited)
+										{
+											<span> • (edited)</span>
+										}
+									</small>
+								</div>
+							</div>
 
-            @if (!string.IsNullOrEmpty(Model.MediaUrl))
-            {
-                <div class="post-media rounded overflow-hidden">
-                    @switch (Model.MediaType)
-                    {
-                        case "image":
-                            <img src="/@Model.MediaUrl"
-                                 alt="Post image"
-                                 class="img-fluid w-100"
-                                 style="max-height: 800px; object-fit: cover;" />
-                            break;
-                        case "video":
-                            <video controls class="w-100" style="max-height: 600px;">
-                                <source src="/@Model.MediaUrl" type="video/mp4">
-                                Your browser does not support the video tag.
-                            </video>
-                            break;
-                        case "audio":
-                            <audio controls class="w-100">
-                                <source src="/@Model.MediaUrl" type="audio/mpeg">
-                                Your browser does not support the audio element.
-                            </audio>
-                            break;
-                    }
-                </div>
-            }
-        </div>
-    </div>
+							<!-- Original Post Content -->
+							@if (!string.IsNullOrEmpty(Model.OriginalPost.Content))
+							{
+								<p class="card-text mb-2" style="line-height: 1.6; white-space: pre-wrap;">@Model.OriginalPost.Content</p>
+							}
 
-    <!-- Post Footer -->
-    <div class="card-footer px-4">
-        <div class="d-flex justify-content-between align-items-center">
-            <!-- Left Side Actions -->
-            <div class="d-flex gap-1">
+							<!-- Original Post Media -->
+							@if (!string.IsNullOrEmpty(Model.OriginalPost.MediaUrl))
+							{
+								<div class="mt-2 post-media rounded overflow-hidden text-center">
+									@switch (Model.OriginalPost.MediaType)
+									{
+										case "image":
+											<img src="/@Model.OriginalPost.MediaUrl"
+												 alt="Post media"
+												 class="img-fluid rounded"
+												 style="max-height: 500px; object-fit: cover;" />
+											break;
+										case "video":
+											<video controls class="rounded" style="max-height: 500px;">
+												<source src="/@Model.OriginalPost.MediaUrl" type="video/mp4">
+												Your browser does not support the video tag.
+											</video>
+											break;
+										case "audio":
+											<audio controls class="w-100">
+												<source src="/@Model.OriginalPost.MediaUrl">
+												Your browser does not support the audio tag.
+											</audio>
+											break;
+									}
+								</div>
+							}
+						</div>
+					</div>
+				}
+			}
+			else
+			{
+				<!-- Regular Post Content -->
+				<p class="post-content" style="line-height: 1.6; white-space: pre-wrap;">@Model.Content</p>
 
-                <div class="d-inline-flex align-items-center me-3">
-                    <!-- Like Button -->
-                    <button class="post-action-btn btn btn-sm d-flex align-items-center px-2 py-1 border-0 bg-transparent @(Model.IsLikedByCurrentUser ? "liked" : "")"
-                            data-post-id="@Model.Id"
-                            onclick="toggleLike(this)">
-                        <i class="@(Model.IsLikedByCurrentUser ? "fas" : "far") fa-thumbs-up"></i>
-                    </button>
-                    <a asp-action="GetLikesOnPost"
-                       asp-controller="Likes"
-                       asp-route-postId="@Model.Id"
-                       asp-route-pageNumber="1"
-                       class="text-muted text-decoration-none ms-1 likes-count"
-                       style="font-size: 0.9rem;">
-                        @Model.LikesCount
-                    </a>
-                </div>
+				@if (!string.IsNullOrEmpty(Model.MediaUrl))
+				{
+					<div class="post-media rounded overflow-hidden text-center">
+						@switch (Model.MediaType)
+						{
+							case "image":
+								<img src="/@Model.MediaUrl"
+									 alt="Post image"
+									 class="img-fluid"
+									 style="max-height: 800px; " />
+								@* object-fit: cover; *@
+								break;
+							case "video":
+								<video controls style="max-height: 600px;">
+									<source src="/@Model.MediaUrl" type="video/mp4">
+									Your browser does not support the video tag.
+								</video>
+								break;
+							case "audio":
+								<audio controls class="w-100">
+									<source src="/@Model.MediaUrl" type="audio/mpeg">
+									Your browser does not support the audio element.
+								</audio>
+								break;
+						}
+					</div>
+				}
+			}
+		</div>
+	</div>
 
-                <div class="d-inline-flex align-items-center me-3">
-                    <!-- Comment Button -->
-                    <button class="post-action-btn btn btn-sm d-flex align-items-center px-2 py-1 border-0 bg-transparent"
-                            data-post-id="@Model.Id"
-                            onclick="location.href='@Url.Action("GetPostWithComments", "Posts")?postId=@Model.Id'">
-                        <i class="far fa-comment"></i>
-                    </button>
-                        <span class="text-muted ms-1 comments-count" style="font-size: 0.9rem;">@Model.CommentsCount</span>
-                </div>
+	<!-- Post Footer -->
+		<div class="card-footer px-4">
+			<div class="d-flex justify-content-between align-items-center">
+				<!-- Left Side Actions -->
+				<div class="d-flex gap-1">
 
-                <div class="d-inline-flex align-items-center">
-                    <!-- Share Button -->
-                    <button class="post-action-btn btn btn-sm d-flex align-items-center px-2 py-1 border-0 bg-transparent"
-                            data-post-id="@Model.Id"
-                            onclick="sharePost(this)">
-                        <i class="fas fa-share"></i>
-                    </button>
-                </div>
+					<div class="d-inline-flex align-items-center me-3">
+						<!-- Like Button -->
+						<button class="post-action-btn btn btn-sm d-flex align-items-center px-2 py-1 border-0 bg-transparent @(Model.IsLikedByCurrentUser ? "liked" : "")"
+								data-post-id="@Model.Id"
+								onclick="toggleLike(this)">
+							<i class="@(Model.IsLikedByCurrentUser ? "fas" : "far") fa-thumbs-up"></i>
+						</button>
+						<a asp-action="GetLikesOnPost"
+						   asp-controller="Likes"
+						   asp-route-postId="@Model.Id"
+						   asp-route-pageNumber="1"
+						   class="text-muted text-decoration-none ms-1 likes-count"
+						   style="font-size: 0.9rem;">
+							@Model.LikesCount
+						</a>
+					</div>
 
-            </div>
+					<div class="d-inline-flex align-items-center me-3">
+						<!-- Comment Button -->
+						<button class="post-action-btn btn btn-sm d-flex align-items-center px-2 py-1 border-0 bg-transparent"
+								data-post-id="@Model.Id"
+								onclick="location.href='@Url.Action("GetPostWithComments", "Posts")?postId=@Model.Id'">
+							<i class="far fa-comment"></i>
+						</button>
+						<span class="text-muted ms-1 comments-count" style="font-size: 0.9rem;">@Model.CommentsCount</span>
+					</div>
 
-            <!-- Right Side Actions -->
-            <div>
-                <!-- Save Button -->
-                <button class="post-action-btn btn btn-sm d-flex align-items-center px-3 py-2 @(Model.IsSavedByCurrentUser ? "saved" : "")"
-                        data-post-id="@Model.Id"
-                        onclick="toggleSavePost(this)">
-                    <i class="@(Model.IsSavedByCurrentUser ? "fas" : "far") fa-bookmark"></i>
-                </button>
-            </div>
-        </div>
-    </div>
+					<div class="d-inline-flex align-items-center">
+						<!-- Share Button -->
+						@{
+							var shareModalId = Model.IsShared && Model.OriginalPost != null ? Model.OriginalPost.Id : Model.Id;
+						}
+						<button class="post-action-btn btn btn-sm d-flex align-items-center px-2 py-1 border-0 bg-transparent"
+								data-bs-toggle="modal"
+								data-bs-target="#sharePostModal-@shareModalId">
+							<i class="fas fa-share"></i>
+						</button>
+						<span class="text-muted ms-1" style="font-size: 0.9rem;">@Model.SharesCount</span>
+					</div>
+
+				</div>
+
+				<!-- Right Side Actions -->
+				<div>
+					<!-- Save Button -->
+					<button class="post-action-btn btn btn-sm d-flex align-items-center px-3 py-2 @(Model.IsSavedByCurrentUser ? "saved" : "")"
+							data-post-id="@Model.Id"
+							onclick="toggleSavePost(this)">
+						<i class="@(Model.IsSavedByCurrentUser ? "fas" : "far") fa-bookmark"></i>
+					</button>
+				</div>
+			</div>
+		</div>
 </div>
+
+@* Include share modal - handle both regular and shared posts *@
+@if (!Model.IsShared)
+{
+	<partial name="_SharePostModal" model="Model" />
+}
+else if (Model.OriginalPost != null)
+{
+	@* For shared posts, pass original post data to the modal *@
+	<partial name="_SharePostModal" model="@(new Socialify.Application.DTOs.Post.PostDto
+	{
+		Id = Model.OriginalPost.Id,
+		UserName = Model.OriginalPost.UserName,
+		UserProfilePicUrl = Model.OriginalPost.UserProfilePicUrl,
+		TimeAgo = Model.OriginalPost.TimeAgo,
+		Content = Model.OriginalPost.Content,
+		MediaUrl = Model.OriginalPost.MediaUrl,
+		MediaType = Model.OriginalPost.MediaType
+	})" />
+}

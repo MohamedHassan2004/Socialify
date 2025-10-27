@@ -160,5 +160,51 @@ namespace Socialify.Presentation.Controllers
             }
             return View(result.Data);
         }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> SharePost([FromForm] SharePostDto sharePostDto)
+        {
+            _logger.LogInformation("SharePost action called. OriginalPostId: {OriginalPostId}, UserId: {UserId}", 
+            sharePostDto?.OriginalPostId, currentUserId);
+
+            if (sharePostDto == null)
+            {
+                _logger.LogError("SharePostDto is null");
+                return BadRequest("Share data is null.");
+            }
+
+            if (!ValidateModelAndLogErrors(sharePostDto, nameof(SharePost)))
+            {
+                _logger.LogError("Model validation failed for SharePost");
+                return BadRequest("Invalid share data.");
+            }
+
+            var result = await _postService.SharePostAsync(currentUserId, sharePostDto);
+ 
+            if (!result.IsSuccess)
+            {
+                _logger.LogError("Failed to share post: {ErrorMessage}", result.ErrorMessage);
+                return BadRequest(result.ErrorMessage);
+            }
+
+            _logger.LogInformation("Post shared successfully by user {UserId}", currentUserId);
+            return Ok(new { message = "Post shared successfully!" });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UnsharePost(int sharedPostId)
+        {
+            var result = await _postService.UnsharePostAsync(currentUserId, sharedPostId);
+            
+            if (!result.IsSuccess)
+            {
+                _logger.LogError("Failed to unshare post: {ErrorMessage}", result.ErrorMessage);
+                return BadRequest(result.ErrorMessage);
+            }
+
+            return Ok(new { message = "Shared post removed successfully!" });
+        }
     }
 }

@@ -27,6 +27,9 @@ namespace Socialify.Infrastructure.Repository
                 .Include(p => p.User)
                 .Include(p => p.Likes)
                 .Include(p => p.SavedPosts)
+                .Include(p => p.SharedPosts)
+                .Include(p => p.OriginalPost)
+                    .ThenInclude(op => op!.User)
                 .AsSplitQuery()
                 .AsNoTracking();
         }
@@ -41,7 +44,12 @@ namespace Socialify.Infrastructure.Repository
         public async Task<PagedResult<Post>> SearchPostsAsync(string searchTerm, int pageNumber, int pageSize)
         {
             return await BaseQuery()
-                .Where(p => EF.Functions.Like(p.Content!, $"%{searchTerm}%"))
+                .Where(p => 
+                    // Search in the post's own content
+                    EF.Functions.Like(p.Content ?? "", $"%{searchTerm}%") ||
+                    // Search in original post's content if it's a shared post
+                    (p.IsShared && p.OriginalPost != null && EF.Functions.Like(p.OriginalPost.Content ?? "", $"%{searchTerm}%"))
+                )
                 .OrderByDescending(p => p.CreatedAt)
                 .ToPagedResultAsync(pageNumber, pageSize);
         }
@@ -63,6 +71,20 @@ namespace Socialify.Infrastructure.Repository
                 .AsNoTracking()
                 .AsSplitQuery()
                 .FirstOrDefaultAsync();  
+        }
+
+        public async Task<Post?> GetPostWithOriginalPostAsync(int postId)
+        {
+            return await _context.Posts
+                .Include(p => p.User)
+                .Include(p => p.Likes)
+                .Include(p => p.SavedPosts)
+                .Include(p => p.SharedPosts)
+                .Include(p => p.OriginalPost)
+                    .ThenInclude(op => op!.User)
+                .AsSplitQuery()
+                .AsNoTracking()
+                .FirstOrDefaultAsync(p => p.Id == postId);  
         }
     }
 }

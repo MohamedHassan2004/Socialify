@@ -32,6 +32,44 @@
     );
 }
 
+function unsharePost(sharedPostId) {
+    showConfirm('Remove Share',
+        'Are you sure you want to remove this shared post?',
+        function () {
+            const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+
+            fetch(`/Posts/UnsharePost?sharedPostId=${sharedPostId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': token || ''
+                },
+                credentials: 'include'
+            })
+                .then(response => {
+                    if (response.ok) {
+                        const postElement = document.querySelector(`[data-post-id="${sharedPostId}"]`)?.closest('.post-card');
+                        if (postElement) {
+                            postElement.remove();
+                            showAlert('success', 'Removed Successfully', 'Shared post has been removed successfully.');
+                        } else {
+                            location.reload();
+                        }
+                    } else if (response.status === 401) {
+                        setTimeout(() => window.location.href = '/Account/Login', 2000);
+                    } else {
+                        return response.text().then(text => {
+                            showAlert('error', 'Error', 'Error response: ' + text);
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error removing shared post:', error);
+                    showAlert('error', 'Error', 'Error removing shared post: ' + error.message);
+                });
+        }
+    );
+}
 
 function toggleLike(element) {
     const postId = element.getAttribute('data-post-id');
@@ -40,7 +78,7 @@ function toggleLike(element) {
         method: 'POST',
         credentials: 'include'
     })
-        .then(response => { 
+        .then(response => {
             if (response.ok) {
                 const likesCountElement = element.closest('div').querySelector('.likes-count');
                 if (!likesCountElement) {
@@ -59,12 +97,12 @@ function toggleLike(element) {
                 setTimeout(() => window.location.href = '/Account/Login', 2000);
             } else {
                 return response.text().then(text => {
-                    showAlert('error', 'error', 'Error response: '+ text);
+                    showAlert('error', 'error', 'Error response: ' + text);
                 });
             }
         })
         .catch(error => {
-            showAlert('error','error', 'Error toggling like: '+ error);
+            showAlert('error', 'error', 'Error toggling like: ' + error);
         });
 }
 

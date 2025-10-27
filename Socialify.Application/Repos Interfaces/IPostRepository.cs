@@ -11,7 +11,7 @@ namespace Socialify.Application.Repos_Interfaces
         Task<PagedResult<Post>> SearchPostsAsync(string searchTerm, int pageNumber, int pageSize);
         Task<PagedResult<Post>> GetPostsByUserId(string userId, int pageNumber, int pageSize);
         Task<Post?> GetPostWithCommentsAsync(int postId);
-
+        Task<Post?> GetPostWithOriginalPostAsync(int postId);
     }
 }
 

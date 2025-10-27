@@ -13,7 +13,7 @@ namespace Socialify.Domain.Events
         public DateTime OccurredOn { get; }
         protected DomainEvent()
         {
-            OccurredOn = DateTime.UtcNow;
+            OccurredOn = DateTime.Now;
             EventId = Guid.NewGuid();
         }
     }

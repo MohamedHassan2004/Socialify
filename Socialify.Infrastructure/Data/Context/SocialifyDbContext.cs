@@ -16,7 +16,7 @@ namespace Socialify.Infrastructure.Data.Context
         public DbSet<SavedPost> SavedPosts { get; set; }
         public DbSet<Like> Likes { get; set; }
         public DbSet<Comment> Comments { get; set; }
-
+        public DbSet<SharedPost> SharedPosts { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -86,6 +86,37 @@ namespace Socialify.Infrastructure.Data.Context
             modelBuilder.Entity<Post>()
                 .HasOne(p => p.User)
                 .WithMany(u => u.Posts)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // SharedPost configuration
+            modelBuilder.Entity<SharedPost>(entity =>
+            {
+                entity.HasKey(sp => sp.Id);
+
+                entity.HasOne(sp => sp.OriginalPost)
+                    .WithMany(p => p.SharedPosts)
+                    .HasForeignKey(sp => sp.OriginalPostId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(sp => sp.Post)
+                    .WithMany()
+                    .HasForeignKey(sp => sp.SharedPostId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(sp => sp.SharedByUser)
+                    .WithMany()
+                    .HasForeignKey(sp => sp.SharedByUserId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasIndex(sp => new { sp.OriginalPostId, sp.SharedByUserId })
+                    .IsUnique();
+            });
+
+            // Post self-referencing relationship for shared posts
+            modelBuilder.Entity<Post>()
+                .HasOne(p => p.OriginalPost)
+                .WithMany()
+                .HasForeignKey(p => p.OriginalPostId)
                 .OnDelete(DeleteBehavior.Restrict);
         }
     }

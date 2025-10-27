@@ -36,7 +36,11 @@
                     <textarea class="form-control"
                               asp-for="Content"
                               placeholder="What's on your mind?"
-                              maxlength="500"></textarea>
+                              maxlength="500"
+                              value="@Model.Content"></textarea>
+                    <div class="text-muted">
+                        <span id="charCount">@((Model.Content != null ? Model.Content.Length : 0))</span>/500 characters
+                    </div>
                     <span asp-validation-for="Content" class="text-danger"></span>
                 </div>
 
@@ -54,16 +58,16 @@
                     <span asp-validation-for="MediaUrl" class="text-danger"></span>
                 </div>
 
-                <div id="mediaPreview" class="mt-3">
+                <div id="mediaPreview" class="mt-3 text-center">
                     @if (!string.IsNullOrEmpty(Model.MediaUrl))
                     {
                         if (Model.MediaType?.Contains("image") == true)
                         {
-                            <img src="/@Model.MediaUrl" class="img-fluid rounded mb-2" style="max-height: 800px; object-fit: cover; width: 100%;" />
+                            <img src="/@Model.MediaUrl" class="img-fluid rounded mb-2" style="max-height: 800px;" />
                         }
                         else if (Model.MediaType?.Contains("video") == true)
                         {
-                            <video src="/@Model.MediaUrl" controls class="w-100 mb-2 rounded" style="max-height: 800px; object-fit: cover; width: 100%;"></video>
+                            <video src="/@Model.MediaUrl" controls class="mb-2 rounded" style="max-height: 800px;"></video>
                         }
                         else if (Model.MediaType?.Contains("audio") == true)
                         {
@@ -102,5 +106,15 @@
         });
     </script>
 
+    <script>
+        // Character counter
+        const textarea = document.querySelector('textarea');
+        const charCount = document.getElementById('charCount');
+        if (textarea && charCount) {
+            textarea.addEventListener('input', function() {
+                charCount.textContent = this.value.length;
+            });
+        }
+    </script>
     <partial name="_ValidationScriptsPartial" />
 }

@@ -29,6 +29,7 @@ namespace Socialify.Infrastructure
             services.AddScoped<ISavedPostRepository, SavedPostRepository>();
             services.AddScoped<ICommentRepository, CommentRepository>();
             services.AddScoped<ICommentService, CommentService>();
+            services.AddScoped<ISharedPostRepository, SharedPostRepository>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 

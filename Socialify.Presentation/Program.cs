@@ -90,12 +90,6 @@ namespace Socialify.Presentation
                 // MediatR configuration
                 builder.Services.AddMediatR(cfg =>
                 {
-                    cfg.RegisterServicesFromAssembly(typeof(Program).Assembly);
-                });
-
-                // ?? ?? ???? multiple assemblies
-                builder.Services.AddMediatR(cfg =>
-                {
                     cfg.RegisterServicesFromAssemblies(
                         typeof(DomainEvent).Assembly,
                         typeof(AuthService).Assembly

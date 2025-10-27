@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Socialify.Infrastructure.Data.Context;
 
@@ -11,9 +12,11 @@ using Socialify.Infrastructure.Data.Context;
 namespace Socialify.Infrastructure.Migrations
 {
     [DbContext(typeof(SocialifyDbContext))]
-    partial class SocialifyDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251024215949_AddSharePostFeature")]
+    partial class AddSharePostFeature
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -292,7 +295,7 @@ namespace Socialify.Infrastructure.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Comments", (string)null);
+                    b.ToTable("Comments");
                 });
 
             modelBuilder.Entity("Socialify.Domain.Entities.Like", b =>
@@ -321,7 +324,7 @@ namespace Socialify.Infrastructure.Migrations
                         .IsUnique()
                         .HasDatabaseName("IX_Likes_PostId_UserId");
 
-                    b.ToTable("Likes", (string)null);
+                    b.ToTable("Likes");
                 });
 
             modelBuilder.Entity("Socialify.Domain.Entities.Post", b =>
@@ -376,7 +379,7 @@ namespace Socialify.Infrastructure.Migrations
                     b.HasIndex("UserId")
                         .HasDatabaseName("IX_Posts_UserId");
 
-                    b.ToTable("Posts", (string)null);
+                    b.ToTable("Posts");
                 });
 
             modelBuilder.Entity("Socialify.Domain.Entities.SavedPost", b =>
@@ -408,7 +411,7 @@ namespace Socialify.Infrastructure.Migrations
                         .IsUnique()
                         .HasDatabaseName("IX_SavedPosts_PostId_UserId");
 
-                    b.ToTable("SavedPosts", (string)null);
+                    b.ToTable("SavedPosts");
                 });
 
             modelBuilder.Entity("Socialify.Domain.Entities.SharedPost", b =>
@@ -441,7 +444,7 @@ namespace Socialify.Infrastructure.Migrations
                     b.HasIndex("OriginalPostId", "SharedByUserId")
                         .IsUnique();
 
-                    b.ToTable("SharedPosts", (string)null);
+                    b.ToTable("SharedPosts");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
