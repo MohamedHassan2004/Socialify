@@ -155,6 +155,7 @@ main {
     background: var(--button-primary-hover);
     color: var(--button-text-color);
     transform: translateY(-1px);
+    border-color: transparent;
     box-shadow: var(--shadow-md);
 }
 

@@ -10,9 +10,7 @@ namespace Socialify.Application.Mappers
     [Mapper]
     public static partial class PostMapper
     {
-        [MapProperty(nameof(Post.Content),nameof(PostDto.Content))]
         public static partial PostDto ToPostDto(this Post post);
-        
         public static PostDto ToPostDto(this Post post, string currentUserId)
         {
             var dto = post.ToPostDto();
@@ -23,12 +21,8 @@ namespace Socialify.Application.Mappers
             dto.IsSavedByCurrentUser = post.SavedPosts.Any(sp => sp.UserId == currentUserId);
             dto.IsSharedByCurrentUser = post.SharedPosts.Any(sp => sp.SharedByUserId == currentUserId);
             dto.IsOwnedByCurrentUser = post.UserId == currentUserId;
-            dto.MediaType = GetMediaType(post.MediaUrl);
-            dto.MediaUrl = post.MediaUrl;
-            dto.Content = post.Content;
-            dto.SharesCount = post.SharesCount;
-            dto.IsShared = post.IsShared;
-  
+            dto.MediaType = MediaTypeHelper.GetMediaType(post.MediaUrl);
+
             // Map original post with only essential information
             if (post.IsShared && post.OriginalPost != null)
             {
@@ -42,29 +36,29 @@ namespace Socialify.Application.Mappers
                     IsEdited = originalPost.IsEdited,
                     Content = originalPost.Content,
                     MediaUrl = originalPost.MediaUrl,
-                    MediaType = GetMediaType(originalPost.MediaUrl),
+                    MediaType = MediaTypeHelper.GetMediaType(originalPost.MediaUrl),
                     UserId = originalPost.UserId,
                     UserName = originalPost.User?.FullName ?? "Unknown User",
                     UserProfilePicUrl = originalPost.User?.ProfilePicUrl ?? ""
                 };
-             }
-                
-            return dto;
-         }
-
-
-        public static partial UpdatePostDto ToUpdatePostDtoCore(this Post post);
-
-        public static UpdatePostDto ToUpdatePostDto(this Post post)
-        {
-            var dto = post.ToUpdatePostDtoCore();
-            dto.Content = post.Content;
-            dto.MediaType = GetMediaType(post.MediaUrl);
-            dto.MediaUrl = post.MediaUrl;
+            }
             return dto;
         }
 
-        private static string? GetMediaType(string? mediaUrl)
+        public static partial UpdatePostDto ToUpdatePostDtoCore(this Post post);
+
+        [MapperIgnore]
+        public static UpdatePostDto ToUpdatePostDto(this Post post)
+        {
+            var dto = post.ToUpdatePostDtoCore();
+            dto.MediaType = MediaTypeHelper.GetMediaType(post.MediaUrl);
+            return dto;
+        }
+    }
+
+    internal static class MediaTypeHelper
+    {
+        public static string? GetMediaType(string? mediaUrl)
         {
             if (string.IsNullOrEmpty(mediaUrl)) return null;
 
@@ -77,6 +71,7 @@ namespace Socialify.Application.Mappers
             if (ImageExtensions.Contains(extension)) return "image";
             if (VideoExtensions.Contains(extension)) return "video";
             if (AudioExtensions.Contains(extension)) return "audio";
+
             return null;
         }
     }

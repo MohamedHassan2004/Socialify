@@ -1,19 +1,20 @@
-﻿let profileActions = document.querySelector('.profile-actions');
-profileActions.addEventListener("click", (e) => {
-    // add friend
-    if (e.target.className.includes("add-friend-btn")) {
-        onclickAddFriend(e);
-    }// delete friend
-    else if (e.target.className.includes('delete-friend')) {
-        onclickDeleteFriend(e, profileActions);
-    } // accept req
-    else if (e.target.className.includes("accept")) {
-        onclickAcceptRequest(e, profileActions);
-    } // reject req
-    else if (e.target.className.includes("reject")) {
-        onclickRejectRequest(e, profileActions);
-    }
+﻿let profileActionsList = document.querySelectorAll('.profile-actions');
+
+profileActionsList.forEach(profileActions => {
+    profileActions.addEventListener("click", (e) => {
+        if (e.target.classList.contains("add-friend-btn")) {
+            onclickAddFriend(e);
+        } else if (e.target.classList.contains("delete-friend")) {
+            onclickDeleteFriend(e, profileActions);
+        } else if (e.target.classList.contains("accept")) {
+            onclickAcceptRequest(e, profileActions);
+        } else if (e.target.classList.contains("reject")) {
+            onclickRejectRequest(e, profileActions);
+        }
+    });
 });
+
+
 
 
 ///////////////
@@ -26,12 +27,10 @@ const deleteFriendBtn = `<button class='btn btn-danger delete-friend'>
 
 function onclickAddFriend(e) {
     if (e.target.innerHTML.includes("fa-user-plus")) {
-        console.log("add");
         e.target.className = e.target.className.replace("btn-primary", "btn-secondary");
         e.target.innerHTML = e.target.innerHTML.replace('class="fas fa-user-plus"', 'class="fa-solid fa-xmark"')
         e.target.innerHTML = e.target.innerHTML.replace('Add Friend', 'Cancel');
     } else {
-        console.log("cancel");
         e.target.className = e.target.className.replace("btn-secondary", "btn-primary");
         e.target.innerHTML = e.target.innerHTML.replace('class="fa-solid fa-xmark"', 'class="fas fa-user-plus"')
         e.target.innerHTML = e.target.innerHTML.replace('Cancel', 'Add Friend');

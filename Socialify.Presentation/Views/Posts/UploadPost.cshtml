@@ -57,6 +57,7 @@
 
 @section Scripts {
     <script src="~/js/media-uploader.js"></script>
+    <script src="~/js/form-change-tracker.js"></script>
     <script>
         // ============================================
         // Initialize MediaUploader
@@ -67,11 +68,20 @@
             buttonId: 'mediaBtn'
         });
 
-        // يمكنك إضافة أي logic إضافي هنا لو محتاج
-        // مثال: التحقق قبل الـ submit
+        // ============================================
+        // Initialize FormChangeTracker
+        // ============================================
+        const changeTracker = new FormChangeTracker({
+            formId: 'postForm',
+            textareaId: 'Content',
+            mediaUploader: uploader,
+            cancelButtonSelectors: ['a[href*="Home/Index"]']
+        });
+
+        // Optional: You can check for changes before submit
         document.getElementById('postForm').addEventListener('submit', function(e) {
-            // يمكنك استخدام uploader.hasFile() للتحقق من وجود ملف
             console.log('Has file:', uploader.hasFile());
+            console.log('Has changes:', changeTracker.hasChanges());
         });
     </script>
 

@@ -23,9 +23,7 @@
                     <p>@Model.Content</p>
                     @if (Model.IsEdited)
                     {
-                        <small class="text-muted d-block px-2">
-                                <em>(Edited)</em>
-                        </small>
+                        <small class="text-muted d-block px-2">(edited)</small>
                     }
                     </div>
                 @if (Model.UserId == currentUserId)

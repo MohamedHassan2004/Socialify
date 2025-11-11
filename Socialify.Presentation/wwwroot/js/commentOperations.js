@@ -83,6 +83,10 @@ document.getElementById('comment_form').addEventListener('submit', async functio
         if (commentsCount) {
             let count = parseInt(commentsCount.textContent);
             commentsCount.textContent = (count + 1).toString();
+
+        const charCountAdding = document.getElementById('charCountAdding');
+        charCountAdding.textContent = '0';
+
         }
     } else {
         showAlert('error', 'Error', await response.text());

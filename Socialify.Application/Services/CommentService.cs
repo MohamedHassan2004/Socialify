@@ -45,7 +45,7 @@
 ﻿                await _unitOfWork.SaveAsync();
 ﻿
 ﻿                var commentWithUser = await _unitOfWork.Comments.GetCommentWithUserAsync(comment.Id);
-﻿                var commentDto = commentWithUser.ToCommentDtoWithCurrentUser(currentUserId);
+﻿                var commentDto = commentWithUser.ToCommentDto(currentUserId);
 ﻿
 ﻿                _logger.LogInformation("Comment added to post {PostId} by user {UserId}", addCommentDto.PostId, currentUserId);
 ﻿                return Result<CommentDto>.Success(commentDto);

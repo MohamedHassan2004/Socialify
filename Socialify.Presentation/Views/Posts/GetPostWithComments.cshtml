@@ -2,7 +2,7 @@
     For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 *@
 @{
-    ViewData["Title"] = "Post Comments";
+	ViewData["Title"] = "Post Comments";
 	ViewData["CssFile"] = "Comments.css";
 }
 @model Socialify.Application.DTOs.Post.PostWithDetailsDto
@@ -10,54 +10,49 @@
 <main>
 	@await Html.PartialAsync("_Post", Model.Post)
 
-    <section id="comments-section">
-        <h4 class ="section-title">Comments</h4>
-        @if (Model.Comments != null && Model.Comments.Any())
-        {
-            foreach (var comment in Model.Comments)
-            {
-                @await Html.PartialAsync("_Comment", comment)
-            }
-        }
-        else
-        {
-            <p id="no-comments">No comments yet. Be the first to comment!</p>
+	<section id="comments-section">
+		<h4 class="section-title">Comments</h4>
+		@if (Model.Comments != null && Model.Comments.Any())
+		{
+			foreach (var comment in Model.Comments)
+			{
+				@await Html.PartialAsync("_Comment", comment)
+			}
+		}
+		else
+		{
+			<p id="no-comments">No comments yet. Be the first to comment!</p>
 		}
 	</section>
 
-    <div class="add-comment">
-        <form id="comment_form" action="/Comments/AddComment" method="post">
-            <input type="hidden" id="post_id" name="PostId" value="@Model.Post.Id" />
+	<div class="add-comment">
+		<form id="comment_form" action="/Comments/AddComment" method="post">
+			<input type="hidden" id="post_id" name="PostId" value="@Model.Post.Id" />
 			@Html.AntiForgeryToken()
-            <div class="input-group mt-3">
-                <input type="text" class="form-control" id="comment_content" name="Content"
-                        placeholder="Write a comment" aria-label="Write a comment" aria-describedby="button-addon2" required />
-                <button type="submit" class="btn btn-primary" id="button-addon2">
-                    <i class="fas fa-paper-plane"></i>
-                </button>
-            </div>
-            <div class="text-muted">
-                <span id="charCountAdding">0</span>/200 characters
-            </div>
-        </form>
-    </div>
+			<div class="input-group mt-3">
+				<input type="text" class="form-control" id="comment_content" name="Content" maxlength="200"
+					placeholder="Write a comment" aria-label="Write a comment" aria-describedby="button-addon2" required />
+				<button type="submit" class="btn btn-primary" id="button-addon2">
+					<i class="fas fa-paper-plane"></i>
+				</button>
+			</div>
+			<div class="text-muted">
+				<span id="charCountAdding">0</span>/200 characters
+			</div>
+		</form>
+	</div>
 </main>
 
-@section Scripts{
-    <script src="~/js/commentOperations.js"></script>
-     <script>
-        // Character counter
-        const comment_content = document.getElementById('comment_content');
-        const charCountAdding = document.getElementById('charCountAdding');
-        if (comment_content && charCountAdding) {
-            comment_content.addEventListener('input', function() {
-                charCountAdding.textContent = this.value.length;
-            });
-        }
-
-		const submitButton = document.querySelector('.add-comment').querySelector('button[type="submit"]');
-		submitButton.addEventListener('click', function() {
-			charCountAdding.textContent = '0';
+@section Scripts {
+	<script src="~/js/commentOperations.js"></script>
+	<script>
+		// Character counter
+		const comment_content = document.getElementById('comment_content');
+		const charCountAdding = document.getElementById('charCountAdding');
+		if (comment_content && charCountAdding) {
+			comment_content.addEventListener('input', function() {
+				charCountAdding.textContent = this.value.length;
 			});
-    </script>
+		}
+	</script>
 }

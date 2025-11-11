@@ -209,7 +209,7 @@ public class PostService : IPostService
                 return Result<PostWithDetailsDto>.Failure("Post not found.");
             }
             var postDto = post.ToPostDto(currentUserId);
-            var commentsDto = post.Comments.Select(c => c.ToCommentDtoWithCurrentUser(currentUserId)).ToList();
+            var commentsDto = post.Comments.Select(c => c.ToCommentDto(currentUserId)).ToList();
 
             return Result<PostWithDetailsDto>.Success(new PostWithDetailsDto()
             {
