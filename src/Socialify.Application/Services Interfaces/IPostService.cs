@@ -15,6 +15,7 @@ public interface IPostService
     Task<Result> UnsharePostAsync(string userId, int sharedPostId);
     Task<Result<UpdatePostDto>> GetPostByIdAsync(int postId, string currentUserId);
     Task<Result<PagedResult<PostDto>>> GetPagedPostsAsync(PaginationParamsDto paramsDto);
+    Task<Result<PagedResult<PostDto>>> GetRelevantFeedsAsync(PaginationParamsDto paramsDto);
     Task<Result<PagedResult<PostDto>>> GetPostsByUserIdAsync(string userId, PaginationParamsDto paramsDto);
     Task<Result<PagedResult<PostDto>>> SearchPostsAsync(string query, PaginationParamsDto paramsDto);
     Task<Result<PostWithDetailsDto>> GetPostWithCommentsAsync(int postId, string currentUserId);

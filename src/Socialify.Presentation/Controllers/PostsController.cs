@@ -119,7 +119,23 @@ namespace Socialify.Presentation.Controllers
 
 
         [HttpGet]
-        public async Task<IActionResult> LoadPosts([FromQuery] int pageNumber)
+        public async Task<IActionResult> LoadRelevantPosts([FromQuery] int pageNumber)
+        {
+            var paramsDto = CreatePaginationParams(pageNumber);
+
+            var result = await _postService.GetRelevantFeedsAsync(paramsDto);
+
+            if (!result.IsSuccess)
+            {
+                TempData["ErrorMessage"] = result.ErrorMessage;
+                return PartialView("_PostList", new List<PostDto>());
+            }
+
+            return PartialView("_PostList", result.Data!.Data);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> LoadExplorePosts([FromQuery] int pageNumber)
         {
             var paramsDto = CreatePaginationParams(pageNumber);
 

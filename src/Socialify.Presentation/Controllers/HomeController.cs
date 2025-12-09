@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Socialify.Application.DTOs.Common;
 using Socialify.Application.DTOs.Home;
 using Socialify.Application.Interfaces;
 using Socialify.Application.Services;
@@ -13,9 +14,12 @@ namespace Socialify.Presentation.Controllers
     public class HomeController : BaseController
     {
         private readonly IHomePageService _homePageService;
-        public HomeController(IHomePageService homePageService, ILogger<HomeController> logger) : base(logger)
+        private readonly IPostService _postService;
+
+        public HomeController(IHomePageService homePageService, IPostService postService, ILogger<HomeController> logger) : base(logger)
         {
             _homePageService = homePageService;
+            _postService = postService;
         }
 
         public async Task<IActionResult> Index()
@@ -30,10 +34,22 @@ namespace Socialify.Presentation.Controllers
             return View(result.Data);
         }
 
-        public IActionResult Explore()
+        public async Task<IActionResult> Explore()
         {
+            var paramsDto = new PaginationParamsDto
+            {
+                PageNumber = 1,
+                PageSize = PageSize,
+                CurrentUserId = currentUserId
+            };
+
+            var result = await _postService.GetPagedPostsAsync(paramsDto);
+            if (!result.IsSuccess)
+            {
+                return HandleServiceError(result, nameof(Index), "Failed to load explore page posts. Please try again.");
+            }
             ViewData["Title"] = "Explore";
-            return View();
+            return View(result.Data);
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

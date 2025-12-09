@@ -1,31 +1,38 @@
-﻿@{
-    ViewData["Title"] = "Explore";
+﻿@model Socialify.Application.DTOs.Common.PagedResult<Socialify.Application.DTOs.Post.PostDto>
+
+@{
     ViewData["CssFile"] = "HomePage.css";
 }
 
 <main>
-    @if (TempData["ErrorMessage"] != null)
-    {
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            <i class="fas fa-exclamation-triangle me-2"></i>
-            @TempData["ErrorMessage"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    }
-    
-    @if (TempData["SuccessMessage"] != null)
-    {
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            <i class="fas fa-check-circle me-2"></i>
-            @TempData["SuccessMessage"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    }
+    <h2>Explore</h2>
+    <p>Discover new content and connect with others!</p>
+    <hr />
 
-    <div class="explore-content">
-        <h2>Explore</h2>
-        <p>Discover new content and connect with others!</p>
-        
-        @await Html.PartialAsync("_PostContainer")
-    </div>
+    @if (Model != null && Model.Data != null && Model.Data.Any())
+    {
+        <div id="posts-section" data-page-size="@Model.PageSize" data-total-pages="@Model.TotalPages">
+            @await Html.PartialAsync("_PostContainer", Model)
+        </div>
+    }
+    else
+    {
+        <div class="card post-card p-4">
+            <h5>No posts available</h5>
+            <p>Check back later for new posts!</p>
+        </div>
+    }
 </main>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            initInfiniteScroll({
+                sectionId: "posts-section",
+                containerId: "posts-container",
+                observerId: "observer",
+                apiUrl: "/Posts/LoadExplorePosts"
+            });
+        });
+    </script>
+}

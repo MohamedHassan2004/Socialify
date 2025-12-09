@@ -43,7 +43,7 @@ namespace Socialify.Application.Services
                 };
 
                 var userInfo = await _profileService.GetProfileBasicInfoAsync(currentUserId);
-                var posts = await _postService.GetPagedPostsAsync(paramsDto);
+                var posts = await _postService.GetRelevantFeedsAsync(paramsDto);
                 //var peopleYouMayKnow = await _friendService.GetPeopleYouMayKnowAsync(currentUserId);
 
                 if (!posts.IsSuccess || !userInfo.IsSuccess)

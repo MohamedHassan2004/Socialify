@@ -369,6 +369,10 @@ public class PostService : IPostService
     public async Task<Result<PagedResult<PostDto>>> GetPostsByUserIdAsync(string userId, PaginationParamsDto paramsDto)
         => await GetFeedsAsync(p => p.UserId == userId, paramsDto, "fetching posts by user ID");
 
+    public async Task<Result<PagedResult<PostDto>>> GetRelevantFeedsAsync(PaginationParamsDto paramsDto)
+        => await GetFeedsAsync(p => p.User.Friendships.Any(f => f.UserId == paramsDto.CurrentUserId) || p.UserId == paramsDto.CurrentUserId, paramsDto, "Getting Relevant Feeds for User");
+
+
     // private helper
     private async Task<Result<PagedResult<PostDto>>> GetFeedsAsync(Expression<Func<Post, bool>> filter, PaginationParamsDto paramsDto, string operationDescription)
     {
@@ -396,6 +400,7 @@ public class PostService : IPostService
             return Result<PagedResult<PostDto>>.Failure($"Error occurred while {operationDescription}.");
         }
     }
+    
     private static void ApplyPostProcessing(PostDto post)
     {
         post.TimeAgo = post.CreatedAt.Humanize(false);
@@ -407,4 +412,5 @@ public class PostService : IPostService
             post.OriginalPost.MediaType = MediaTypeHelper.GetMediaType(post.OriginalPost.MediaUrl);
         }
     }
+
 }

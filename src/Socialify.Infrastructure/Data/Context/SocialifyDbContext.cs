@@ -147,6 +147,12 @@ namespace Socialify.Infrastructure.Data.Context
                 .WithMany(f => f.Friendships)
                 .HasForeignKey(f => f.FriendId)
                 .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<Friendship>(entity =>
+            {
+                entity.HasIndex(f => new { f.UserId, f.FriendId })
+                    .HasDatabaseName("IX_Friendships_UserId_FriendId");
+            });
         }
     }
 }
