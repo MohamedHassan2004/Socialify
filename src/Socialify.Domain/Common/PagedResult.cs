@@ -16,6 +16,18 @@ namespace Socialify.Application.DTOs.Common
 
         public bool HasPreviousPage => PageNumber > 1;
         public bool HasNextPage => PageNumber < TotalPages;
+
+        public PagedResult(IEnumerable<T> Data, int TotalCount, int PageNumber, int PageSize)
+        {
+            this.Data = Data;
+            this.PageNumber = PageNumber;
+            this.PageSize = PageSize;
+            this.TotalCount = TotalCount;
+        }
+        public PagedResult()
+        {
+            
+        }
     }
 
 }

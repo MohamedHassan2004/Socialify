@@ -1,19 +1,23 @@
 ﻿using Humanizer;
 using MediatR;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Socialify.Application.DTOs.Comment;
 using Socialify.Application.DTOs.Common;
 using Socialify.Application.DTOs.Post;
 using Socialify.Application.Interfaces;
 using Socialify.Application.Mappers;
+using Socialify.Application.Projections;
 using Socialify.Application.Repos_Interfaces;
 using Socialify.Application.Services_Interfaces;
 using Socialify.Domain.Common;
 using Socialify.Domain.Entities;
 using Socialify.Domain.Events;
+using System.Linq.Expressions;
 
 namespace Socialify.Application.Services;
+
 public class PostService : IPostService
 {
     private readonly IPostRepository _postRepository;
@@ -25,9 +29,9 @@ public class PostService : IPostService
     private readonly string _postMediaPath;
 
     public PostService(
-        IPostRepository postRepository, 
-        ILogger<PostService> logger, 
-        IFileManager fileManager, 
+        IPostRepository postRepository,
+        ILogger<PostService> logger,
+        IFileManager fileManager,
         IConfiguration config,
         ISharedPostRepository sharedPostRepository,
         IMediator mediator)
@@ -41,11 +45,12 @@ public class PostService : IPostService
         _postMediaPath = config["FileSettings:PostMediaPath"] ?? "posts";
     }
 
+    // write operations
     public async Task<Result> UploadPostAsync(string userId, UploadPostDto uploadPostDto)
     {
         try
         {
-            if(string.IsNullOrWhiteSpace(userId))
+            if (string.IsNullOrWhiteSpace(userId))
             {
                 return Result.Failure("User ID is required.");
             }
@@ -82,7 +87,7 @@ public class PostService : IPostService
             _logger.LogInformation("User {UserId} uploaded a new post {PostId}.", userId, post.Id);
             return Result.Success();
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             _logger.LogError(ex, "Error occurred while uploading post.");
             return Result.Failure("Error occurred while uploading post.");
@@ -168,91 +173,6 @@ public class PostService : IPostService
         }
     }
 
-    public Task<Result<PagedResult<PostDto>>> GetPagedPostsAsync(PaginationParamsDto paramsDto) =>
-        HandlePagedOperation(() => _postRepository.GetPagedPostsAsync(paramsDto.PageNumber, paramsDto.PageSize),"fetching paged posts", paramsDto.CurrentUserId);
-
-    public Task<Result<PagedResult<PostDto>>> SearchPostsAsync(string query, PaginationParamsDto paramsDto) =>
-        HandlePagedOperation(() => _postRepository.SearchPostsAsync(query, paramsDto.PageNumber, paramsDto.PageSize),"searching posts", paramsDto.CurrentUserId);
-
-    public Task<Result<PagedResult<PostDto>>> GetPostsByUserIdAsync(string userId, PaginationParamsDto paramsDto) =>
-        HandlePagedOperation(() => _postRepository.GetPostsByUserId(userId, paramsDto.PageNumber, paramsDto.PageSize), "fetching posts by user", paramsDto.CurrentUserId);
-
-    public async Task<Result<UpdatePostDto>> GetPostByIdAsync(int postId, string currentUserId)
-    {
-        try
-        {
-            var post = await _postRepository.GetByIdAsync(postId);
-            if (post == null)
-            {
-                return Result<UpdatePostDto>.Failure("Post not found.");
-            }
-
-            var updatePostDto = post.ToUpdatePostDto();
-
-            return Result<UpdatePostDto>.Success(updatePostDto);
-        }
-        catch(Exception ex)
-        {
-            _logger.LogError(ex, "Error occurred while fetching post by ID.");
-            return Result<UpdatePostDto>.Failure("Error occurred while fetching post by ID.");
-        }   
-    }
-
-
-    public async Task<Result<PostWithDetailsDto>> GetPostWithCommentsAsync(int postId, string currentUserId)
-    {
-        try
-        {
-            var post = await _postRepository.GetPostWithCommentsAsync(postId);
-            if (post == null)
-            {
-                return Result<PostWithDetailsDto>.Failure("Post not found.");
-            }
-            var postDto = post.ToPostDto(currentUserId);
-            var commentsDto = post.Comments.Select(c => c.ToCommentDto(currentUserId)).ToList();
-
-            return Result<PostWithDetailsDto>.Success(new PostWithDetailsDto()
-            {
-                Post = postDto,
-                Comments = commentsDto
-            }); 
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error occurred while fetching post with comments.");
-            return Result<PostWithDetailsDto>.Failure("Error occurred while fetching post with comments.");
-        }
-    }
-
-    // ---------- Private Helpers ----------
-    private async Task<Result<PagedResult<PostDto>>> HandlePagedOperation(
-        Func<Task<PagedResult<Post>>> repositoryCall,
-        string operationDescription,
-        string currentUserId)
-    {
-        try
-        {
-            var postsPaged = await repositoryCall();
-            var postDtos = postsPaged.Data.Select(p => p.ToPostDto(currentUserId)).ToList();
-
-            var dtoPaged = new PagedResult<PostDto>
-            {
-                Data = postDtos,
-                PageNumber = postsPaged.PageNumber,
-                PageSize = postsPaged.PageSize,
-                TotalCount = postsPaged.TotalCount
-            };
-
-            return Result<PagedResult<PostDto>>.Success(dtoPaged);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, $"Error occurred while {operationDescription}.");
-            return Result<PagedResult<PostDto>>.Failure($"Error occurred while {operationDescription}.");
-        }
-    }
-
-
     public async Task<Result> SharePostAsync(string userId, SharePostDto sharePostDto)
     {
         try
@@ -284,7 +204,7 @@ public class PostService : IPostService
                 Content = sharePostDto.AdditionalComment,
                 UserId = userId,
                 IsShared = true,
-                OriginalPostId = actualOriginalPostId, 
+                OriginalPostId = actualOriginalPostId,
                 CreatedAt = DateTime.Now
             };
 
@@ -367,6 +287,124 @@ public class PostService : IPostService
         {
             _logger.LogError(ex, "Error occurred while unsharing post.");
             return Result.Failure("Error occurred while unsharing post.");
+        }
+    }
+
+
+    // read operations
+    public async Task<Result<UpdatePostDto>> GetPostByIdAsync(int postId, string currentUserId)
+    {
+        try
+        {
+            var post = await _postRepository.GetByIdAsync(postId);
+            if (post == null)
+            {
+                return Result<UpdatePostDto>.Failure("Post not found.");
+            }
+
+            var updatePostDto = post.ToUpdatePostDto();
+
+            return Result<UpdatePostDto>.Success(updatePostDto);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error occurred while fetching post by ID.");
+            return Result<UpdatePostDto>.Failure("Error occurred while fetching post by ID.");
+        }
+    }
+
+    public async Task<Result<PostWithDetailsDto>> GetPostWithCommentsAsync(int postId, string currentUserId)
+    {
+        try
+        {
+            var post = await _postRepository.GetPostWithCommentsAsync(PostProjections.ToPostWithDetailsDto(currentUserId), postId);
+            if (post == null)
+            {
+                return Result<PostWithDetailsDto>.Failure("Post not found.");
+            }
+            ApplyPostProcessing(post.Post);
+
+            return Result<PostWithDetailsDto>.Success(new PostWithDetailsDto()
+            {
+                Post = post.Post,
+                Comments = post.Comments.Select(c =>
+                {
+                    c.TimeAgo = c.CreatedAt.Humanize(false);
+                    return c;
+                }).ToList()
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error occurred while fetching post with comments.");
+            return Result<PostWithDetailsDto>.Failure("Error occurred while fetching post with comments.");
+        }
+    }
+
+    public async Task<Result<PagedResult<PostDto>>> SearchPostsAsync(string query, PaginationParamsDto paramsDto)
+    {
+        try
+        {
+            var posts = await _postRepository.SearchPostsAsync(PostProjections.ToFeedDto(paramsDto.CurrentUserId) ,query, paramsDto.PageNumber, paramsDto.PageSize);
+
+            foreach (var post in posts.Data)
+            {
+                ApplyPostProcessing(post);
+            }
+
+            var dtoPaged = new PagedResult<PostDto>(posts.Data, posts.TotalCount, posts.PageNumber, posts.PageSize);
+
+            return Result<PagedResult<PostDto>>.Success(dtoPaged);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error occurred while searching about {query}.", query);
+            return Result<PagedResult<PostDto>>.Failure($"Error occurred while searching about {query}.");
+        }
+    }
+
+    public async Task<Result<PagedResult<PostDto>>> GetPagedPostsAsync(PaginationParamsDto paramsDto)
+        => await GetFeedsAsync(p => true, paramsDto, "fetching paged posts");
+
+    public async Task<Result<PagedResult<PostDto>>> GetPostsByUserIdAsync(string userId, PaginationParamsDto paramsDto)
+        => await GetFeedsAsync(p => p.UserId == userId, paramsDto, "fetching posts by user ID");
+
+    // private helper
+    private async Task<Result<PagedResult<PostDto>>> GetFeedsAsync(Expression<Func<Post, bool>> filter, PaginationParamsDto paramsDto, string operationDescription)
+    {
+        try
+        {
+            var posts = await _postRepository.GetFeedsAsync(
+                filter,
+                PostProjections.ToFeedDto(paramsDto.CurrentUserId),
+                paramsDto.PageNumber,
+                paramsDto.PageSize,
+                p => p.CreatedAt);
+
+            foreach (var post in posts.Data)
+            {
+                ApplyPostProcessing(post);
+            }
+
+            var pagedDto = new PagedResult<PostDto>(posts.Data, posts.TotalCount, posts.PageNumber, posts.PageSize);
+
+            return Result<PagedResult<PostDto>>.Success(pagedDto);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, $"Error occurred while {operationDescription}.");
+            return Result<PagedResult<PostDto>>.Failure($"Error occurred while {operationDescription}.");
+        }
+    }
+    private static void ApplyPostProcessing(PostDto post)
+    {
+        post.TimeAgo = post.CreatedAt.Humanize(false);
+        post.MediaType = MediaTypeHelper.GetMediaType(post.MediaUrl);
+
+        if (post.OriginalPost != null)
+        {
+            post.OriginalPost.TimeAgo = post.OriginalPost.CreatedAt.Humanize(false);
+            post.OriginalPost.MediaType = MediaTypeHelper.GetMediaType(post.OriginalPost.MediaUrl);
         }
     }
 }
