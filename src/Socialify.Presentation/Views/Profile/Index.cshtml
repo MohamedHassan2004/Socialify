@@ -1,0 +1,100 @@
+﻿@using Socialify.Domain.Enums
+
+@{
+    ViewData["Title"] = "Profile";
+    ViewData["CssFile"] = "Profile.css";
+}
+@model Socialify.Application.DTOs.Profile.ProfilePageDto
+
+
+<main>
+
+    @if (Model != null)
+    {
+        @await Html.PartialAsync("_ProfileHeader", Model.ProfileInfo)
+    }
+
+    <ul class="nav nav-tabs profile-nav" id="profileTab" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="posts-tab" data-bs-toggle="tab" data-bs-target="#posts" type="button" role="tab" aria-controls="posts" aria-selected="true">Posts</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="friends-tab" data-bs-toggle="tab" data-bs-target="#friends" type="button" role="tab" aria-controls="friends" aria-selected="false">Friends</button>
+        </li>
+    </ul>
+
+    <div class="tab-content" id="profileTabContent">
+
+        <div class="tab-pane fade show active" id="posts" role="tabpanel" aria-labelledby="posts-tab">
+            <div id="posts-section"
+                 data-total-pages="@Model.Posts.TotalPages"
+                 data-page-size="@Model.Posts.PageSize"
+                 data-user-id="@Model.ProfileInfo.Id">
+
+                @await Html.PartialAsync("_PostContainer", Model.Posts)
+            </div>
+        </div>
+
+
+        <div class="tab-pane fade" id="friends" role="tabpanel" aria-labelledby="friends-tab">
+            <h5>Friends</h5>
+            <div id="friends-section"
+                 data-total-pages="@Model.Friends.TotalPages"
+                 data-page-size="@Model.Friends.PageSize"
+                 data-user-id="@Model.ProfileInfo.Id">
+            
+            <div id="friends-container">
+            @if (Model.Friends != null && Model.Friends.Data.Any())
+            {
+                foreach (var friend in Model.Friends.Data)
+                {
+                    @await Html.PartialAsync("_UserCard", friend)
+                }
+            }
+            else
+            {
+                <strong>No friends yet.</strong>
+            }
+			</div>
+
+			<div id="observer"></div>
+            </div>
+        </div>
+    </div>
+</main>
+
+
+@section Scripts {
+    <script src="~/js/deleteProfilePicture.js"></script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const section = document.getElementById("posts-section");
+            const userId = section.dataset.userId;
+
+            initInfiniteScroll({
+                sectionId: "posts-section",
+                containerId: "posts-container",
+                observerId: "observer",
+                apiUrl: "/Posts/LoadUserPosts",
+                queryParams: { userId }
+            });
+        });
+    </script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const section = document.getElementById("friends-section");
+            const userId = section.dataset.userId;
+
+            initInfiniteScroll({
+                sectionId: "friends-section",
+                containerId: "friends-container",
+                observerId: "observer",
+                apiUrl: "/Friendship/LoadFriendsByUserId",
+                queryParams: { userId }
+            });
+        });
+    </script>
+
+}

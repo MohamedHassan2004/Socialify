@@ -1,0 +1,28 @@
+﻿
+
+@using Socialify.Application.DTOs.Common
+@using Socialify.Application.DTOs.Profile
+@using System.Security.Claims
+
+@{
+    ViewData["Title"] = "Friends Requests List";
+}
+
+@model IEnumerable<ProfileBasicInfoDto>
+
+<main>
+    <section class="container mx-auto my-8 px-4">
+        <h4 class="section-title">Friends Requests</h4>
+        @if (Model != null && Model.Any())
+        {
+            <div id="profiles-container" class="search-results-list">
+                <partial name="_ProfileList" model="Model" /> 
+            </div>
+        }
+        else
+        {
+            <p class="text-gray-600">No Friends Requests yet.</p>
+        }
+    </section>
+</main>
+

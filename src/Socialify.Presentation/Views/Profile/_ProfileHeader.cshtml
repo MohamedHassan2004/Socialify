@@ -1,0 +1,41 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}
+@model Socialify.Application.DTOs.Profile.ProfileDto
+
+<div class="profile-header">
+
+    <div class="profile-info">
+        <img src="/@Model.ProfilePicUrl" class="profile-avatar profile-avatar-hover" alt="User Profile Picture">
+        @if (Model.IsCurrentUser)
+        {
+            <div class="profile-avatar-actions">
+                <button class="avatar-action-btn update-btn" title="Update Picture" onclick="location.href='@Url.Action("UpdateProfilePic", "Profile")'">
+                    <i class="fas fa-pen"></i>
+                </button>
+                @if (!Model.ProfilePicUrl.Contains("default"))
+                {
+                    <button class="avatar-action-btn delete-btn" title="Delete Picture" onclick="DeleteProfilePic()">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                }
+            </div>
+        }
+
+        <div class="profile-details">
+            <h2>@Model.FullName</h2>
+            @if (!string.IsNullOrEmpty(Model.Bio))
+            {
+                <p class="text-muted">@Model.Bio</p>
+            }
+            <span>Joined on: @Model.JoinedOn.ToString("dd-MM-yyyy")</span>
+        </div>
+
+    </div>
+
+    @await Html.PartialAsync("_ProfileActions", Model)
+
+</div>
+

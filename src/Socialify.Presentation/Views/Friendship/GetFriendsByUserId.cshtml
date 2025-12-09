@@ -1,0 +1,52 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    var currentUserId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
+    var userId = ViewBag.UserId;
+}
+
+@using Socialify.Application.DTOs.Common
+@using Socialify.Application.DTOs.Profile
+@using System.Security.Claims
+
+@{
+    ViewData["Title"] = "Friends List";
+}
+
+@model PagedResult<ProfileBasicInfoDto>
+
+<main>
+    <section class="container mx-auto my-8 px-4">
+        <h4 class="section-title">Friends</h4>
+        @if (Model != null && Model.Data.Count() > 0)
+        {
+            <div id="profiles-container" class="results-list"
+                 data-total-pages="@Model.TotalPages"
+                 data-page-size="@Model.PageSize">
+                <partial name="_ProfileList" model="Model.Data" />
+            </div>
+            <div id="observer"></div>
+        }
+        else
+        {
+            <p class="text-gray-600">No Friends yet.</p>
+        }
+    </section>
+</main>
+
+@section Scripts {
+    <script>
+        let apiUrl = userId == @currentUserId? "/Friendship/LoadFriendsByUserId" : "/Friendship/LoadMyFriends"
+        document.addEventListener("DOMContentLoaded", () => {
+            const section = document.getElementById("profiles-container");
+            initInfiniteScroll({
+                sectionId: "profiles-container",
+                containerId: "profiles-container",
+                observerId: "observer",
+                apiUrl: "/Friendship/LoadFriendsByUserId",
+                queryParams: { userId: '@userId' }
+            });
+        });
+    </script>
+}

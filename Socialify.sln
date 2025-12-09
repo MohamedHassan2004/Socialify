@@ -1,15 +1,21 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.13.35931.197 d17.13
+# Visual Studio Version 18
+VisualStudioVersion = 18.3.11222.16 d18.3
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Socialify.Domain", "Socialify.Domain\Socialify.Domain.csproj", "{0C3A4306-1589-45D0-9D19-371074174E87}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Socialify.Domain", "src\Socialify.Domain\Socialify.Domain.csproj", "{0C3A4306-1589-45D0-9D19-371074174E87}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Socialify.Infrastructure", "Socialify.Infrastructure\Socialify.Infrastructure.csproj", "{C019E41B-7BDA-42FE-9070-3BCEED02758D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Socialify.Infrastructure", "src\Socialify.Infrastructure\Socialify.Infrastructure.csproj", "{C019E41B-7BDA-42FE-9070-3BCEED02758D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Socialify.Application", "Socialify.Application\Socialify.Application.csproj", "{B073CA4E-3530-4164-80F5-0AF55212F13D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Socialify.Application", "src\Socialify.Application\Socialify.Application.csproj", "{B073CA4E-3530-4164-80F5-0AF55212F13D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Socialify.Presentation", "Socialify.Presentation\Socialify.Presentation.csproj", "{BA365207-08CB-444E-8C69-FD5ECF196F48}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Socialify.Presentation", "src\Socialify.Presentation\Socialify.Presentation.csproj", "{BA365207-08CB-444E-8C69-FD5ECF196F48}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{0B3F8865-E286-432C-B3DB-7080CBBC92FE}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{5BFF20D3-A9F9-4A05-A718-BB50DB0A462C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Socialify.Domain.Tests", "tests\Socialify.Domain.Tests\Socialify.Domain.Tests.csproj", "{DD5B9875-89A6-46B5-B7E1-ECFCBD7C4F03}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,9 +39,20 @@ Global
 		{BA365207-08CB-444E-8C69-FD5ECF196F48}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BA365207-08CB-444E-8C69-FD5ECF196F48}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BA365207-08CB-444E-8C69-FD5ECF196F48}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DD5B9875-89A6-46B5-B7E1-ECFCBD7C4F03}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DD5B9875-89A6-46B5-B7E1-ECFCBD7C4F03}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DD5B9875-89A6-46B5-B7E1-ECFCBD7C4F03}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DD5B9875-89A6-46B5-B7E1-ECFCBD7C4F03}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{0C3A4306-1589-45D0-9D19-371074174E87} = {0B3F8865-E286-432C-B3DB-7080CBBC92FE}
+		{C019E41B-7BDA-42FE-9070-3BCEED02758D} = {0B3F8865-E286-432C-B3DB-7080CBBC92FE}
+		{B073CA4E-3530-4164-80F5-0AF55212F13D} = {0B3F8865-E286-432C-B3DB-7080CBBC92FE}
+		{BA365207-08CB-444E-8C69-FD5ECF196F48} = {0B3F8865-E286-432C-B3DB-7080CBBC92FE}
+		{DD5B9875-89A6-46B5-B7E1-ECFCBD7C4F03} = {5BFF20D3-A9F9-4A05-A718-BB50DB0A462C}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {FC07730A-F224-4006-8928-6DEF9AE339FB}

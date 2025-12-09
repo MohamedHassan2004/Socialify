@@ -1,0 +1,74 @@
+@using Socialify.Application.DTOs.Account
+@model LoginDto
+
+@{
+    ViewData["Title"] = "Login";
+    ViewData["CssFile"] = "Forms.css";
+	Layout = "~/Views/Shared/_UnAuthorizedLayout.cshtml";
+}
+
+<div class="form-card">
+    <div class="brand-header">
+        <h1>Socialify</h1>
+    </div>
+
+    <form asp-action="Login" method="post">
+        @Html.AntiForgeryToken()
+        <div class="title"><h2>Sign in</h2></div>
+        
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                @TempData["ErrorMessage"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+        
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="fas fa-check-circle me-2"></i>
+                @TempData["SuccessMessage"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+        
+        <div asp-validation-summary="All" class="text-danger"></div>
+
+
+        <div class="mb-2">
+            <label asp-for="Email" class="form-label"></label>
+            <input asp-for="Email" class="form-control" id="inputEmail" required />
+            <span asp-validation-for="Email" class="text-danger"></span>
+        </div>
+
+        <div class="mb-2">
+            <label asp-for="Password" class="form-label"></label>
+            <div class="input-group">
+                <input asp-for="Password" class="form-control" id="inputPassword" required type="password" />
+                <span class="input-group-text" id="togglePassword" style="cursor:pointer">
+                    <i class="fa-solid fa-eye" id="eyeIcon"></i>
+                </span>
+            </div>
+            <span asp-validation-for="Password" class="text-danger"></span>
+        </div>
+
+
+        <div class="mb-2 form-check">
+            <input asp-for="RememberMe" class="form-check-input" id="inputRememberMe" type="checkbox" />
+            <label asp-for="RememberMe" class="form-check-label" for="inputRememberMe">Remember me</label>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Sign in</button>
+
+        <div class="link">
+            Don't have an account? <a asp-controller="Account" asp-action="RegisterStep1">Create one</a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+	<script src="~/js/togglePassword.js"></script>
+} 
