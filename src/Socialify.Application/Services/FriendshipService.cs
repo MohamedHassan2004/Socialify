@@ -131,7 +131,7 @@ namespace Socialify.Application.Services
             try
             {
                 var friendships = await _friendshipRepository.GetFriendshipAsync(
-                    userId, paramsDto.PageNumber, paramsDto.PageSize);
+                    userId, paramsDto.CurrentUserId, paramsDto.PageNumber, paramsDto.PageSize);
 
                 if (friendships == null || !friendships.Data.Any())
                 {
@@ -145,23 +145,14 @@ namespace Socialify.Application.Services
                         });
                 }
 
-                var friendIds = friendships.Data.Select(f => f.FriendId).ToList();
-                var allFriendsFriendships = await _friendshipRepository.GetFriendshipsForUsersAsync(friendIds);
-
-                var lookup = allFriendsFriendships
-                    .GroupBy(f => f.UserId)
-                    .ToDictionary(g => g.Key, g => g.ToList());
-
-                var friendDtos = friendships.Data.Select(f =>
+                // Direct mapping - no second query needed!
+                var friendDtos = friendships.Data.Select(f => new ProfileBasicInfoDto
                 {
-                    var friend = f.Friend;
-
-                    friend.Friendships = lookup.ContainsKey(friend.Id)
-                        ? lookup[friend.Id]
-                        : new List<Friendship>();
-
-                    return friend.ToProfileBasicInfoDto(paramsDto.CurrentUserId);
-
+                    Id = f.Id,
+                    FullName = f.FullName,
+                    ProfilePicUrl = f.ProfilePicUrl,
+                    Bio = f.Bio,
+                    RelationshipStatus = f.RelationshipStatus
                 }).ToList();
 
                 return Result<PagedResult<ProfileBasicInfoDto>>.Success(

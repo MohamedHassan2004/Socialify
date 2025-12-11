@@ -26,7 +26,7 @@ namespace Socialify.Application.Mappers
             {
                 return RelationshipStatus.Self;
             }
-            else if (user.Friendships.Any(f => f.UserId == currentUserId || f.FriendId == currentUserId))
+            else if (user.Friendships.Any(f => f.UserId == currentUserId))
             {
                 return RelationshipStatus.Friend;
             }

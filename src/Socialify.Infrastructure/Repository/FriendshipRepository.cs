@@ -1,7 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Socialify.Application.DTOs.Common;
+using Socialify.Application.DTOs.Profile;
 using Socialify.Application.Repos_Interfaces;
 using Socialify.Domain.Entities;
+using Socialify.Domain.Enums;
 using Socialify.Infrastructure.Data.Context;
 using System;
 using System.Collections.Generic;
@@ -20,19 +22,30 @@ namespace Socialify.Infrastructure.Repository
             _context = context;
         }
 
-        // to optimize
-        public async Task<PagedResult<Friendship>> GetFriendshipAsync(string userId, int pageNumber, int pageSize)
+        public async Task<PagedResult<ProfileBasicInfoDto>> GetFriendshipAsync(
+            string userId, 
+            string currentUserId, 
+            int pageNumber, 
+            int pageSize)
         {
             var query = _context.Friendships
                 .Where(f => f.UserId == userId)
-                .Include(f => f.Friend)
-                    .ThenInclude(friend => friend.SentFriendRequests)
-                .Include(f => f.Friend)
-                    .ThenInclude(friend => friend.ReceivedFriendRequests)
-                .AsSplitQuery()
+                .Select(f => new ProfileBasicInfoDto
+                {
+                    Id = f.Friend.Id,
+                    FullName = f.Friend.FullName,
+                    ProfilePicUrl = f.Friend.ProfilePicUrl,
+                    Bio = f.Friend.Bio,
+                    RelationshipStatus = 
+                        f.Friend.Id == currentUserId ? RelationshipStatus.Self :
+                        f.Friend.Friendships.Any(fs => fs.UserId == currentUserId) ? RelationshipStatus.Friend :
+                        f.Friend.SentFriendRequests.Any(fr => fr.ReceiverId == currentUserId) ? RelationshipStatus.ReceivedRequest :
+                        f.Friend.ReceivedFriendRequests.Any(fr => fr.SenderId == currentUserId) ? RelationshipStatus.SentRequest :
+                        RelationshipStatus.None
+                })
                 .AsNoTracking();
 
-            return await query.OrderByDescending(q => q.Friend.FullName).ToPagedResultAsync(pageNumber, pageSize);
+            return await query.OrderByDescending(q => q.FullName).ToPagedResultAsync(pageNumber, pageSize);
         }
 
         public async Task<PagedResult<Friendship>> GetMyFriendshipAsync(string currentUserId, int pageNumber, int pageSize)
@@ -53,13 +66,13 @@ namespace Socialify.Infrastructure.Repository
                 .ToListAsync();
         }
 
-        public async Task<IEnumerable<Friendship>> GetFriendshipsForUsersAsync(List<string> userIds)
-        {
-            return await _context.Friendships
-                .Where(f => userIds.Contains(f.UserId))
-                .AsNoTracking()
-                .ToListAsync();
-        }
+        //public async Task<IEnumerable<Friendship>> GetFriendshipsForUsersAsync(List<string> userIds)
+        //{
+        //    return await _context.Friendships
+        //        .Where(f => userIds.Contains(f.UserId))
+        //        .AsNoTracking()
+        //        .ToListAsync();
+        //}
 
         //public async Task<IEnumerable<ApplicationUser>> GetPeopleYouMayKnow(string currentUserId)
         //{

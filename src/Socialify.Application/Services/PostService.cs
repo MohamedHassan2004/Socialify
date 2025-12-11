@@ -375,6 +375,9 @@ public class PostService : IPostService
 
     // private helper
     private async Task<Result<PagedResult<PostDto>>> GetFeedsAsync(Expression<Func<Post, bool>> filter, PaginationParamsDto paramsDto, string operationDescription)
+        Expression<Func<Post, bool>> filter,
+        PaginationParamsDto paramsDto,
+        string operationDescription)
     {
         try
         {
