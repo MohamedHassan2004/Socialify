@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Socialify.Application.DTOs.Profile;
 using Socialify.Application.Mappers;
 using Socialify.Application.Repos_Interfaces;
@@ -21,15 +22,38 @@ namespace Socialify.Application.Services
         private readonly IFriendshipService _friendshipService;
         private readonly IFriendshipRepository _friendshipRepository;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly INotificationService _notificationService;
         private readonly ILogger<FriendRequestService> _logger;
 
-        public FriendRequestService(ILogger<FriendRequestService> logger, IFriendRequestRepository friendRequestRepository, IFriendshipService friendshipService, IFriendshipRepository friendshipRepository, IUnitOfWork unitOfWork)
+        public FriendRequestService(
+            ILogger<FriendRequestService> logger,
+            IFriendRequestRepository friendRequestRepository,
+            IFriendshipService friendshipService,
+            IFriendshipRepository friendshipRepository,
+            IUnitOfWork unitOfWork,
+            INotificationService notificationService)
         {
             _friendRequestRepository = friendRequestRepository;
             _friendshipService = friendshipService;
             _friendshipRepository = friendshipRepository;
             _unitOfWork = unitOfWork;
+            _notificationService = notificationService;
             _logger = logger;
+        }
+
+        public async Task<Result<int>> GetIncomingFriendRequestsCountAsync(string currentUserId)
+        {
+            try
+            {
+                var count = await _friendRequestRepository.GetIncomingRequestsCountAsync(currentUserId);
+                _logger.LogInformation("Fetched Incoming Friend Requests Count for user {UserId} successfully", currentUserId);
+                return Result<int>.Success(count);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occured while Getting Incoming Requests Count");
+                return Result<int>.Failure("Error occured while Getting Incoming Requests Count");
+            }
         }
 
         public async Task<Result<IEnumerable<ProfileBasicInfoDto>>> GetIncomingRequestsAsync(string currentUserId)
@@ -82,6 +106,9 @@ namespace Socialify.Application.Services
                 }
                 _friendRequestRepository.Remove(result);
                 await _friendRequestRepository.SaveChangesAsync();
+
+                await _notificationService.DeleteNotificationAsync(senderId, NotificationType.FriendRequest, receiverId);
+
                 return Result.Success();
             }
             catch (Exception ex)
@@ -114,6 +141,9 @@ namespace Socialify.Application.Services
 
                 await _friendRequestRepository.AddAsync(request);
                 await _friendRequestRepository.SaveChangesAsync();
+
+                await _notificationService.SendNotificationAsync(senderId, NotificationType.FriendRequest, receiverId);
+
                 _logger.LogInformation("User {sender} Sent a Friend Request for User {receiver}", senderId, receiverId);
                 return Result.Success();
             }
@@ -139,6 +169,9 @@ namespace Socialify.Application.Services
                 }
 
                 await _unitOfWork.CommitTransactionAsync();
+
+                await _notificationService.SendNotificationAsync(currentUserId, NotificationType.AcceptedFriendRequest, friendId);
+
                 _logger.LogInformation("User {currentUser} has Accepted a Friend Request from User {sender}", currentUserId, friendId);
                 return Result.Success();
             }

@@ -7,6 +7,7 @@ using Socialify.Domain.Events;
 using Socialify.Infrastructure;
 using Socialify.Infrastructure.Data.Context;
 using Socialify.Infrastructure.Data.Seed;
+using Socialify.Infrastructure.Hubs;
 using Socialify.Infrastructure.Identity;
 using Socialify.Presentation.Filters;
 using Socialify.Presentation.Middlewares;
@@ -68,6 +69,8 @@ namespace Socialify.Presentation
                 })
                 .AddEntityFrameworkStores<SocialifyDbContext>();
 
+
+                builder.Services.AddSignalR();
                 builder.Services.AddInfrastructure();
 
                 builder.Services.ConfigureApplicationCookie(options =>
@@ -117,7 +120,6 @@ namespace Socialify.Presentation
                     app.UseHsts();
                 }
 
-                // Middleware ?????? Request ID ??? request
                 app.Use(async (context, next) =>
                 {
                     using (LogContext.PushProperty("RequestId", context.TraceIdentifier))
@@ -137,6 +139,7 @@ namespace Socialify.Presentation
                 app.UseAuthentication();
                 app.UseAuthorization();
 
+                app.MapHub<NotificationHub>("/hubs/notification");
 
                 app.MapControllerRoute(
                     name: "default",

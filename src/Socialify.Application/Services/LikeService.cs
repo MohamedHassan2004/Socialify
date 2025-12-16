@@ -7,6 +7,7 @@ using Socialify.Application.Repos_Interfaces;
 using Socialify.Application.Services_Interfaces;
 using Socialify.Domain.Common;
 using Socialify.Domain.Entities;
+using Socialify.Domain.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,11 +20,13 @@ namespace Socialify.Application.Services
     {
         private readonly ILogger<LikeService> _logger;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly INotificationService _notificationService;
 
-        public LikeService(ILogger<LikeService> logger, IUnitOfWork unitOfWork)
+        public LikeService(ILogger<LikeService> logger, IUnitOfWork unitOfWork, INotificationService notificationService)
         {
             _logger = logger;
             _unitOfWork = unitOfWork;
+            _notificationService = notificationService;
         }
 
         public async Task<Result> ToggleLikeAsync(string userId, int postId)
@@ -37,11 +40,13 @@ namespace Socialify.Application.Services
                 {
                     _unitOfWork.Likes.Remove(existingLike);
                     post?.DecrementLikesCount();
+                    await _notificationService.DeleteNotificationAsync(userId, NotificationType.Like, post!.UserId, postId);
                 }
                 else
                 {
                     await _unitOfWork.Likes.AddAsync(new Like { UserId = userId, PostId = postId });
                     post?.IncrementLikes();
+                    await _notificationService.SendNotificationAsync(userId, NotificationType.Like, post!.UserId, postId);
                 }
 
                 await _unitOfWork.SaveAsync();

@@ -13,6 +13,7 @@ using Socialify.Application.Repos_Interfaces;
 using Socialify.Application.Services_Interfaces;
 using Socialify.Domain.Common;
 using Socialify.Domain.Entities;
+using Socialify.Domain.Enums;
 using Socialify.Domain.Events;
 using System.Linq.Expressions;
 
@@ -26,6 +27,7 @@ public class PostService : IPostService
     private readonly IConfiguration _config;
     private readonly ISharedPostRepository _sharedPostRepository;
     private readonly IMediator _mediator;
+    private readonly INotificationService _notificationService;
     private readonly string _postMediaPath;
 
     public PostService(
@@ -34,7 +36,8 @@ public class PostService : IPostService
         IFileManager fileManager,
         IConfiguration config,
         ISharedPostRepository sharedPostRepository,
-        IMediator mediator)
+        IMediator mediator,
+        INotificationService notificationService)
     {
         _postRepository = postRepository;
         _logger = logger;
@@ -42,6 +45,7 @@ public class PostService : IPostService
         _config = config;
         _sharedPostRepository = sharedPostRepository;
         _mediator = mediator;
+        _notificationService = notificationService;
         _postMediaPath = config["FileSettings:PostMediaPath"] ?? "posts";
     }
 
@@ -150,19 +154,23 @@ public class PostService : IPostService
             {
                 return Result.Failure("You are not authorized to delete this post.");
             }
-            if (!string.IsNullOrEmpty(post.MediaUrl))
+
+            await _mediator.Publish(new OriginalPostDeletingEvent(post.Id));
+
+            var mediaUrl = post.MediaUrl;
+
+            _postRepository.Remove(post);
+            await _postRepository.SaveChangesAsync();
+
+            if (!string.IsNullOrEmpty(mediaUrl))
             {
-                var deleteFileResult = _fileManager.DeleteFile(post.MediaUrl);
+                var deleteFileResult = _fileManager.DeleteFile(mediaUrl);
                 if (!deleteFileResult.IsSuccess)
                 {
                     _logger.LogWarning("Failed to delete media file at {MediaUrl}: {ErrorMessage}", post.MediaUrl, deleteFileResult.ErrorMessage);
                 }
             }
 
-            await _mediator.Publish(new OriginalPostDeletingEvent(post.Id));
-
-            _postRepository.Remove(post);
-            await _postRepository.SaveChangesAsync();
             _logger.LogInformation("Post {PostId} deleted successfully by user {UserId}.", post.Id, currentUserId);
             return Result.Success();
         }
@@ -238,6 +246,9 @@ public class PostService : IPostService
 
             await _postRepository.SaveChangesAsync();
 
+            await _notificationService.SendNotificationAsync(userId, NotificationType.Share, postToUpdate.UserId, sharedPost.Id);
+
+
             _logger.LogInformation("User {UserId} shared post {PostId}.", userId, sharePostDto.OriginalPostId);
             return Result.Success();
         }
@@ -279,6 +290,8 @@ public class PostService : IPostService
             // Delete the shared post
             _postRepository.Remove(sharedPost);
             await _postRepository.SaveChangesAsync();
+
+            await _notificationService.DeleteNotificationAsync(userId, NotificationType.Share, sharedPost!.UserId, sharedPostId);
 
             _logger.LogInformation("User {UserId} unshared post {PostId}.", userId, sharedPostId);
             return Result.Success();
@@ -374,10 +387,8 @@ public class PostService : IPostService
 
 
     // private helper
-    private async Task<Result<PagedResult<PostDto>>> GetFeedsAsync(Expression<Func<Post, bool>> filter, PaginationParamsDto paramsDto, string operationDescription)
-        Expression<Func<Post, bool>> filter,
-        PaginationParamsDto paramsDto,
-        string operationDescription)
+    private async Task<Result<PagedResult<PostDto>>> GetFeedsAsync
+        (Expression<Func<Post, bool>> filter, PaginationParamsDto paramsDto, string operationDescription)
     {
         try
         {

@@ -19,6 +19,7 @@ namespace Socialify.Infrastructure.Data.Context
         public DbSet<SharedPost> SharedPosts { get; set; }
         public DbSet<FriendRequest> FriendRequests { get; set; }
         public DbSet<Friendship> Friendships { get; set; }
+        public DbSet<Notification> Notifications { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -90,7 +91,7 @@ namespace Socialify.Infrastructure.Data.Context
                 .WithMany(u => u.Posts)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // SharedPost configuration
+            // ----------- SharedPost ----------- //
             modelBuilder.Entity<SharedPost>(entity =>
             {
                 entity.HasKey(sp => sp.Id);
@@ -153,6 +154,33 @@ namespace Socialify.Infrastructure.Data.Context
                 entity.HasIndex(f => new { f.UserId, f.FriendId })
                     .HasDatabaseName("IX_Friendships_UserId_FriendId");
             });
+
+            // Notification configuration
+            modelBuilder.Entity<Notification>()
+                .HasIndex(n => n.ReceiverUserId)
+                .HasDatabaseName("IX_Notifications_ReceiverUserId");
+
+            modelBuilder.Entity<Notification>()
+                .HasIndex(n => n.PostId)
+                .HasDatabaseName("IX_Notifications_PostId");
+
+            modelBuilder.Entity<Notification>()
+                .HasOne(n => n.ReceiverUser)
+                .WithMany()
+                .HasForeignKey(n => n.ReceiverUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Notification>()
+                .HasOne(n => n.User)
+                .WithMany(u => u.Notifications)
+                .HasForeignKey(n => n.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Notification>()
+                .HasOne(n => n.Post)
+                .WithMany(p => p.Notifications)
+                .HasForeignKey(n => n.PostId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

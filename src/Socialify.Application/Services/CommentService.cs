@@ -6,7 +6,8 @@
 ﻿using Socialify.Application.Services_Interfaces;
 ﻿using Socialify.Domain.Common;
 ﻿using Socialify.Domain.Entities;
-﻿using System;
+using Socialify.Domain.Enums;
+using System;
 ﻿using System.Collections.Generic;
 ﻿using System.Linq;
 ﻿using System.Text;
@@ -18,12 +19,14 @@
 ﻿    {
 ﻿        private readonly ILogger<CommentService> _logger;
 ﻿        private readonly IUnitOfWork _unitOfWork;
-﻿
-﻿        public CommentService(ILogger<CommentService> logger, IUnitOfWork unitOfWork)
+        private readonly INotificationService _notificationService;
+
+        public CommentService(ILogger<CommentService> logger, IUnitOfWork unitOfWork, INotificationService notificationService)
 ﻿        {
 ﻿            _logger = logger;
 ﻿            _unitOfWork = unitOfWork;
-﻿        }﻿
+            _notificationService = notificationService;
+        }﻿
 ﻿
 ﻿        public async Task<Result<CommentDto>> AddCommentAsync(AddCommentDto addCommentDto, string currentUserId)
 ﻿        {
@@ -46,6 +49,8 @@
 ﻿
 ﻿                var commentWithUser = await _unitOfWork.Comments.GetCommentWithUserAsync(comment.Id);
 ﻿                var commentDto = commentWithUser.ToCommentDto(currentUserId);
+
+                await _notificationService.SendNotificationAsync(currentUserId, NotificationType.Comment, post.UserId, post.Id);
 ﻿
 ﻿                _logger.LogInformation("Comment added to post {PostId} by user {UserId}", addCommentDto.PostId, currentUserId);
 ﻿                return Result<CommentDto>.Success(commentDto);
@@ -105,8 +110,9 @@
 ﻿
 ﻿                _unitOfWork.Comments.Remove(comment);
 ﻿                post.DecrementCommentsCount();
-﻿
-﻿                await _unitOfWork.SaveAsync();
+                await _notificationService.DeleteNotificationAsync(currentUserId, NotificationType.Comment, post!.UserId, post.Id);
+
+                await _unitOfWork.SaveAsync();
 ﻿
 ﻿                _logger.LogInformation("Comment {CommentId} deleted by user {UserId}", commentId, currentUserId);
 ﻿                return Result.Success();

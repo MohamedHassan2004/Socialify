@@ -4,6 +4,7 @@ using Socialify.Application.Interfaces;
 using Socialify.Application.Services;
 using Socialify.Infrastructure.Identity;
 using Socialify.Infrastructure.Repository;
+using Socialify.Infrastructure.Hubs;
 using Socialify.Application.Services_Interfaces;
 using Socialify.Application.ReposInterfaces;
 using Socialify.Application.Repos_Interfaces;
@@ -35,6 +36,12 @@ namespace Socialify.Infrastructure
             services.AddScoped<IFriendRequestRepository, FriendRequestRepository>();    
             services.AddScoped<IFriendshipService, FriendshipService>();
             services.AddScoped<IFriendshipRepository, FriendshipRepository>();
+            services.AddScoped<INotificationRepository, NotificationRepository>();
+            services.AddScoped<INotificationHubContext, NotificationHubContext>();
+            services.AddScoped<INotificationService, NotificationService>();
+
+
+
 
 
 

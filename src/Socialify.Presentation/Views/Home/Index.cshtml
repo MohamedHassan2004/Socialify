@@ -25,6 +25,9 @@
         {
             <div id="posts-section" data-page-size="@Model.Posts.PageSize" data-total-pages="@Model.Posts.TotalPages">
                 @await Html.PartialAsync("_PostContainer", Model.Posts)
+                <div class="text-center">
+                    <a asp-action="Explore" asp-controller="Home" class="btn btn-primary">Explore More</a>
+                </div>
             </div>
         }
         else

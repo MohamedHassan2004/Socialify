@@ -50,15 +50,6 @@
         cursor: pointer;
     }
 
-/* ----------------------------- Notification Styles ----------------------------- */
-
-#req-count, #notification {
-    background-color: red;
-    color: white;
-    padding: 2px 5px;
-    border-radius: 50%;
-    font-size: 12px;
-}
 
 /* ----------------------------- Responsive Styles ----------------------------- */
 @media (max-width: 1500px) {

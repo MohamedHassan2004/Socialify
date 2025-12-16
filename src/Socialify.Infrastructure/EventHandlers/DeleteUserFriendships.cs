@@ -11,13 +11,13 @@ using System.Threading.Tasks;
 
 namespace Socialify.Infrastructure.EventHandlers
 {
-    public class DeleteUserFriendRequests : INotificationHandler<UserDeletingEvent>
+    public class DeleteUserFriendships : INotificationHandler<UserDeletingEvent>
     {
         private readonly IFriendshipRepository _friendshipRepository;
         private readonly IFriendRequestRepository _friendRequestRepository;
-        private readonly ILogger<DeleteUserFriendRequests> _logger;
+        private readonly ILogger<DeleteUserFriendships> _logger;
 
-        public DeleteUserFriendRequests(IFriendshipRepository friendshipRepository, IFriendRequestRepository friendRequestRepository, ILogger<DeleteUserFriendRequests> logger)
+        public DeleteUserFriendships(IFriendshipRepository friendshipRepository, IFriendRequestRepository friendRequestRepository, ILogger<DeleteUserFriendships> logger)
         {
             _friendshipRepository = friendshipRepository;
             _friendRequestRepository = friendRequestRepository;

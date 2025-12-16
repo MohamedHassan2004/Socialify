@@ -2,6 +2,8 @@
     For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 *@
 @{
+	var friendRequestsCount = ViewBag.FriendRequestsCount as int? ?? 0;
+	var notificationsCount = ViewBag.NotificationsCount as int? ?? 0;
 }
 @model Socialify.Application.DTOs.Profile.ProfileBasicInfoDto
 
@@ -23,13 +25,13 @@
             <ul class="list-group list-group-flush card-list">
                 <li class="list-group-item"><a asp-action="Logout" asp-controller="Account"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
                 <li class="list-group-item">
-                    <a href="#"><i class="fa-solid fa-bell"></i> Notifications</a>
+                    <a asp-controller="Notifications" asp-action="GetMyNotifications"><i class="fa-solid fa-bell"></i> Notifications <span class="notifications-badge @(notificationsCount == 0 ? "d-none" : "")">@notificationsCount</span></a>
                 </li>
                 <li class="list-group-item"><a asp-action="GetSavedPosts" asp-controller="SavedPosts"><i class="fas fa-bookmark"></i> Saved Posts</a></li>
                 <li class="list-group-item"><a asp-action="Explore" asp-controller="Home"><i class="far fa-compass"></i> Explore</a></li>
                 <li class="list-group-item"><a asp-action="GetMyFriends" asp-controller="Friendship"><i class="fas fa-users"></i> My Friends</a></li>
                 <li class="list-group-item">
-                    <a asp-action="GetIncomingFriendRequests" asp-controller="Friendship"><i class="fas fa-user-plus"></i> Friends Requests</a>
+                    <a asp-action="GetIncomingFriendRequests" asp-controller="Friendship"><i class="fas fa-user-plus"></i> Friends Requests <span class="friendRequests-badge @(friendRequestsCount == 0 ? "d-none":"")">@friendRequestsCount</span></a>
                 </li>
             </ul>
         </div>

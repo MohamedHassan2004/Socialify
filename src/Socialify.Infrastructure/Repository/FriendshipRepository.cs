@@ -61,36 +61,10 @@ namespace Socialify.Infrastructure.Repository
         public async Task<IEnumerable<Friendship>> GetFriendshipByUserIdAsync(string userId)
         {
             return await _context.Friendships
-                .Where(f => f.UserId == userId)
+                .Where(f => f.UserId == userId || f.FriendId == userId)
                 .AsNoTracking()
                 .ToListAsync();
         }
 
-        //public async Task<IEnumerable<Friendship>> GetFriendshipsForUsersAsync(List<string> userIds)
-        //{
-        //    return await _context.Friendships
-        //        .Where(f => userIds.Contains(f.UserId))
-        //        .AsNoTracking()
-        //        .ToListAsync();
-        //}
-
-        //public async Task<IEnumerable<ApplicationUser>> GetPeopleYouMayKnow(string currentUserId)
-        //{
-        //    var friendsOfFriends = await _context.Friendships
-        //        .Where(f => f.UserId == currentUserId)
-        //        .SelectMany(f => _context.Friendships
-        //            .Where(fof => fof.UserId == f.FriendId && fof.FriendId != currentUserId)
-        //            .Select(fof => fof.Friend))
-        //        .Distinct()
-        //        .ToListAsync();
-
-        //    var friendRequests = await _context.FriendRequests
-        //        .Where(fr => fr.SenderId == currentUserId || fr.ReceiverId == currentUserId)
-        //        .ToListAsync();
-
-        //    var peopleYouMayKnow = friendsOfFriends.Where(f => friendRequests.(f.Id)).ToList();
-
-        //    return peopleYouMayKnow;
-        //}
     }
 }

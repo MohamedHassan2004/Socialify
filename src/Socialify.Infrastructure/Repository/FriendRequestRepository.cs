@@ -34,6 +34,14 @@ namespace Socialify.Infrastructure.Repository
                 .AsNoTracking()
                 .ToListAsync();
         }
+
+        public async Task<int> GetIncomingRequestsCountAsync(string userId)
+        {
+            return await _context.FriendRequests
+                .Where(fr => fr.ReceiverId == userId)
+                .CountAsync();
+        }
+
         public async Task<IEnumerable<FriendRequest>> GetOutgoingRequestsAsync(string userId)
         {
             return await _context.FriendRequests

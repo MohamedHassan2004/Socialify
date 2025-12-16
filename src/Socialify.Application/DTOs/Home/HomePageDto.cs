@@ -14,6 +14,7 @@ namespace Socialify.Application.DTOs.Home
     {
         public ProfileBasicInfoDto User { get; set; }
         public PagedResult<PostDto> Posts { get; set; } = new();
-        //public PagedResult<ProfileBasicInfoDto> People { get; set; } = new();
+        public int NotificationsCount { get; set; } = 0;
+        public int FriendRequestsCount { get; set; } = 0;
     }
 }

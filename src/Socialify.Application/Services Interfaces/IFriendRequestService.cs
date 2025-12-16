@@ -15,5 +15,6 @@ namespace Socialify.Application.Services_Interfaces
         Task<Result> AcceptFriendRequestAsync(string senderId, string receiverId);
         Task<Result<IEnumerable<ProfileBasicInfoDto>>> GetOutgoingRequestsAsync(string userId);
         Task<Result<IEnumerable<ProfileBasicInfoDto>>> GetIncomingRequestsAsync(string userId);
+        Task<Result<int>> GetIncomingFriendRequestsCountAsync(string currentUserId);
     }
 }
