@@ -1,0 +1,41 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+	ViewData["Title"] = "Notifications";
+}
+
+@model IEnumerable<Socialify.Application.DTOs.Notification.NotificationDto>
+
+<main>
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+    }
+    else
+    {
+        @if (Model != null && Model.Any())
+        {
+            <h4 class="section-title">Notifications</h4>
+            @foreach(var notification in Model)
+            {
+                <a href="@notification.Link" class="notification-item @(notification.IsRead ? "read" : "unread")">
+                    <img src="/@notification.UserProfilePicUrl"
+                         alt="@notification.UserName"
+                         class="notification-avatar">
+                    <div class="notification-info">
+                        <p class="notification-text">
+                            <strong>@notification.UserName</strong> @notification.Message
+                        </p>
+                        <span class="notification-time">@notification.TimeAgo</span>
+                    </div>
+                </a>
+            }
+        }
+        else
+        {
+            <p class="no-notifications">No notifications yet.</p>
+        }
+    }
+</main>

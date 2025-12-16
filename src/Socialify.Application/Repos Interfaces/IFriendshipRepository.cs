@@ -15,6 +15,5 @@ namespace Socialify.Application.Repos_Interfaces
         Task<PagedResult<ProfileBasicInfoDto>> GetFriendshipAsync(string userId, string currentUserId, int pageNumber, int pageSize);
         Task<PagedResult<Friendship>> GetMyFriendshipAsync(string currentUserId, int pageNumber, int pageSize);
         Task<IEnumerable<Friendship>> GetFriendshipByUserIdAsync(string userId);
-        Task<IEnumerable<Friendship>> GetFriendshipsForUsersAsync(List<string> userIds);
     }
 }

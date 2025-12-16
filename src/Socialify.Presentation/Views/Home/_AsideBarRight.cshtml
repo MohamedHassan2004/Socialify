@@ -1,15 +1,16 @@
 ﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+    Notifications Sidebar - Displays real-time notifications
 *@
-@{
-}
 
 <div class="aside-bar">
     <div class="aside-bar-container">
         <div class="notifications">
-            <h4>Notifications</h4>
+            <div class="notifications-header">
+                <h4><i class="fa-solid fa-bell"></i> Notifications</h4>
+                <a asp-controller="Notifications" asp-action="GetMyNotifications" class="view-all-link">View All</a>
+            </div>
             <div class="notifications-container">
-                <p>Not Implemented yet.</p>
+                <p class="no-notifications">Loading notifications...</p>
             </div>
         </div>
     </div>

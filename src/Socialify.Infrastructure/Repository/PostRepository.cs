@@ -79,19 +79,5 @@ namespace Socialify.Infrastructure.Repository
                 .Select(projection)
                 .FirstOrDefaultAsync();
         }
-
-        //public async Task<Post?> GetPostWithOriginalPostAsync(int postId)
-        //{
-        //    return await _context.Posts
-        //        .Include(p => p.User)
-        //        .Include(p => p.Likes)
-        //        .Include(p => p.SavedPosts)
-        //        .Include(p => p.SharedPosts)
-        //        .Include(p => p.OriginalPost)
-        //            .ThenInclude(op => op!.User)
-        //        .AsSplitQuery()
-        //        .AsNoTracking()
-        //        .FirstOrDefaultAsync(p => p.Id == postId);  
-        //}
     }
 }

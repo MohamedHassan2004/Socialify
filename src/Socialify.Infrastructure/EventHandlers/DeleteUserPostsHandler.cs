@@ -32,12 +32,14 @@ namespace Socialify.Infrastructure.EventHandlers
             {
                 var postsWithMedia = await _postRepository.FindAsync(p => p.UserId == notification.UserId && p.MediaUrl != null);
                 var mediaUrls = postsWithMedia
-                    .Where(p => !string.IsNullOrEmpty(p.MediaUrl)).Select(p => p.MediaUrl!).ToArray();
+                    .Where(p => !string.IsNullOrEmpty(p.MediaUrl))
+                    .Select(p => p.MediaUrl!)
+                    .ToArray();
+
                 foreach (var url in mediaUrls)
                 {
                     _fileManager.DeleteFile(url);
                 }
-
 
                 var userPosts = await _postRepository.FindAsync(p => p.UserId == notification.UserId);
                 foreach (var post in userPosts)

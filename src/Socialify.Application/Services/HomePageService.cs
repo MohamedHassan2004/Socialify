@@ -18,14 +18,21 @@ namespace Socialify.Application.Services
         private readonly ILogger<HomePageService> _logger;
         private readonly IProfileService _profileService;
         private readonly IPostService _postService;
-        //private readonly IFriendService _friendService;
+        private readonly INotificationService _notificationService;
+        private readonly IFriendRequestService _friendRequestService;
 
-        public HomePageService(ILogger<HomePageService> logger, IProfileService profileService, IPostService postService)// IFriendService friendService)
+        public HomePageService(
+            ILogger<HomePageService> logger,
+            IProfileService profileService,
+            IPostService postService,
+            INotificationService notificationService,
+            IFriendRequestService friendRequestService)
         {
             _logger = logger;
             _profileService = profileService;
             _postService = postService;
-            //_friendService = friendService;
+            _notificationService = notificationService;
+            _friendRequestService = friendRequestService;
         }
 
         public async Task<Result<HomePageDto>> GetHomePageAsync(string currentUserId, int pageSize)
@@ -44,16 +51,19 @@ namespace Socialify.Application.Services
 
                 var userInfo = await _profileService.GetProfileBasicInfoAsync(currentUserId);
                 var posts = await _postService.GetRelevantFeedsAsync(paramsDto);
-                //var peopleYouMayKnow = await _friendService.GetPeopleYouMayKnowAsync(currentUserId);
+                var notificationsCount = await _notificationService.GetUnreadNotificationsCountAsync(currentUserId);
+                var friendRequestsCount = await _friendRequestService.GetIncomingFriendRequestsCountAsync(currentUserId);
 
-                if (!posts.IsSuccess || !userInfo.IsSuccess)
+                if (!posts.IsSuccess || !userInfo.IsSuccess || !notificationsCount.IsSuccess || !friendRequestsCount.IsSuccess)
                     return Result<HomePageDto>.Failure("Failed to fetch posts or user info.");
 
                 var dto = new HomePageDto
                 {
                     User = userInfo.Data,
-                    Posts = posts.Data
-                    //PeopleYouMayKnow = peopleYouMayKnow.Data ?? new List<UserDto>()
+                    Posts = posts.Data,
+                    NotificationsCount = notificationsCount.Data,
+                    FriendRequestsCount = friendRequestsCount.Data
+
                 };
 
                 return Result<HomePageDto>.Success(dto);

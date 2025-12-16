@@ -29,5 +29,6 @@ namespace Socialify.Domain.Entities
         public ICollection<Friendship> Friendships { get; set; } = new List<Friendship>();
         public ICollection<FriendRequest> SentFriendRequests { get; set; } = new List<FriendRequest>();
         public ICollection<FriendRequest> ReceivedFriendRequests { get; set; } = new List<FriendRequest>();
+        public ICollection<Notification> Notifications { get; set; } = new List<Notification>();   
     }
 }

@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Socialify.Application.Repos_Interfaces;
 using Socialify.Domain.Events;
+using Socialify.Infrastructure.Data.Context;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,14 +15,12 @@ namespace Socialify.Infrastructure.EventHandlers
     
     public class CleanUpUserActivitiesHandler : INotificationHandler<UserDeletingEvent>
     {
-        private readonly IUnitOfWork _unitOfWork;
-        private readonly ISharedPostRepository _sharedPostRepository;
+        private readonly SocialifyDbContext _context;
         private readonly ILogger<CleanUpUserActivitiesHandler> _logger;
 
-        public CleanUpUserActivitiesHandler(IUnitOfWork unitOfWork, ISharedPostRepository sharedPostRepository, ILogger<CleanUpUserActivitiesHandler> logger)
+        public CleanUpUserActivitiesHandler(SocialifyDbContext context, ILogger<CleanUpUserActivitiesHandler> logger)
         {
-            _unitOfWork = unitOfWork;
-            _sharedPostRepository = sharedPostRepository;
+            _context = context;
             _logger = logger;
         }
 
@@ -30,13 +29,14 @@ namespace Socialify.Infrastructure.EventHandlers
             try
             {
                 // delete saved posts
-                var savedPosts = await _unitOfWork.SavedPosts.FindAsync(sp => sp.UserId == notification.UserId);
-                _unitOfWork.SavedPosts.RemoveRange(savedPosts);
+                await _context.SavedPosts.Where(sp => sp.UserId == notification.UserId).ExecuteDeleteAsync(cancellationToken);
 
                 // delete likes
-                var likes = await _unitOfWork.Likes
-                    .FindAsync(l => l.UserId == notification.UserId, include: q => q.Include(l => l.Post));
-                _unitOfWork.Likes.RemoveRange(likes);
+                var likes = await _context.Likes
+                    .Where(l => l.UserId == notification.UserId)
+                    .Include(l => l.Post)
+                    .ToListAsync();
+                _context.Likes.RemoveRange(likes);
 
                 var likedPosts = likes.Select(l => l.Post).ToList();
                 foreach (var post in likedPosts)
@@ -45,9 +45,11 @@ namespace Socialify.Infrastructure.EventHandlers
                 }
 
                 // delete comments
-                var comments = await _unitOfWork.Comments
-                    .FindAsync(c => c.UserId == notification.UserId, include: q => q.Include(c => c.Post));
-                _unitOfWork.Comments.RemoveRange(comments);
+                var comments = await _context.Comments
+                    .Where(l => l.UserId == notification.UserId)
+                    .Include(c => c.Post)
+                    .ToListAsync();
+                _context.Comments.RemoveRange(comments);
 
                 var commentedPosts = comments.Select(c => c.Post).ToList();
                 foreach (var post in commentedPosts)
@@ -56,15 +58,16 @@ namespace Socialify.Infrastructure.EventHandlers
                 }
 
                 // delete shared posts
-                var sharedPosts = await _sharedPostRepository.FindAsync(sp => sp.SharedByUserId == notification.UserId);
-                _sharedPostRepository.RemoveRange(sharedPosts);
+                await _context.SharedPosts.Where(sp => sp.SharedByUserId == notification.UserId).ExecuteDeleteAsync(cancellationToken);
 
 
-                await _unitOfWork.SaveAsync();
+                // delete notifications
+                await _context.Notifications.Where(n => n.ReceiverUserId == notification.UserId).ExecuteDeleteAsync(cancellationToken);
 
-                _logger.LogInformation(
-                    "Deleted {Likes} likes, {Comments} comments, and {Saved} saved posts for user {UserId}",
-                    likes.Count(), comments.Count(), savedPosts.Count(), notification.UserId);
+
+                var rowsAffected = await _context.SaveChangesAsync();
+
+                _logger.LogInformation("Deleted {rowsAffected} records for user {UserId}", rowsAffected, notification.UserId);
             }
             catch (Exception ex)
             {

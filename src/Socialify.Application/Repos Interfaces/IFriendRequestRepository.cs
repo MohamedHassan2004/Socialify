@@ -14,5 +14,6 @@ namespace Socialify.Application.Repos_Interfaces
         Task<IEnumerable<FriendRequest>> GetIncomingRequestsAsync(string userId);
         Task<IEnumerable<FriendRequest>> GetOutgoingRequestsAsync(string userId);
         Task<FriendRequest?> GetFriendRequestAsync(string senderId, string receiverId);
+        Task<int> GetIncomingRequestsCountAsync(string userId);
     }
 }

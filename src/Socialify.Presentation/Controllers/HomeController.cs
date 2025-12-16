@@ -30,6 +30,8 @@ namespace Socialify.Presentation.Controllers
                 return HandleServiceError(result, nameof(Index), "Failed to load home page data. Please try again.");
             }
 
+            ViewBag.FriendRequestsCount = result.Data.FriendRequestsCount;
+            ViewBag.NotificationsCount = result.Data.NotificationsCount;
             ViewData["Title"] = "Home Page";
             return View(result.Data);
         }
