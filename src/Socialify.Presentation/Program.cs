@@ -112,7 +112,7 @@ namespace Socialify.Presentation
                 }
 
                 // Configure the HTTP request pipeline.
-                //app.UseMiddleware<ExceptionHandlingMiddleware>();
+                app.UseMiddleware<ExceptionHandlingMiddleware>();
 
                 if (!app.Environment.IsDevelopment())
                 {
