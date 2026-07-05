@@ -51,6 +51,17 @@ The project is structured into four layers to ensure separation of concerns and 
 
 ---
 
+## Screenshots
+
+![alt text](screenshots/home.png)
+![alt text](screenshots/profile.png)
+![alt text](screenshots/settings.png)
+![alt text](screenshots/search.png)
+![alt text](screenshots/friends.png)
+![alt text](screenshots/uploadPost.png)
+
+---
+
 ## Contact 🤝
 Mohamed Hassan
 - [LinkedIn](https://linkedin.com/in/mohamed-hassan2004)
